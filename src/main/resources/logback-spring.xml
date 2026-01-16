@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>log/netmon2.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- daily rollover + size limit -->
+            <fileNamePattern>log/netmon2.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+
+            <!-- max size of a single log file -->
+            <maxFileSize>20MB</maxFileSize>
+
+            <!-- how many days of logs to keep -->
+            <maxHistory>30</maxHistory>
+
+            <!-- total size cap for all logs -->
+            <totalSizeCap>2GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="ROLLING" />
+    </root>
+
+</configuration>

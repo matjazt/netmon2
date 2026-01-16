@@ -33,5 +33,7 @@ out/
 /nbdist/
 /.nb-gradle/
 
-### VS Code ###
-.vscode/
+# Ignore log files
+log/
+
+src/main/resources/application-local.yaml

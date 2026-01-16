@@ -2,5 +2,23 @@ spring:
   application:
     name: netmon2
 
+  profiles:
+    active: local
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/network_monitor
+    username: set-in-local-yaml
+    password: set-in-local-yaml
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none        # important for DB-first
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: false
+    open-in-view: false
+
 greeting:
   template: "Zdravo, %s!"
