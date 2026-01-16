@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: netmon2
+
+greeting:
+  template: "Zdravo, %s!"
