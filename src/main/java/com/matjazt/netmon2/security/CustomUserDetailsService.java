@@ -1,11 +1,14 @@
 package com.matjazt.netmon2.security;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.matjazt.netmon2.repository.AccountRepository;
 
 /**
  * Custom UserDetailsService for user authentication.
@@ -21,10 +24,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final PasswordEncoder passwordEncoder;
+    private static final Logger logger = LoggerFactory.getLogger(CustomUserDetailsService.class);
 
-    public CustomUserDetailsService(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
+        private final AccountRepository accountRepository;
+
+    public CustomUserDetailsService(AccountRepository accountRepository) {
+        this.accountRepository = accountRepository;
     }
 
     /**
@@ -48,7 +53,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         // Spring Security will compare this with the provided password
         return User.builder()
                 .username(username)
-                .password(passwordEncoder.encode(password))
+                .password(password)
                 .roles("USER") // You can customize roles/authorities here
                 .build();
     }
@@ -67,11 +72,16 @@ public class CustomUserDetailsService implements UserDetailsService {
      * @return the plain-text password if user is valid, null if user not found
      */
     private String validateCredentials(String username) {
-        // SAMPLE IMPLEMENTATION - Replace with your logic
-        if ("matjaz".equals(username)) {
-            return "hahaha";
+        logger.info("Authenticating user: {}", username);
+
+        var account = accountRepository.findByUsername(username);
+
+        if (account.isPresent()) {
+            logger.info("User found: {}", username);
+            return account.get().getPasswordHash();
         }
 
+        logger.info("User not found: {}", username);
         // Return null if user not found
         return null;
     }
