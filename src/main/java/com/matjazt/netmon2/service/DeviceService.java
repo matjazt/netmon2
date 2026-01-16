@@ -17,6 +17,7 @@ import com.matjazt.netmon2.entity.DeviceEntity;
 import com.matjazt.netmon2.entity.DeviceOperationMode;
 import com.matjazt.netmon2.entity.DeviceStatusHistoryEntity;
 import com.matjazt.netmon2.entity.NetworkEntity;
+import com.matjazt.netmon2.mapper.DeviceMapper;
 import com.matjazt.netmon2.repository.DeviceRepository;
 import com.matjazt.netmon2.repository.DeviceStatusHistoryRepository;
 import com.matjazt.netmon2.repository.NetworkRepository;
@@ -53,6 +54,7 @@ public class DeviceService {
     private final DeviceRepository deviceRepository;
     private final NetworkRepository networkRepository;
     private final DeviceStatusHistoryRepository statusHistoryRepository;
+    private final DeviceMapper deviceMapper;
 
     /**
      * Constructor injection - Spring automatically provides the implementations.
@@ -64,44 +66,12 @@ public class DeviceService {
      */
     public DeviceService(DeviceRepository deviceRepository,
             NetworkRepository networkRepository,
-            DeviceStatusHistoryRepository statusHistoryRepository) {
+            DeviceStatusHistoryRepository statusHistoryRepository,
+            DeviceMapper deviceMapper) {
         this.deviceRepository = deviceRepository;
         this.networkRepository = networkRepository;
         this.statusHistoryRepository = statusHistoryRepository;
-    }
-
-    // ========== MAPPER METHODS ==========
-
-    /**
-     * Map DeviceEntity to DeviceDto
-     */
-    private DeviceDto toDto(DeviceEntity entity) {
-        return new DeviceDto(
-                entity.getId(),
-                entity.getNetwork().getId(),
-                entity.getName(),
-                entity.getMacAddress(),
-                entity.getIpAddress(),
-                entity.getOnline(),
-                entity.getLastSeen(),
-                entity.getDeviceOperationMode(),
-                entity.getActiveAlertId());
-    }
-
-    /**
-     * Map list of DeviceEntity to list of DeviceDto
-     */
-    private List<DeviceDto> toDtoList(List<DeviceEntity> entities) {
-        return entities.stream()
-                .map(this::toDto)
-                .toList();
-    }
-
-    /**
-     * Map Page of DeviceEntity to Page of DeviceDto
-     */
-    private Page<DeviceDto> toDtoPage(Page<DeviceEntity> page) {
-        return page.map(this::toDto);
+        this.deviceMapper = deviceMapper;
     }
 
     // ========== BASIC CRUD OPERATIONS ==========
@@ -171,7 +141,7 @@ public class DeviceService {
      */
     public List<DeviceDto> findAllDeviceSummaries() {
         List<DeviceEntity> entities = deviceRepository.findAllWithNetwork();
-        return toDtoList(entities);
+        return deviceMapper.toDtos(entities);
     }
 
     /**
@@ -179,7 +149,7 @@ public class DeviceService {
      */
     public List<DeviceDto> findDeviceSummariesByNetwork(Long networkId) {
         List<DeviceEntity> entities = deviceRepository.findByNetwork_Id(networkId);
-        return toDtoList(entities);
+        return deviceMapper.toDtos(entities);
     }
 
     /**
@@ -187,7 +157,7 @@ public class DeviceService {
      */
     public List<DeviceDto> findOnlineDeviceSummaries(Long networkId) {
         List<DeviceEntity> entities = deviceRepository.findByNetwork_IdAndOnline(networkId, true);
-        return toDtoList(entities);
+        return deviceMapper.toDtos(entities);
     }
 
     // ========== BUSINESS LOGIC EXAMPLES ==========
@@ -286,7 +256,7 @@ public class DeviceService {
             entityPage = deviceRepository.findAllWithNetwork(pageable);
         }
 
-        return toDtoPage(entityPage);
+        return deviceMapper.toDtoPage(entityPage);
     }
 
     /**

@@ -20,6 +20,7 @@ import com.matjazt.netmon2.dto.response.DeviceResponseDto;
 import com.matjazt.netmon2.entity.DeviceEntity;
 import com.matjazt.netmon2.entity.DeviceOperationMode;
 import com.matjazt.netmon2.entity.DeviceStatusHistoryEntity;
+import com.matjazt.netmon2.mapper.DeviceApiMapper;
 import com.matjazt.netmon2.service.DeviceService;
 
 /**
@@ -53,46 +54,15 @@ import com.matjazt.netmon2.service.DeviceService;
 public class DeviceController {
 
     private final DeviceService deviceService;
+    private final DeviceApiMapper deviceApiMapper;
 
     /**
      * Constructor injection of service layer.
      * Service contains business logic and uses repositories.
      */
-    public DeviceController(DeviceService deviceService) {
+    public DeviceController(DeviceService deviceService, DeviceApiMapper deviceApiMapper) {
         this.deviceService = deviceService;
-    }
-
-    // ========== MAPPER METHODS ==========
-
-    /**
-     * Map DeviceDto to DeviceResponseDto
-     */
-    private DeviceResponseDto toResponseDto(DeviceDto dto) {
-        return new DeviceResponseDto(
-                dto.id(),
-                dto.networkId(),
-                dto.name(),
-                dto.macAddress(),
-                dto.ipAddress(),
-                dto.online(),
-                dto.lastSeen(),
-                dto.deviceOperationMode());
-    }
-
-    /**
-     * Map list of DeviceDto to list of DeviceResponseDto
-     */
-    private List<DeviceResponseDto> toResponseDtoList(List<DeviceDto> dtos) {
-        return dtos.stream()
-                .map(this::toResponseDto)
-                .toList();
-    }
-
-    /**
-     * Map Page of DeviceDto to Page of DeviceResponseDto
-     */
-    private Page<DeviceResponseDto> toResponseDtoPage(Page<DeviceDto> page) {
-        return page.map(this::toResponseDto);
+        this.deviceApiMapper = deviceApiMapper;
     }
 
     // ========== GET ENDPOINTS (retrieve data) ==========
@@ -106,7 +76,7 @@ public class DeviceController {
     @GetMapping
     public List<DeviceResponseDto> getAllDevices() {
         List<DeviceDto> dtos = deviceService.findAllDeviceSummaries();
-        return toResponseDtoList(dtos);
+        return deviceApiMapper.toResponses(dtos);
     }
 
     /**
@@ -122,7 +92,7 @@ public class DeviceController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         Page<DeviceDto> dtoPage = deviceService.getDeviceSummariesPaginated(null, page, size);
-        return toResponseDtoPage(dtoPage);
+        return deviceApiMapper.toResponsePage(dtoPage);
     }
 
     /**
@@ -164,7 +134,7 @@ public class DeviceController {
     @GetMapping("/network/{networkId}")
     public List<DeviceResponseDto> getDevicesByNetwork(@PathVariable Long networkId) {
         List<DeviceDto> dtos = deviceService.findDeviceSummariesByNetwork(networkId);
-        return toResponseDtoList(dtos);
+        return deviceApiMapper.toResponses(dtos);
     }
 
     /**
@@ -175,7 +145,7 @@ public class DeviceController {
     @GetMapping("/network/{networkId}/online")
     public List<DeviceResponseDto> getOnlineDevices(@PathVariable Long networkId) {
         List<DeviceDto> dtos = deviceService.findOnlineDeviceSummaries(networkId);
-        return toResponseDtoList(dtos);
+        return deviceApiMapper.toResponses(dtos);
     }
 
     /**
