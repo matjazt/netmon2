@@ -12,7 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.matjazt.netmon2.dto.response.DeviceResponseDto;
+import com.matjazt.netmon2.dto.DeviceDto;
 import com.matjazt.netmon2.entity.DeviceEntity;
 import com.matjazt.netmon2.entity.DeviceOperationMode;
 import com.matjazt.netmon2.entity.DeviceStatusHistoryEntity;
@@ -68,6 +68,40 @@ public class DeviceService {
         this.deviceRepository = deviceRepository;
         this.networkRepository = networkRepository;
         this.statusHistoryRepository = statusHistoryRepository;
+    }
+
+    // ========== MAPPER METHODS ==========
+
+    /**
+     * Map DeviceEntity to DeviceDto
+     */
+    private DeviceDto toDto(DeviceEntity entity) {
+        return new DeviceDto(
+                entity.getId(),
+                entity.getNetwork().getId(),
+                entity.getName(),
+                entity.getMacAddress(),
+                entity.getIpAddress(),
+                entity.getOnline(),
+                entity.getLastSeen(),
+                entity.getDeviceOperationMode(),
+                entity.getActiveAlertId());
+    }
+
+    /**
+     * Map list of DeviceEntity to list of DeviceDto
+     */
+    private List<DeviceDto> toDtoList(List<DeviceEntity> entities) {
+        return entities.stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    /**
+     * Map Page of DeviceEntity to Page of DeviceDto
+     */
+    private Page<DeviceDto> toDtoPage(Page<DeviceEntity> page) {
+        return page.map(this::toDto);
     }
 
     // ========== BASIC CRUD OPERATIONS ==========
@@ -132,16 +166,28 @@ public class DeviceService {
 
     // ========== DTO SUMMARY METHODS ==========
 
-    public List<DeviceResponseDto> findAllDeviceSummaries() {
-        return deviceRepository.findAllSummaries();
+    /**
+     * Get all devices as DTOs
+     */
+    public List<DeviceDto> findAllDeviceSummaries() {
+        List<DeviceEntity> entities = deviceRepository.findAllWithNetwork();
+        return toDtoList(entities);
     }
 
-    public List<DeviceResponseDto> findDeviceSummariesByNetwork(Long networkId) {
-        return deviceRepository.findSummariesByNetworkId(networkId);
+    /**
+     * Get devices by network as DTOs
+     */
+    public List<DeviceDto> findDeviceSummariesByNetwork(Long networkId) {
+        List<DeviceEntity> entities = deviceRepository.findByNetwork_Id(networkId);
+        return toDtoList(entities);
     }
 
-    public List<DeviceResponseDto> findOnlineDeviceSummaries(Long networkId) {
-        return deviceRepository.findOnlineSummariesByNetworkId(networkId);
+    /**
+     * Get online devices by network as DTOs
+     */
+    public List<DeviceDto> findOnlineDeviceSummaries(Long networkId) {
+        List<DeviceEntity> entities = deviceRepository.findByNetwork_IdAndOnline(networkId, true);
+        return toDtoList(entities);
     }
 
     // ========== BUSINESS LOGIC EXAMPLES ==========
@@ -229,13 +275,18 @@ public class DeviceService {
      * Pageable defines page number, size, and sorting.
      * Page contains results + metadata (total pages, total elements, etc.)
      */
-    public Page<DeviceResponseDto> getDeviceSummariesPaginated(Long networkId, int page, int size) {
+    public Page<DeviceDto> getDeviceSummariesPaginated(Long networkId, int page, int size) {
         // Create Pageable: page 0 is first page, sort by name ascending
         Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
+        Page<DeviceEntity> entityPage;
+
         if (networkId != null) {
-            return deviceRepository.findSummariesByNetworkId(networkId, pageable);
+            entityPage = deviceRepository.findByNetworkIdWithNetwork(networkId, pageable);
+        } else {
+            entityPage = deviceRepository.findAllWithNetwork(pageable);
         }
-        return deviceRepository.findAllSummaries(pageable);
+
+        return toDtoPage(entityPage);
     }
 
     /**
