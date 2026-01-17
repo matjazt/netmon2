@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug Netmon2 Application",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.matjazt.netmon2.Netmon2Application",
+            "projectName": "netmon2",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
