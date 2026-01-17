@@ -26,7 +26,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomUserDetailsService.class);
 
-        private final AccountRepository accountRepository;
+    private final AccountRepository accountRepository;
 
     public CustomUserDetailsService(AccountRepository accountRepository) {
         this.accountRepository = accountRepository;
@@ -43,9 +43,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // Validate credentials using your custom logic
-        String password = validateCredentials(username);
+        logger.info("Authenticating user: {}", username);
 
-        if (password == null) {
+        var account = accountRepository.findByUsername(username);
+
+        if (!account.isPresent()) {
             throw new UsernameNotFoundException("User not found: " + username);
         }
 
@@ -53,36 +55,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         // Spring Security will compare this with the provided password
         return User.builder()
                 .username(username)
-                .password(password)
-                .roles("USER") // You can customize roles/authorities here
+                .password(account.get().getPasswordHash())
+                .roles(account.get().getAccountType().getName()) // You can customize roles/authorities here
                 .build();
     }
 
-    /**
-     * ====== IMPLEMENT YOUR AUTHENTICATION LOGIC HERE ======
-     * 
-     * This method validates username and returns the expected password.
-     * Replace this with your actual authentication mechanism:
-     * - Database lookup
-     * - LDAP query
-     * - External API call
-     * - etc.
-     * 
-     * @param username the username to validate
-     * @return the plain-text password if user is valid, null if user not found
-     */
-    private String validateCredentials(String username) {
-        logger.info("Authenticating user: {}", username);
-
-        var account = accountRepository.findByUsername(username);
-
-        if (account.isPresent()) {
-            logger.info("User found: {}", username);
-            return account.get().getPasswordHash();
-        }
-
-        logger.info("User not found: {}", username);
-        // Return null if user not found
-        return null;
-    }
 }

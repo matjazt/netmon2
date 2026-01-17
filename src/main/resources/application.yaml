@@ -6,7 +6,7 @@ spring:
     active: local
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/network_monitor
+    url: set-in-local-yaml
     username: set-in-local-yaml
     password: set-in-local-yaml
     driver-class-name: org.postgresql.Driver
