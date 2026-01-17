@@ -3,9 +3,11 @@
     "files.autoSave": "onFocusChange",
     // Format Java files on save
     "editor.formatOnSave": true,
+    //"java.format.settings.url": "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml",
+    //"java.format.settings.profile": "GoogleStyle",
     // Use Eclipse formatter for Java (comes with Extension Pack for Java)
     "[java]": {
-        "editor.defaultFormatter": "redhat.java",
+        "editor.defaultFormatter": "josevseb.google-java-format-for-vs-code",
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
             "source.organizeImports": "always"
@@ -13,5 +15,8 @@
     },
     "java.configuration.updateBuildConfiguration": "automatic",
     "java.compile.nullAnalysis.mode": "automatic",
-    "spring-boot.ls.problem.application-yaml.YAML_SHOULD_ESCAPE": "HINT"
+    "spring-boot.ls.problem.application-yaml.YAML_SHOULD_ESCAPE": "HINT",
+    "java.format.enabled": true,
+    "java.format.settings.google.extra": "--aosp",
+    "editor.defaultFormatter": null
 }
