@@ -7,10 +7,10 @@ import jakarta.persistence.Table;
 
 /**
  * JPA entity for device_operation_mode reference table.
- * This entity exists for OpenJPA schema validation and foreign key
- * relationships.
- * Runtime code uses DeviceOperationMode enum directly - this entity is never
- * queried.
+ *
+ * <p>This entity exists for OpenJPA schema validation and foreign key relationships.
+ *
+ * <p>Runtime code uses DeviceOperationMode enum directly - this entity is never queried.
  */
 @Entity
 @Table(name = "device_operation_mode")

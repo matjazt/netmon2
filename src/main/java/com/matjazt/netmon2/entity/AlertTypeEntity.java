@@ -7,9 +7,10 @@ import jakarta.persistence.Table;
 
 /**
  * JPA entity for alert_type reference table.
- * This entity exists for OpenJPA schema validation and foreign key
- * relationships.
- * Runtime code uses AlertType enum directly - this entity is never queried.
+ *
+ * <p>This entity exists for OpenJPA schema validation and foreign key relationships.
+ *
+ * <p>Runtime code uses AlertType enum directly - this entity is never queried.
  */
 @Entity
 @Table(name = "alert_type")

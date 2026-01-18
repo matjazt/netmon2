@@ -1,8 +1,5 @@
 package com.matjazt.netmon2.entity;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,14 +7,17 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
 /**
  * JPA Entity representing a monitored network.
- * 
- * JPA (Jakarta Persistence API) is similar to Entity Framework in .NET.
- * Entities are POJOs (Plain Old Java Objects) that map to database tables.
- * 
- * This entity stores basic information about each monitored network.
- * The network name is extracted from the MQTT topic.
+ *
+ * <p>JPA (Jakarta Persistence API) is similar to Entity Framework in .NET. Entities are POJOs
+ * (Plain Old Java Objects) that map to database tables.
+ *
+ * <p>This entity stores basic information about each monitored network. The network name is
+ * extracted from the MQTT topic.
  */
 @Entity // Marks this class as a database entity
 @Table(name = "network") // Maps to "network" table in database
@@ -29,23 +29,22 @@ public class NetworkEntity {
 
     /**
      * Network name (extracted from MQTT topic).
-     * For topic "network/MaliGrdi", this would be "MaliGrdi".
-     * Unique constraint ensures we don't duplicate networks.
+     *
+     * <p>For topic "network/MaliGrdi", this would be "MaliGrdi". Unique constraint ensures we don't
+     * duplicate networks.
      */
     @Column(nullable = false, unique = true, length = 100)
     private String name;
 
     /**
      * When this network was first seen.
-     * 
-     * @Column with columnDefinition allows us to use PostgreSQL's TIMESTAMP type.
+     *
+     * <p>@Column with columnDefinition allows us to use PostgreSQL's TIMESTAMP type.
      */
     @Column(name = "first_seen", nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime firstSeen;
 
-    /**
-     * When we last received data for this network.
-     */
+    /** When we last received data for this network. */
     @Column(name = "last_seen", nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime lastSeen;
 
@@ -55,15 +54,12 @@ public class NetworkEntity {
     @Column(name = "email_address", nullable = true, length = 1000)
     private String emailAddress;
 
-    /**
-     * If there's an active alert for this network, references the alert ID.
-     */
+    /** If there's an active alert for this network, references the alert ID. */
     @Column(name = "active_alert_id", nullable = true)
     private Long activeAlertId;
 
     // JPA requires a no-argument constructor
-    public NetworkEntity() {
-    }
+    public NetworkEntity() {}
 
     public NetworkEntity(String name) {
         this.name = name;
@@ -118,9 +114,7 @@ public class NetworkEntity {
         return emailAddress;
     }
 
-    /**
-     * Sets the email address for alerts, automatically trimming whitespace.
-     */
+    /** Sets the email address for alerts, automatically trimming whitespace. */
     public void setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress != null ? emailAddress.trim() : null;
     }

@@ -1,9 +1,5 @@
 package com.matjazt.netmon2.entity;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Objects;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,9 +11,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Objects;
+
 /**
  * Account entity for authentication and authorization.
- * Stores user credentials, profile information, and timestamps.
+ *
+ * <p>Stores user credentials, profile information, and timestamps.
  */
 @Entity
 @Table(name = "account")
@@ -50,15 +51,19 @@ public class AccountEntity {
     private LocalDateTime lastSeen;
 
     // Constructors
-    public AccountEntity() {
-    }
+    public AccountEntity() {}
 
     /**
      * Creates a new account with the specified details.
-     * The createdAt timestamp is automatically set to current UTC time.
+     *
+     * <p>The createdAt timestamp is automatically set to current UTC time.
      */
-    public AccountEntity(String username, AccountTypeEntity accountType, String passwordHash,
-            String fullName, String email) {
+    public AccountEntity(
+            String username,
+            AccountTypeEntity accountType,
+            String passwordHash,
+            String fullName,
+            String email) {
         this.username = username;
         this.accountType = accountType;
         this.passwordHash = passwordHash;
@@ -141,10 +146,8 @@ public class AccountEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         AccountEntity that = (AccountEntity) o;
         return Objects.equals(id, that.id);
     }
@@ -156,12 +159,20 @@ public class AccountEntity {
 
     @Override
     public String toString() {
-        return "Account{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", accountType=" + accountType.getName() +
-                ", fullName='" + fullName + '\'' +
-                ", email='" + email + '\'' +
-                '}';
+        return "Account{"
+                + "id="
+                + id
+                + ", username='"
+                + username
+                + '\''
+                + ", accountType="
+                + accountType.getName()
+                + ", fullName='"
+                + fullName
+                + '\''
+                + ", email='"
+                + email
+                + '\''
+                + '}';
     }
 }

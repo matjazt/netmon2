@@ -7,19 +7,22 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * Configuration for password encoding.
- * 
- * BCryptPasswordEncoder is the recommended encoder for production use.
- * It automatically salts passwords and uses adaptive hashing.
+ *
+ * <p>BCryptPasswordEncoder is the recommended encoder for production use. It automatically salts
+ * passwords and uses adaptive hashing.
  */
 @Configuration
 public class PasswordEncoderConfig {
 
     /**
      * Create PasswordEncoder bean.
-     * 
-     * This is used by Spring Security to:
-     * - Encode passwords when creating users
-     * - Compare provided passwords with stored passwords during authentication
+     *
+     * <p>This is used by Spring Security to:
+     *
+     * <ul>
+     *   <li>Encode passwords when creating users
+     *   <li>Compare provided passwords with stored passwords during authentication
+     * </ul>
      */
     @Bean
     public PasswordEncoder passwordEncoder() {

@@ -1,7 +1,5 @@
 package com.matjazt.netmon2.entity;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,11 +12,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import java.time.LocalDateTime;
+
 /**
  * JPA Entity representing an alert (alert) in the system.
- * 
- * Alerts are triggered when networks or devices go down, or when
- * unauthorized devices are detected.
+ *
+ * <p>Alerts are triggered when networks or devices go down, or when unauthorized devices are
+ * detected.
  */
 @Entity
 @Table(name = "alert")
@@ -28,22 +28,19 @@ public class AlertEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * When this alert was triggered.
-     */
+    /** When this alert was triggered. */
     @Column(name = "timestamp", nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime timestamp;
 
-    /**
-     * The network this alert is associated with.
-     */
+    /** The network this alert is associated with. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "network_id", nullable = false)
     private NetworkEntity network;
 
     /**
      * The device this alert is associated with (optional).
-     * Null for network-level alerts.
+     *
+     * <p>Null for network-level alerts.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "device_id", nullable = true)
@@ -51,7 +48,8 @@ public class AlertEntity {
 
     /**
      * The type of alert.
-     * Stored as integer matching alert_type.id for referential integrity.
+     *
+     * <p>Stored as integer matching alert_type.id for referential integrity.
      */
     @Column(name = "alert_type_id", nullable = false)
     @Enumerated(EnumType.ORDINAL)
@@ -59,31 +57,31 @@ public class AlertEntity {
 
     /**
      * Reference to AlertTypeEntity for OpenJPA foreign key validation only.
-     * Not used in runtime code - insertable/updatable=false ensures enum field
-     * controls the value.
+     *
+     * <p>Not used in runtime code - insertable/updatable=false ensures enum field controls the
+     * value.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "alert_type_id", insertable = false, updatable = false)
     private AlertTypeEntity alertTypeRef;
 
-    /**
-     * Human-readable alert message.
-     */
+    /** Human-readable alert message. */
     @Column(name = "message", nullable = true, length = 500)
     private String message;
 
-    /**
-     * When this alert was closed/resolved (optional).
-     */
+    /** When this alert was closed/resolved (optional). */
     @Column(name = "closure_timestamp", nullable = true, columnDefinition = "TIMESTAMP")
     private LocalDateTime closureTimestamp;
 
     // JPA requires no-arg constructor
-    public AlertEntity() {
-    }
+    public AlertEntity() {}
 
-    public AlertEntity(LocalDateTime timestamp, NetworkEntity network, DeviceEntity device,
-            AlertType alertType, String message) {
+    public AlertEntity(
+            LocalDateTime timestamp,
+            NetworkEntity network,
+            DeviceEntity device,
+            AlertType alertType,
+            String message) {
         this.timestamp = timestamp;
         this.network = network;
         this.device = device;

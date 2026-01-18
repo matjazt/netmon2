@@ -1,8 +1,5 @@
 package com.matjazt.netmon2.entity;
 
-import java.io.Serializable;
-import java.util.Objects;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -12,9 +9,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import java.io.Serializable;
+import java.util.Objects;
+
 /**
  * Join table entity representing which networks an account can manage.
- * Many-to-many relationship between accounts and networks.
+ *
+ * <p>Many-to-many relationship between accounts and networks.
  */
 @Entity
 @Table(name = "account_network")
@@ -33,8 +34,7 @@ public class AccountNetworkEntity implements Serializable {
     private NetworkEntity network;
 
     // Constructors
-    public AccountNetworkEntity() {
-    }
+    public AccountNetworkEntity() {}
 
     public AccountNetworkEntity(AccountEntity account, NetworkEntity network) {
         this.account = account;
@@ -68,10 +68,8 @@ public class AccountNetworkEntity implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         AccountNetworkEntity that = (AccountNetworkEntity) o;
         return Objects.equals(id, that.id);
     }
@@ -83,9 +81,11 @@ public class AccountNetworkEntity implements Serializable {
 
     @Override
     public String toString() {
-        return "AccountNetwork{" +
-                "accountId=" + (account != null ? account.getId() : null) +
-                ", networkId=" + (network != null ? network.getId() : null) +
-                '}';
+        return "AccountNetwork{"
+                + "accountId="
+                + (account != null ? account.getId() : null)
+                + ", networkId="
+                + (network != null ? network.getId() : null)
+                + '}';
     }
 }

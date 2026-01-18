@@ -1,7 +1,5 @@
 package com.matjazt.netmon2.entity;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -12,13 +10,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import java.time.LocalDateTime;
+
 /**
  * JPA Entity representing a device status change event.
- * 
- * This is a historical record - each row represents when a device
- * changed state (went online or offline).
- * We only insert new rows when the status actually changes,
- * not on every MQTT message.
+ *
+ * <p>This is a historical record - each row represents when a device changed state (went online or
+ * offline).
+ *
+ * <p>We only insert new rows when the status actually changes, not on every MQTT message.
  */
 @Entity
 @Table(name = "device_status_history")
@@ -30,48 +30,50 @@ public class DeviceStatusHistoryEntity {
 
     /**
      * Many-to-One relationship: many status records belong to one network.
-     * Similar to a foreign key in SQL, but JPA manages the relationship.
-     * 
-     * @ManyToOne tells JPA this is a relationship field.
-     * @JoinColumn specifies the foreign key column name.
+     *
+     * <p>Similar to a foreign key in SQL, but JPA manages the relationship.
+     *
+     * <p>@ManyToOne tells JPA this is a relationship field. @JoinColumn specifies the foreign key
+     * column name.
      */
     @ManyToOne(fetch = FetchType.LAZY) // LAZY = don't load network unless accessed
     @JoinColumn(name = "network_id", nullable = false)
     private NetworkEntity network;
 
-    /**
-     * The device this history entry is associated with.
-     */
+    /** The device this history entry is associated with. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "device_id", nullable = false)
     private DeviceEntity device;
 
     /**
      * Device IP address at the time of this status change.
-     * Can change for the same device (DHCP), so we store it historically.
+     *
+     * <p>Can change for the same device (DHCP), so we store it historically.
      */
     @Column(name = "ip_address", nullable = false, length = 45) // 45 chars for IPv6
     private String ipAddress;
 
-    /**
-     * True if device went online, false if it went offline.
-     */
+    /** True if device went online, false if it went offline. */
     @Column(nullable = false)
     private Boolean online;
 
     /**
      * When this status change occurred.
-     * Uses the timestamp from the MQTT message.
+     *
+     * <p>Uses the timestamp from the MQTT message.
      */
     @Column(nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime timestamp;
 
     // JPA requires no-arg constructor
-    public DeviceStatusHistoryEntity() {
-    }
+    public DeviceStatusHistoryEntity() {}
 
-    public DeviceStatusHistoryEntity(NetworkEntity network, DeviceEntity device, String ipAddress,
-            Boolean online, LocalDateTime timestamp) {
+    public DeviceStatusHistoryEntity(
+            NetworkEntity network,
+            DeviceEntity device,
+            String ipAddress,
+            Boolean online,
+            LocalDateTime timestamp) {
         this.network = network;
         this.device = device;
         this.ipAddress = ipAddress;

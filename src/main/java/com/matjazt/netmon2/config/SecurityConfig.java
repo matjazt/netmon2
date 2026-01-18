@@ -10,11 +10,14 @@ import org.springframework.security.web.SecurityFilterChain;
 
 /**
  * Spring Security configuration for HTTP Basic Authentication.
- * 
- * This configuration:
- * - Requires authentication for all endpoints
- * - Uses HTTP Basic Auth (username/password in Authorization header)
- * - Delegates user verification to CustomUserDetailsService
+ *
+ * <p>This configuration:
+ *
+ * <ul>
+ *   <li>Requires authentication for all endpoints
+ *   <li>Uses HTTP Basic Auth (username/password in Authorization header)
+ *   <li>Delegates user verification to CustomUserDetailsService
+ * </ul>
  */
 @Configuration
 @EnableWebSecurity
@@ -23,15 +26,14 @@ public class SecurityConfig {
 
     /**
      * Configure security filter chain.
-     * 
-     * Spring Security 6.x uses lambda-based configuration.
+     *
+     * <p>Spring Security 6.x uses lambda-based configuration.
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 // Require authentication for all requests
-                .authorizeHttpRequests(auth -> auth
-                        .anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 // Enable HTTP Basic Authentication
                 .httpBasic(Customizer.withDefaults())
                 // Disable CSRF for API (enable if you have a web UI with forms)

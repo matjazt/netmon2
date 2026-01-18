@@ -1,12 +1,13 @@
 package com.matjazt.netmon2.dto;
 
-import java.time.LocalDateTime;
-
 import com.matjazt.netmon2.entity.DeviceOperationMode;
+
+import java.time.LocalDateTime;
 
 /**
  * Generic DTO for device data used in the service layer.
- * This is the domain model used between service and controller layers.
+ *
+ * <p>This is the domain model used between service and controller layers.
  */
 public record DeviceDto(
         Long id,
@@ -17,5 +18,4 @@ public record DeviceDto(
         Boolean online,
         LocalDateTime lastSeen,
         DeviceOperationMode deviceOperationMode,
-        Long activeAlertId) {
-}
+        Long activeAlertId) {}

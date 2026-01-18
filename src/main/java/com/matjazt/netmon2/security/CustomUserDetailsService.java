@@ -1,5 +1,7 @@
 package com.matjazt.netmon2.security;
 
+import com.matjazt.netmon2.repository.AccountRepository;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.User;
@@ -8,17 +10,13 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.matjazt.netmon2.repository.AccountRepository;
-
 /**
  * Custom UserDetailsService for user authentication.
- * 
- * This is where you implement your username/password verification logic.
- * Spring Security will call loadUserByUsername() during authentication.
- * 
- * TO CUSTOMIZE:
- * Replace the validateCredentials() method with your actual authentication
- * logic
+ *
+ * <p>This is where you implement your username/password verification logic. Spring Security will
+ * call loadUserByUsername() during authentication.
+ *
+ * <p>TO CUSTOMIZE: Replace the validateCredentials() method with your actual authentication logic
  * (e.g., database lookup, LDAP, external API, etc.)
  */
 @Service
@@ -33,9 +31,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     /**
-     * Load user by username.
-     * Called by Spring Security during authentication.
-     * 
+     * Load user by username. Called by Spring Security during authentication.
+     *
      * @param username the username from the HTTP Basic Auth header
      * @return UserDetails containing username, encoded password, and authorities
      * @throws UsernameNotFoundException if user not found
@@ -56,8 +53,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         return User.builder()
                 .username(username)
                 .password(account.get().getPasswordHash())
-                .roles(account.get().getAccountType().getName()) // You can customize roles/authorities here
+                .roles(
+                        account.get()
+                                .getAccountType()
+                                .getName()) // You can customize roles/authorities here
                 .build();
     }
-
 }

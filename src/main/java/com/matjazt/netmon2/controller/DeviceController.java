@@ -1,6 +1,12 @@
 package com.matjazt.netmon2.controller;
 
-import java.util.List;
+import com.matjazt.netmon2.dto.DeviceDto;
+import com.matjazt.netmon2.dto.response.DeviceResponseDto;
+import com.matjazt.netmon2.entity.DeviceEntity;
+import com.matjazt.netmon2.entity.DeviceOperationMode;
+import com.matjazt.netmon2.entity.DeviceStatusHistoryEntity;
+import com.matjazt.netmon2.mapper.DeviceApiMapper;
+import com.matjazt.netmon2.service.DeviceService;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -16,39 +22,44 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.matjazt.netmon2.dto.DeviceDto;
-import com.matjazt.netmon2.dto.response.DeviceResponseDto;
-import com.matjazt.netmon2.entity.DeviceEntity;
-import com.matjazt.netmon2.entity.DeviceOperationMode;
-import com.matjazt.netmon2.entity.DeviceStatusHistoryEntity;
-import com.matjazt.netmon2.mapper.DeviceApiMapper;
-import com.matjazt.netmon2.service.DeviceService;
+import java.util.List;
 
 /**
  * REST Controller demonstrating how to use services and repositories.
- * 
- * @RestController combines @Controller and @ResponseBody
- *                 - Makes this a REST API controller
- *                 - Automatically serializes return values to JSON
- * 
- * @RequestMapping sets the base URL path for all endpoints
- * 
- *                 SPRING MVC REQUEST MAPPINGS:
- *                 - @GetMapping - HTTP GET (retrieve data)
- *                 - @PostMapping - HTTP POST (create new resource)
- *                 - @PutMapping - HTTP PUT (update existing resource)
- *                 - @DeleteMapping - HTTP DELETE (remove resource)
- * 
- *                 PATH VARIABLES vs QUERY PARAMETERS:
- *                 - @PathVariable: /devices/{id} - required, part of URL path
- *                 - @RequestParam: /devices?name=value - optional or multiple
- *                 values
- * 
- *                 RESPONSE ENTITY:
- *                 - Allows controlling HTTP status codes
- *                 - ResponseEntity.ok() = 200 OK
- *                 - ResponseEntity.notFound() = 404 Not Found
- *                 - ResponseEntity.status(HttpStatus.CREATED) = 201 Created
+ *
+ * <p>@RestController combines @Controller and @ResponseBody
+ *
+ * <ul>
+ *   <li>Makes this a REST API controller
+ *   <li>Automatically serializes return values to JSON
+ * </ul>
+ *
+ * <p>@RequestMapping sets the base URL path for all endpoints
+ *
+ * <p>SPRING MVC REQUEST MAPPINGS:
+ *
+ * <ul>
+ *   <li>@GetMapping - HTTP GET (retrieve data)
+ *   <li>@PostMapping - HTTP POST (create new resource)
+ *   <li>@PutMapping - HTTP PUT (update existing resource)
+ *   <li>@DeleteMapping - HTTP DELETE (remove resource)
+ * </ul>
+ *
+ * <p>PATH VARIABLES vs QUERY PARAMETERS:
+ *
+ * <ul>
+ *   <li>@PathVariable: /devices/{id} - required, part of URL path
+ *   <li>@RequestParam: /devices?name=value - optional or multiple values
+ * </ul>
+ *
+ * <p>RESPONSE ENTITY:
+ *
+ * <ul>
+ *   <li>Allows controlling HTTP status codes
+ *   <li>ResponseEntity.ok() = 200 OK
+ *   <li>ResponseEntity.notFound() = 404 Not Found
+ *   <li>ResponseEntity.status(HttpStatus.CREATED) = 201 Created
+ * </ul>
  */
 @RestController
 @RequestMapping("/api/devices")
@@ -60,7 +71,8 @@ public class DeviceController {
 
     /**
      * Constructor injection of service layer.
-     * Service contains business logic and uses repositories.
+     *
+     * <p>Service contains business logic and uses repositories.
      */
     public DeviceController(DeviceService deviceService, DeviceApiMapper deviceApiMapper) {
         this.deviceService = deviceService;
@@ -71,9 +83,8 @@ public class DeviceController {
 
     /**
      * EXAMPLE: GET /api/devices
-     * 
-     * Get all devices (careful with large datasets!)
-     * Returns 200 OK with JSON array of devices
+     *
+     * <p>Get all devices (careful with large datasets!) Returns 200 OK with JSON array of devices
      */
     @GetMapping
     public List<DeviceResponseDto> getAllDevices() {
@@ -83,11 +94,12 @@ public class DeviceController {
 
     /**
      * EXAMPLE: GET /api/devices/paginated?page=0&size=20
-     * 
-     * Get devices with pagination
-     * 
-     * @RequestParam extracts query parameters from URL
-     *               defaultValue provides fallback if parameter is missing
+     *
+     * <p>Get devices with pagination
+     *
+     * <p>@RequestParam extracts query parameters from URL
+     *
+     * <p>defaultValue provides fallback if parameter is missing
      */
     @GetMapping("/paginated")
     public Page<DeviceResponseDto> getDevicesPaginated(
@@ -99,39 +111,45 @@ public class DeviceController {
 
     /**
      * EXAMPLE: GET /api/devices/5
-     * 
-     * Get device by ID
-     * 
-     * @PathVariable extracts {id} from URL path
-     * 
-     *               Returns:
-     *               - 200 OK with device JSON if found
-     *               - 404 Not Found if device doesn't exist
+     *
+     * <p>Get device by ID
+     *
+     * <p>@PathVariable extracts {id} from URL path
+     *
+     * <p>Returns:
+     *
+     * <ul>
+     *   <li>200 OK with device JSON if found
+     *   <li>404 Not Found if device doesn't exist
+     * </ul>
      */
     @GetMapping("/{id}")
     public ResponseEntity<DeviceEntity> getDeviceById(@PathVariable Long id) {
-        return deviceService.findDeviceById(id)
+        return deviceService
+                .findDeviceById(id)
                 .map(ResponseEntity::ok) // If found, return 200 OK
                 .orElse(ResponseEntity.notFound().build()); // If not found, return 404
     }
 
     /**
      * EXAMPLE: GET /api/devices/mac/AA:BB:CC:DD:EE:FF
-     * 
-     * Find device by MAC address
-     * MAC address is part of the URL path
+     *
+     * <p>Find device by MAC address
+     *
+     * <p>MAC address is part of the URL path
      */
     @GetMapping("/mac/{macAddress}")
     public ResponseEntity<DeviceEntity> getDeviceByMac(@PathVariable String macAddress) {
-        return deviceService.findDeviceByMac(macAddress)
+        return deviceService
+                .findDeviceByMac(macAddress)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     /**
      * EXAMPLE: GET /api/devices/network/5
-     * 
-     * Get all devices on a specific network
+     *
+     * <p>Get all devices on a specific network
      */
     @GetMapping("/network/{networkId}")
     public List<DeviceResponseDto> getDevicesByNetwork(@PathVariable Long networkId) {
@@ -141,8 +159,8 @@ public class DeviceController {
 
     /**
      * EXAMPLE: GET /api/devices/network/5/online
-     * 
-     * Get only online devices on a network
+     *
+     * <p>Get only online devices on a network
      */
     @GetMapping("/network/{networkId}/online")
     public List<DeviceResponseDto> getOnlineDevices(@PathVariable Long networkId) {
@@ -152,9 +170,10 @@ public class DeviceController {
 
     /**
      * EXAMPLE: GET /api/devices/network/5/stats
-     * 
-     * Get device statistics for a network
-     * Returns custom object (not entity) as JSON
+     *
+     * <p>Get device statistics for a network
+     *
+     * <p>Returns custom object (not entity) as JSON
      */
     @GetMapping("/network/{networkId}/stats")
     public DeviceService.DeviceStats getDeviceStats(@PathVariable Long networkId) {
@@ -163,21 +182,21 @@ public class DeviceController {
 
     /**
      * EXAMPLE: GET /api/devices/5/history?limit=50
-     * 
-     * Get device status history
-     * Combines path variable and query parameter
+     *
+     * <p>Get device status history
+     *
+     * <p>Combines path variable and query parameter
      */
     @GetMapping("/{id}/history")
     public List<DeviceStatusHistoryEntity> getDeviceHistory(
-            @PathVariable Long id,
-            @RequestParam(defaultValue = "50") int limit) {
+            @PathVariable Long id, @RequestParam(defaultValue = "50") int limit) {
         return deviceService.getDeviceHistory(id, limit);
     }
 
     /**
      * EXAMPLE: GET /api/devices/needing-alerts
-     * 
-     * Get devices that need alert generation
+     *
+     * <p>Get devices that need alert generation
      */
     @GetMapping("/needing-alerts")
     public List<DeviceEntity> getDevicesNeedingAlerts() {
@@ -186,13 +205,12 @@ public class DeviceController {
 
     /**
      * EXAMPLE: GET /api/devices/exists?networkId=5&macAddress=AA:BB:CC:DD:EE:FF
-     * 
-     * Check if device exists (returns boolean)
+     *
+     * <p>Check if device exists (returns boolean)
      */
     @GetMapping("/exists")
     public boolean checkDeviceExists(
-            @RequestParam Long networkId,
-            @RequestParam String macAddress) {
+            @RequestParam Long networkId, @RequestParam String macAddress) {
         return deviceService.deviceExists(networkId, macAddress);
     }
 
@@ -200,22 +218,24 @@ public class DeviceController {
 
     /**
      * EXAMPLE: POST /api/devices
-     * 
-     * Create a new device
-     * 
-     * @RequestBody deserializes JSON from request body to DeviceEntity
-     * 
-     *              Request body example:
-     *              {
-     *              "network": {"id": 5},
-     *              "macAddress": "AA:BB:CC:DD:EE:FF",
-     *              "ipAddress": "192.168.1.100",
-     *              "online": true,
-     *              "name": "My Device"
-     *              }
-     * 
-     *              Returns 201 Created with the saved device (including generated
-     *              ID)
+     *
+     * <p>Create a new device
+     *
+     * <p>@RequestBody deserializes JSON from request body to DeviceEntity
+     *
+     * <p>Request body example:
+     *
+     * <pre>{@code
+     * {
+     *   "network": {"id": 5},
+     *   "macAddress": "AA:BB:CC:DD:EE:FF",
+     *   "ipAddress": "192.168.1.100",
+     *   "online": true,
+     *   "name": "My Device"
+     * }
+     * }</pre>
+     *
+     * <p>Returns 201 Created with the saved device (including generated ID)
      */
     @PostMapping
     public ResponseEntity<DeviceEntity> createDevice(@RequestBody DeviceEntity device) {
@@ -225,39 +245,38 @@ public class DeviceController {
 
     /**
      * EXAMPLE: POST /api/devices/mqtt-update
-     * 
-     * Process MQTT device update
-     * Custom DTO (Data Transfer Object) for request body
-     * 
-     * Request body:
+     *
+     * <p>Process MQTT device update Custom DTO (Data Transfer Object) for request body
+     *
+     * <p>Request body:
+     *
+     * <pre>{@code
      * {
-     * "networkId": 5,
-     * "macAddress": "AA:BB:CC:DD:EE:FF",
-     * "ipAddress": "192.168.1.100",
-     * "online": true
+     *   "networkId": 5,
+     *   "macAddress": "AA:BB:CC:DD:EE:FF",
+     *   "ipAddress": "192.168.1.100",
+     *   "online": true
      * }
+     * }</pre>
      */
     @PostMapping("/mqtt-update")
     public DeviceEntity processMqttUpdate(@RequestBody MqttDeviceUpdateRequest request) {
         return deviceService.processDeviceUpdate(
-                request.networkId,
-                request.macAddress,
-                request.ipAddress,
-                request.online);
+                request.networkId, request.macAddress, request.ipAddress, request.online);
     }
 
     // ========== PUT ENDPOINTS (update existing resources) ==========
 
     /**
      * EXAMPLE: PUT /api/devices/5
-     * 
-     * Update an existing device
-     * ID in path + full entity in body
+     *
+     * <p>Update an existing device
+     *
+     * <p>ID in path + full entity in body
      */
     @PutMapping("/{id}")
     public ResponseEntity<DeviceEntity> updateDevice(
-            @PathVariable Long id,
-            @RequestBody DeviceEntity device) {
+            @PathVariable Long id, @RequestBody DeviceEntity device) {
 
         // Verify device exists
         if (!deviceService.findDeviceById(id).isPresent()) {
@@ -272,14 +291,14 @@ public class DeviceController {
 
     /**
      * EXAMPLE: PUT /api/devices/5/mode?mode=ALWAYS_ON
-     * 
-     * Update only the operation mode
-     * Partial update - only changes one field
+     *
+     * <p>Update only the operation mode
+     *
+     * <p>Partial update - only changes one field
      */
     @PutMapping("/{id}/mode")
     public ResponseEntity<DeviceEntity> updateDeviceMode(
-            @PathVariable Long id,
-            @RequestParam DeviceOperationMode mode) {
+            @PathVariable Long id, @RequestParam DeviceOperationMode mode) {
         try {
             DeviceEntity updated = deviceService.updateDeviceMode(id, mode);
             return ResponseEntity.ok(updated);
@@ -292,9 +311,10 @@ public class DeviceController {
 
     /**
      * EXAMPLE: DELETE /api/devices/5
-     * 
-     * Delete a device
-     * Returns 204 No Content on success
+     *
+     * <p>Delete a device
+     *
+     * <p>Returns 204 No Content on success
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDevice(@PathVariable Long id) {
@@ -310,9 +330,9 @@ public class DeviceController {
 
     /**
      * Data Transfer Object for MQTT update request.
-     * 
-     * In a real project, this would be in a separate dto package.
-     * DTOs separate API structure from database entities.
+     *
+     * <p>In a real project, this would be in a separate dto package. DTOs separate API structure
+     * from database entities.
      */
     public static class MqttDeviceUpdateRequest {
         public Long networkId;

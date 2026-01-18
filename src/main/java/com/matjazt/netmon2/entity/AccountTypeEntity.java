@@ -1,7 +1,5 @@
 package com.matjazt.netmon2.entity;
 
-import java.util.Objects;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,9 +7,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.util.Objects;
+
 /**
  * Account type entity representing roles or permission levels.
- * Examples: Admin, MonitoringDevice, Viewer, etc.
+ *
+ * <p>Examples: Admin, MonitoringDevice, Viewer, etc.
  */
 @Entity
 @Table(name = "account_type")
@@ -28,8 +29,7 @@ public class AccountTypeEntity {
     private String description;
 
     // Constructors
-    public AccountTypeEntity() {
-    }
+    public AccountTypeEntity() {}
 
     public AccountTypeEntity(String name, String description) {
         this.name = name;
@@ -63,10 +63,8 @@ public class AccountTypeEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         AccountTypeEntity that = (AccountTypeEntity) o;
         return Objects.equals(id, that.id);
     }
@@ -78,9 +76,6 @@ public class AccountTypeEntity {
 
     @Override
     public String toString() {
-        return "AccountType{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
+        return "AccountType{" + "id=" + id + ", name='" + name + '\'' + '}';
     }
 }

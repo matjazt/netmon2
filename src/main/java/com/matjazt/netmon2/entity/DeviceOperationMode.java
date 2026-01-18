@@ -2,15 +2,13 @@ package com.matjazt.netmon2.entity;
 
 /**
  * Enum representing the operational mode of a device on a network.
- * Determines monitoring behavior and alerting policy.
- * 
- * Ordinal values match device_operation_mode.id in database for referential
- * integrity.
+ *
+ * <p>Determines monitoring behavior and alerting policy.
+ *
+ * <p>Ordinal values match device_operation_mode.id in database for referential integrity.
  */
 public enum DeviceOperationMode {
-    /**
-     * Device is not allowed on the network - triggers DEVICE_UNAUTHORIZED alerts
-     */
+    /** Device is not allowed on the network - triggers DEVICE_UNAUTHORIZED alerts */
     UNAUTHORIZED, // ordinal = 0
 
     /** Device is allowed but not actively monitored for uptime */

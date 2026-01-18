@@ -2,8 +2,8 @@ package com.matjazt.netmon2.entity;
 
 /**
  * Enum representing alert types in the system.
- * 
- * Ordinal values match alert_type.id in database for referential integrity.
+ *
+ * <p>Ordinal values match alert_type.id in database for referential integrity.
  */
 public enum AlertType {
     /** Network has not reported within configured alerting_delay period */
