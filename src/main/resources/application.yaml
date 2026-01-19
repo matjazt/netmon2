@@ -38,3 +38,15 @@ mqtt:
   keep-alive-interval: 60                    # Keep-alive interval in seconds
   completion-timeout: 5000                   # Completion timeout in milliseconds
   ssl-verify-hostname: true                  # Verify SSL hostname (disable only for testing)
+
+alerter:
+  smtp-host: changeit                        # SMTP server hostname
+  smtp-port: changeit                        # SMTP port (587 for TLS, 465 for SSL, 25 for plain)
+  smtp-username: changeit                    # SMTP username for authentication
+  smtp-password: changeit                    # SMTP password for authentication
+  smtp-start-tls: true                       # Enable STARTTLS (recommended for port 587)
+  smtp-auth: true                            # Enable SMTP authentication
+  from-email: changeit                       # Sender email address
+  from-name: netmon2                         # Sender display name
+  interval-seconds: 120                      # Alert processing interval in seconds
+  initial-delay-seconds: 10                  # Initial delay before first alert processing in seconds

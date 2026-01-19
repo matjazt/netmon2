@@ -24,6 +24,7 @@ dependencies {
 	implementation("org.mapstruct:mapstruct:1.5.5.Final")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1")
 	implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("org.springframework.boot:spring-boot-starter-mail")
 	implementation("org.springframework.integration:spring-integration-mqtt:7.0.1")
 	implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
