@@ -28,8 +28,7 @@ mqtt:
   client-id: netmon2
   username: changeit
   password: changeit
-  subscribe-topics:
-    - network/Kus/scan
+  topic-template: network/{networkName}/scan
   truststore-path: changeit  # Optional: Path to JKS truststore for self-signed CA certificates
   truststore-password: changeit              # Optional: Truststore password (required if truststore-path is set)
   automatic-reconnect: true                  # Enable automatic reconnection on connection loss
@@ -37,4 +36,5 @@ mqtt:
   qos: 1                                     # Quality of Service level (0=at most once, 1=at least once, 2=exactly once)
   connection-timeout: 30                     # Connection timeout in seconds
   keep-alive-interval: 60                    # Keep-alive interval in seconds
+  completion-timeout: 5000                   # Completion timeout in milliseconds
   ssl-verify-hostname: true                  # Verify SSL hostname (disable only for testing)

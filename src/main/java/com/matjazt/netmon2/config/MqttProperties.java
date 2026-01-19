@@ -3,8 +3,6 @@ package com.matjazt.netmon2.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 @ConfigurationProperties(prefix = "mqtt")
 public class MqttProperties {
@@ -13,7 +11,7 @@ public class MqttProperties {
     private String clientId;
     private String username;
     private String password;
-    private List<String> subscribeTopics;
+    private String topicTemplate;
     private String truststorePath;
     private String truststorePassword;
     private boolean automaticReconnect = true;
@@ -21,6 +19,7 @@ public class MqttProperties {
     private int qos = 1;
     private int connectionTimeout = 30;
     private int keepAliveInterval = 60;
+    private int completionTimeout = 30000;
     private boolean sslVerifyHostname = true;
 
     // getters and setters
@@ -56,12 +55,12 @@ public class MqttProperties {
         this.password = password;
     }
 
-    public List<String> getSubscribeTopics() {
-        return subscribeTopics;
+    public String getTopicTemplate() {
+        return topicTemplate;
     }
 
-    public void setSubscribeTopics(List<String> subscribeTopics) {
-        this.subscribeTopics = subscribeTopics;
+    public void setTopicTemplate(String topicTemplate) {
+        this.topicTemplate = topicTemplate;
     }
 
     public String getTruststorePath() {
@@ -118,6 +117,14 @@ public class MqttProperties {
 
     public void setKeepAliveInterval(int keepAliveInterval) {
         this.keepAliveInterval = keepAliveInterval;
+    }
+
+    public int getCompletionTimeout() {
+        return completionTimeout;
+    }
+    
+    public void setCompletionTimeout(int completionTimeout) {
+        this.completionTimeout = completionTimeout;
     }
 
     public boolean isSslVerifyHostname() {
