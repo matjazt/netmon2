@@ -8,18 +8,26 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 /**
- * Repository for NetworkEntity.
+ * Spring Data JPA repository for {@link NetworkEntity}.
  *
- * <p>Manages monitored networks.
+ * <p>Provides CRUD operations and custom query methods for managing monitored networks. Spring Data
+ * generates the implementation automatically based on method naming conventions.
+ *
+ * <p>Extends {@link JpaRepository} which provides standard methods: save(), findById(), findAll(),
+ * delete(), etc. Custom query methods are derived from method names - no implementation code
+ * needed.
  */
 @Repository
 public interface NetworkRepository extends JpaRepository<NetworkEntity, Long> {
 
     /**
-     * Find network by name
+     * Finds network by exact name match.
      *
-     * <p>Network name is unique, so we return Optional. The name is extracted from MQTT topic
-     * (e.g., "MaliGrdi").
+     * <p>Network names are unique. Returns Optional to handle case where network doesn't exist.
+     * Name is extracted from MQTT topic (e.g., "network/HomeNetwork" → "HomeNetwork").
+     *
+     * @param name the network name
+     * @return Optional containing the network if found, empty otherwise
      */
     Optional<NetworkEntity> findByName(String name);
 
@@ -27,17 +35,27 @@ public interface NetworkRepository extends JpaRepository<NetworkEntity, Long> {
      * Check if a network exists by name
      *
      * <p>Useful before creating a new network from MQTT message.
+     *
+     * @param name the network name to check
+     * @return true if network exists, false otherwise
      */
     boolean existsByName(String name);
 
     /**
-     * Find networks that have an active alert
+     * Finds all networks with active unresolved alerts.
      *
-     * <p>activeAlertId is not null means there's an unresolved alert.
+     * <p>A network has an active alert when {@code activeAlertId} is not null. Used by alert
+     * service to check if network issues have resolved.
+     *
+     * @return list of networks with active alerts
      */
     java.util.List<NetworkEntity> findByActiveAlertIdIsNotNull();
 
-    /** Find networks without active alerts */
+    /**
+     * Finds all networks without active alerts.
+     *
+     * @return list of networks with no active alerts
+     */
     java.util.List<NetworkEntity> findByActiveAlertIdIsNull();
 
     /**

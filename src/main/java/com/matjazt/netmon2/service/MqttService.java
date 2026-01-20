@@ -1,14 +1,5 @@
 package com.matjazt.netmon2.service;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.integration.annotation.ServiceActivator;
-import org.springframework.messaging.Message;
-import org.springframework.stereotype.Service;
 import com.matjazt.netmon2.dto.NetworkStatusMessageDto;
 import com.matjazt.netmon2.entity.AlertType;
 import com.matjazt.netmon2.entity.DeviceEntity;
@@ -19,8 +10,52 @@ import com.matjazt.netmon2.repository.AlertRepository;
 import com.matjazt.netmon2.repository.DeviceRepository;
 import com.matjazt.netmon2.repository.DeviceStatusHistoryRepository;
 import com.matjazt.netmon2.repository.NetworkRepository;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.integration.annotation.ServiceActivator;
+import org.springframework.messaging.Message;
+import org.springframework.stereotype.Service;
+
 import tools.jackson.databind.ObjectMapper;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Service for processing MQTT messages containing network device scan results.
+ *
+ * <p>Receives messages from the {@code mqttInputChannel} via Spring Integration and processes
+ * device status updates. Tracks device state changes (online/offline transitions) and stores
+ * historical data in the database.
+ *
+ * <p>Message Flow:
+ *
+ * <ol>
+ *   <li>MQTT broker publishes device scan results to topics
+ *   <li>MqttPahoMessageDrivenChannelAdapter receives messages
+ *   <li>Messages delivered to mqttInputChannel
+ *   <li>This service's {@code @ServiceActivator} method processes messages
+ *   <li>Device state changes recorded in database
+ * </ol>
+ *
+ * <p>Expected message format:
+ *
+ * <pre>
+ * {
+ *   "hostname": "Scanner",
+ *   "timestamp": "2026-01-20T11:45:40+01:00",
+ *   "devices": [
+ *     {"ip": "192.168.1.1", "mac": "AA:BB:CC:DD:EE:FF"}
+ *   ]
+ * }
+ * </pre>
+ *
+ * <p>Only state changes are stored - if a device was online and is still online, no record is
+ * created. This minimizes database writes while preserving complete state history.
+ */
 @Service
 public class MqttService {
 
@@ -45,6 +80,19 @@ public class MqttService {
         logger.info("initialized");
     }
 
+    /**
+     * Handles incoming MQTT messages from the mqttInputChannel.
+     *
+     * <p>The {@code @ServiceActivator} annotation registers this method as a message handler for
+     * the specified input channel. Spring Integration automatically invokes this method when
+     * messages arrive.
+     *
+     * <p>Processes device scan results: extracts network name from topic, parses JSON payload,
+     * updates network last-seen timestamp, records device state changes (online/offline), and
+     * triggers alerts for unauthorized devices.
+     *
+     * @param messagex Spring Integration message containing MQTT payload and headers
+     */
     @ServiceActivator(inputChannel = "mqttInputChannel")
     public void handle(Message<String> messagex) {
         org.springframework.messaging.MessageHeaders headers = messagex.getHeaders();
@@ -200,8 +248,8 @@ public class MqttService {
                         // device was already online, no change, don't record
                         logger.info(
                                 "Device is still online: "
-                                            + device.getBasicInfo()
-                                            + " on "
+                                        + device.getBasicInfo()
+                                        + " on "
                                         + network.getName());
 
                     } else {

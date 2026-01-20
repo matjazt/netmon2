@@ -16,34 +16,63 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Repository for DeviceEntity.
+ * Spring Data JPA repository for {@link DeviceEntity}.
  *
- * <p>Manages devices on monitored networks.
+ * <p>Provides CRUD operations and custom query methods for managing network devices. Demonstrates
+ * both derived query methods (named method patterns) and custom JPQL queries with {@code @Query}.
+ *
+ * <p>Query Method Types:
+ *
+ * <ul>
+ *   <li>Derived queries: Method name parsed to generate query (e.g., findByMacAddress)
+ *   <li>JPQL queries: Custom queries with @Query annotation for complex logic
+ *   <li>Native queries: Direct SQL when JPQL limitations are reached
+ * </ul>
  */
 @Repository
 public interface DeviceRepository extends JpaRepository<DeviceEntity, Long> {
 
     /**
-     * Find device by MAC address
+     * Finds device by MAC address.
      *
-     * <p>MAC address is the unique identifier for devices.
+     * <p>MAC address is the unique identifier for devices across all networks. Returns Optional
+     * since device may not exist yet.
+     *
+     * @param macAddress the device MAC address (format: "AA:BB:CC:DD:EE:FF")
+     * @return Optional containing the device if found, empty otherwise
      */
     Optional<DeviceEntity> findByMacAddress(String macAddress);
 
-    /** Find all devices on a specific network */
+    /**
+     * Finds all devices on a specific network.
+     *
+     * <p>Uses navigation property syntax: {@code network.id} navigates through the network
+     * relationship. Spring Data JPA automatically joins tables.
+     *
+     * @param networkId the network ID
+     * @return list of devices on the network
+     */
     List<DeviceEntity> findByNetwork_Id(Long networkId);
 
     /**
-     * Find devices by online status
+     * Finds devices by online status.
      *
-     * <p>Useful for dashboard showing online/offline devices.
+     * <p>Useful for dashboards showing all currently online or offline devices.
+     *
+     * @param online true for online devices, false for offline
+     * @return list of devices with the specified status
      */
     List<DeviceEntity> findByOnline(Boolean online);
 
     /**
-     * Find online devices on a specific network
+     * Finds online devices on a specific network.
      *
-     * <p>Combining multiple conditions.
+     * <p>Combines multiple criteria in method name. Spring Data JPA generates query with AND
+     * condition.
+     *
+     * @param networkId the network ID
+     * @param online true for online devices, false for offline
+     * @return list of devices matching both criteria
      */
     List<DeviceEntity> findByNetwork_IdAndOnline(Long networkId, Boolean online);
 

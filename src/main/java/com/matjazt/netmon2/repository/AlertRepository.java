@@ -17,60 +17,95 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Repository for AlertEntity.
+ * Spring Data JPA repository for {@link AlertEntity}.
  *
- * <p>Manages alerts triggered by network/device issues.
+ * <p>Manages alerts triggered by network and device issues. Demonstrates advanced Spring Data JPA
+ * features including derived queries, custom JPQL, pagination, and complex filtering.
+ *
+ * <p>Alert Lifecycle:
+ *
+ * <ul>
+ *   <li>Alert created when issue detected (e.g., network down, device offline)
+ *   <li>Alert remains open while issue persists (closureTimestamp is null)
+ *   <li>Alert closed when issue resolves (closureTimestamp set to current time)
+ *   <li>Closure email sent to notify administrators
+ * </ul>
  */
 @Repository
 public interface AlertRepository extends JpaRepository<AlertEntity, Long> {
 
     /**
-     * Find all open (unresolved) alerts
+     * Finds all open (unresolved) alerts.
      *
-     * <p>An alert is open if closureTimestamp is null.
+     * <p>An alert is open when {@code closureTimestamp} is null. Used by alert service to check
+     * active alerts and determine if closure emails should be sent.
+     *
+     * @return list of open alerts
      */
     List<AlertEntity> findByClosureTimestampIsNull();
 
-    /** Find all closed (resolved) alerts */
-    List<AlertEntity> findByClosureTimestampIsNotNull();
-
     /**
-     * Find open alerts for a specific network
+     * Finds open alerts for a specific network.
      *
-     * <p>Useful for dashboard showing current issues per network.
+     * <p>Useful for dashboard showing current issues per network. Combines network navigation and
+     * null check.
+     *
+     * @param networkId the network ID
+     * @return list of open alerts for the network
      */
     List<AlertEntity> findByNetwork_IdAndClosureTimestampIsNull(Long networkId);
 
-    /** Find all alerts for a specific network (open and closed) */
-    List<AlertEntity> findByNetwork(NetworkEntity network);
-
     /**
-     * Find alerts by type
+     * Finds all alerts (open and closed) for a specific network.
      *
-     * <p>Example: find all DEVICE_UNAUTHORIZED alerts
+     * <p>Uses entity parameter instead of ID for demonstration. Spring Data JPA handles the join
+     * automatically.
+     *
+     * @param network the network entity
+     * @return list of all alerts for the network
+     *     <p>s alerts by type.
+     *     <p>Alert types: NETWORK_DOWN, DEVICE_DOWN, DEVICE_UNAUTHORIZED. Uses enum parameter -
+     *     Spring Data JPA maps to database ordinal value automatically.
+     * @param alertType the alert type
+     * @return list of alerts of the specified type
      */
     List<AlertEntity> findByAlertType(AlertType alertType);
 
     /**
-     * Find open alerts by type
+     * Finds open alerts by type.
      *
-     * <p>Combining enum and null check in derived query.
+     * <p>Combines enum and null check. Useful for counting specific alert types currently active.
+     *
+     * @param alertType the alert type
+     * @return list of open alerts of the specified type);
+     *     <p>/** Find alerts by type
+     *     <p>Example: find all DEVICE_UNAUTHORIZED alerts
      */
     List<AlertEntity> findByAlertTypeAndClosureTimestampIsNull(AlertType alertType);
 
     /**
-     * Find alerts for a specific device
+     * Finds alerts for a specific device.
      *
-     * <p>Device can be null for network-level alerts, so check nullable fields carefully.
+     * <p>Note: Device can be null for network-level alerts (NETWORK_DOWN). Use {@code findByDevice}
+     * instead of this method if you need to handle nulls explicitly.
+     *
+     * @param deviceId the device ID
+     * @return list of alerts for the device
      */
     List<AlertEntity> findByDevice_Id(Long deviceId);
 
     /**
-     * Find alerts within a date range
+     * Finds alerts within a date range (inclusive).
      *
-     * <p>Between includes both boundaries.
+     * <p>The "Between" keyword includes both start and end timestamps. Useful for generating
+     * reports for specific time periods.
      *
-     * <p>Useful for generating reports.
+     * @param start the start timestamp (inclusive)
+     * @param end the end timestamp (inclusive)
+     * @return list of alerts within the date rangeng deviceId);
+     *     <p>/** Find alerts within a date range
+     *     <p>Between includes both boundaries.
+     *     <p>Useful for generating reports.
      */
     List<AlertEntity> findByTimestampBetween(LocalDateTime start, LocalDateTime end);
 
