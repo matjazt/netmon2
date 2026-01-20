@@ -267,33 +267,6 @@ public class AlerterService {
         for (NetworkEntity network : networkRepository.findAll()) {
             processNetworkAlerts(network);
         }
-        /*
-        try {
-            // TODO: Replace with actual alert logic
-            // Example: query database for devices needing alerts, check conditions, etc.
-
-            String currentTime = LocalDateTime.now().format(TIME_FORMATTER);
-            String subject = "Test Alert - " + currentTime;
-            String body =
-                    String.format(
-                            "This is a test alert sent at %s\n\n"
-                                + "This framework can be used for:\n"
-                                + "- Device offline notifications\n"
-                                + "- Network status alerts\n"
-                                + "- Periodic health reports\n"
-                                + "- Any scheduled background processing\n\n"
-                                + "Configure alerter.interval-seconds in application.yaml to change"
-                                + " frequency.",
-                            currentTime);
-
-            sendEmail("mt.dev@gmx.com", subject, body);
-
-            logger.info("AlerterService: Alert processing completed successfully");
-
-        } catch (Exception e) {
-            logger.error("AlerterService: Error during alert processing", e);
-        }
-            */
     }
 
     @Transactional

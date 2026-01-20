@@ -287,9 +287,6 @@ public class MqttService {
                     continue; // already processed
                 }
 
-                var mac = knownDevice.getMacAddress();
-                var ip = knownDevice.getIpAddress();
-
                 // in all cases, update device's current online status and last seen
                 knownDevice.setOnline(false);
                 deviceRepository.save(knownDevice);
@@ -311,7 +308,11 @@ public class MqttService {
                     // Record offline status with last known IP
                     var offlineStatus =
                             new DeviceStatusHistoryEntity(
-                                    network, knownDevice, ip, false, messageTimestamp);
+                                    network,
+                                    knownDevice,
+                                    knownDevice.getIpAddress(),
+                                    false,
+                                    messageTimestamp);
                     deviceStatusHistoryRepository.save(offlineStatus);
                 }
             }

@@ -20,7 +20,7 @@ Network Monitor 2 expects JSON messages with the following structure:
 ### Field Descriptions
 
 | Field | Type | Required | Description |
-|-------|------|----------|-------------|
+| ----- | ---- | -------- | ----------- |
 | `hostname` | string | Yes | Name of the device/scanner publishing the message |
 | `timestamp` | ISO 8601 string | Yes | When the scan was performed (with timezone) |
 | `devices` | array | Yes | List of devices found on the network |
@@ -249,7 +249,7 @@ mosquitto_pub -h localhost -p 1883 \
 
 Look for:
 
-```
+```txt
 INFO  MqttService : Received MQTT message: payload='...'
 ```
 

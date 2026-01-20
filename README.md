@@ -246,7 +246,7 @@ Users authenticate via Spring Security:
 
 ## Project Structure
 
-```
+```txt
 netmon2/
 ├── build.gradle.kts                 # Gradle project configuration
 ├── settings.gradle.kts              # Gradle settings
