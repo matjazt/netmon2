@@ -130,6 +130,10 @@ public class DeviceEntity {
         return macAddress;
     }
 
+    public String getBasicInfo() {
+        return getNameOrUnknown() + " (mac: " + macAddress + ", ip: " + ipAddress + ")";
+    }
+
     public void setName(String name) {
         this.name = name;
     }

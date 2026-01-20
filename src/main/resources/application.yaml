@@ -48,5 +48,5 @@ alerter:
   smtp-auth: true                            # Enable SMTP authentication
   from-email: changeit                       # Sender email address
   from-name: netmon2                         # Sender display name
-  interval-seconds: 120                      # Alert processing interval in seconds
-  initial-delay-seconds: 10                  # Initial delay before first alert processing in seconds
+  interval-seconds: 10                       # Alert processing interval in seconds
+  initial-delay-seconds: 30                  # Initial delay before first alert processing in seconds

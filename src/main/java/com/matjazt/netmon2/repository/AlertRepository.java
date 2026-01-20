@@ -2,6 +2,7 @@ package com.matjazt.netmon2.repository;
 
 import com.matjazt.netmon2.entity.AlertEntity;
 import com.matjazt.netmon2.entity.AlertType;
+import com.matjazt.netmon2.entity.DeviceEntity;
 import com.matjazt.netmon2.entity.NetworkEntity;
 
 import org.springframework.data.domain.Page;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository for AlertEntity.
@@ -98,6 +100,25 @@ public interface AlertRepository extends JpaRepository<AlertEntity, Long> {
                     + "WHERE a.closureTimestamp IS NULL "
                     + "ORDER BY a.timestamp DESC")
     List<AlertEntity> findRecentOpenAlerts(Pageable pageable);
+
+    /**
+     * Find the latest alert for a network or device.
+     *
+     * <p>If device is null, finds latest network-level alert. If device is provided, finds latest
+     * device-specific alert.
+     *
+     * @param network The network
+     * @param device The device (null for network-level alerts)
+     * @return The most recent alert, or empty if none exists
+     */
+    @Query(
+            "SELECT a FROM AlertEntity a "
+                    + "WHERE a.network = :network "
+                    + "AND ((:device IS NULL AND a.device IS NULL) OR a.device = :device) "
+                    + "ORDER BY a.timestamp DESC "
+                    + "LIMIT 1")
+    Optional<AlertEntity> findLatestAlert(
+            @Param("network") NetworkEntity network, @Param("device") DeviceEntity device);
 
     /**
      * CUSTOM QUERY: Count open alerts per network

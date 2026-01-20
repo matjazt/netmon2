@@ -88,6 +88,29 @@ public interface DeviceStatusHistoryRepository
                     + "ORDER BY h.timestamp DESC")
     List<DeviceStatusHistoryEntity> findLatestStatusPerDevice(@Param("networkId") Long networkId);
 
+    /** CUSTOM QUERY: Get latest status change for the given device */
+    @Query(
+            "SELECT h FROM DeviceStatusHistoryEntity h "
+                    + "WHERE h.network.id = :networkId "
+                    + "AND h.device.id = :deviceId "
+                    + "ORDER BY h.timestamp DESC "
+                    + "LIMIT 1")
+    DeviceStatusHistoryEntity findLatestHistoryEntryByDevice(
+            @Param("networkId") Long networkId, @Param("deviceId") Long deviceId);
+
+    /** CUSTOM QUERY: Get currently online devices on a network */
+    @Query(
+            "SELECT h FROM DeviceStatusHistoryEntity h "
+                    + "WHERE h.network.id = :networkId "
+                    + "AND h.online = true "
+                    + "AND h.timestamp = ("
+                    + "  SELECT MAX(h2.timestamp) "
+                    + "  FROM DeviceStatusHistoryEntity h2 "
+                    + "  WHERE h2.device.id = h.device.id"
+                    + ") "
+                    + "ORDER BY h.timestamp DESC")
+    List<DeviceStatusHistoryEntity> findCurrentlyOnlineDevices(@Param("networkId") Long networkId);
+
     /**
      * CUSTOM QUERY: Calculate uptime percentage for a device
      *
