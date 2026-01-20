@@ -38,8 +38,8 @@ public class AlerterProperties {
     private String fromEmail;
     private String fromName;
 
-    private long intervalSeconds = 60;
-    private long initialDelaySeconds = 5;
+    private long intervalSeconds = 20;
+    private long initialDelaySeconds = 30;
 
     // Getters and setters
 

@@ -67,14 +67,14 @@ Edit `src/main/resources/application-local.yaml` (or `application.yaml` for defa
 ```yaml
 mqtt:
   url: ssl://broker.example.com:8883  # MQTT broker URL
-  client-id: netmon2                   # Unique client identifier
-  username: your-username              # MQTT authentication
-  password: your-password              # MQTT password
+  client-id: netmon2                  # Unique client identifier
+  username: your-username             # MQTT authentication
+  password: your-password             # MQTT password
   topic-template: network/{networkName}/scan  # Topic pattern
   truststore-path: /path/to/truststore.jks    # Optional: for self-signed CAs
-  truststore-password: changeit        # Optional: truststore password
-  automatic-reconnect: true            # Enable automatic reconnection
-  clean-session: false                 # Persistent session
+  truststore-password: changeit       # Optional: truststore password
+  automatic-reconnect: true           # Enable automatic reconnection
+  clean-session: false                # Persistent session
   qos: 1                              # Quality of Service (0, 1, or 2)
   connection-timeout: 30              # Connection timeout in seconds
   keep-alive-interval: 60             # Keep-alive interval in seconds
@@ -90,12 +90,12 @@ alerter:
   smtp-port: 587                      # SMTP port (587 for TLS)
   smtp-username: your-email           # SMTP username
   smtp-password: your-password        # SMTP password
-  smtp-start-tls: true               # Enable STARTTLS
-  smtp-auth: true                    # Enable SMTP authentication
-  from-email: alerts@example.com     # Sender email address
-  from-name: Network Monitor         # Sender display name
-  interval-seconds: 120              # Alert check interval
-  initial-delay-seconds: 10          # Initial delay before first check
+  smtp-start-tls: true                # Enable STARTTLS
+  smtp-auth: true                     # Enable SMTP authentication
+  from-email: alerts@example.com      # Sender email address
+  from-name: Network Monitor          # Sender display name
+  interval-seconds: 20                # Alert check interval
+  initial-delay-seconds: 30           # Initial delay before first check
 ```
 
 ### Database Connection
@@ -222,7 +222,7 @@ Devices can be configured with three operation modes:
 
 ### Alert System
 
-The `AlerterService` runs on a configurable schedule (default: every 120 seconds) and checks for:
+The `AlerterService` runs on a configurable schedule (default: every 20 seconds) and checks for:
 
 1. **NETWORK_DOWN**: Network hasn't sent data within configured `alerting_delay` period
 2. **DEVICE_DOWN**: An ALWAYS_ON device is offline
@@ -250,23 +250,30 @@ Users authenticate via Spring Security:
 netmon2/
 ├── build.gradle.kts                 # Gradle project configuration
 ├── settings.gradle.kts              # Gradle settings
-├── src/
-│   ├── main/
-│   │   ├── java/com/matjazt/netmon2/
-│   │   │   ├── config/             # Spring configuration classes
-│   │   │   ├── controller/         # REST controllers
-│   │   │   ├── dto/                # Data Transfer Objects
-│   │   │   ├── entity/             # JPA entities
-│   │   │   ├── mapper/             # MapStruct mappers
-│   │   │   ├── repository/         # Spring Data repositories
-│   │   │   ├── security/           # Spring Security configuration
-│   │   │   └── service/            # Business logic services
-│   │   └── resources/
-│   │       ├── application.yaml    # Default configuration
-│   │       └── application-local.yaml  # Local overrides
-│   └── test/                       # Unit and integration tests
-└── database/                       # Database scripts
-    └── schema.sql                  # Database schema DDL
+├── database/                        # Database scripts
+│   └── schema.sql                   # Database schema DDL
+├── docs/                            # Documentation
+│   └── MqttMessageFormat.md         # MQTT message format and examples
+├── network-scanners/                # Network scanner implementations
+│   └── RouterOS/                    # MikroTik RouterOS scanner
+│       ├── networkScan.rsc          # RouterOS script
+│       ├── networkScan.json         # Configuration file
+│       └── networkScan.RouterOS.md  # Installation guide
+└── src/
+    ├── main/
+    │   ├── java/com/matjazt/netmon2/
+    │   │   ├── config/              # Spring configuration classes
+    │   │   ├── controller/          # REST controllers
+    │   │   ├── dto/                 # Data Transfer Objects
+    │   │   ├── entity/              # JPA entities
+    │   │   ├── mapper/              # MapStruct mappers
+    │   │   ├── repository/          # Spring Data repositories
+    │   │   ├── security/            # Spring Security configuration
+    │   │   └── service/             # Business logic services
+    │   └── resources/
+    │       ├── application.yaml     # Default configuration
+    │       └── application-local.yaml  # Local overrides
+    └── test/                        # Unit and integration tests
 ```
 
 ## Development Tips
