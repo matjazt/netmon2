@@ -6,7 +6,7 @@ plugins {
 
 group = "com.matjazt"
 version = "0.0.1-SNAPSHOT"
-description = "Newtork monitoring back end"
+description = "Network monitoring back end"
 
 java {
 	toolchain {
