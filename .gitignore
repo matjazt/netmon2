@@ -36,4 +36,4 @@ out/
 # Ignore log files
 log/
 
-src/main/resources/application-local.yaml
+.env

@@ -6,9 +6,9 @@ spring:
     active: local
 
   datasource:
-    url: set-in-local-yaml
-    username: set-in-local-yaml
-    password: set-in-local-yaml
+    url: changeit
+    username: changeit
+    password: changeit
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -20,6 +20,16 @@ spring:
         show_sql: false
     open-in-view: false
 
+# Actuator configuration for health checks and monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info     # Expose only health and info endpoints
+  endpoint:
+    health:
+      show-details: always
+
 greeting:
   template: "Zdravo, %s!"
 
@@ -29,10 +39,10 @@ mqtt:
   username: changeit
   password: changeit
   topic-template: network/{networkName}/scan
-  truststore-path: changeit                  # Optional: Path to JKS truststore for self-signed CA certificates
-  truststore-password: changeit              # Optional: Truststore password (required if truststore-path is set)
+  truststore-path:                           # Optional: Path to JKS truststore for self-signed CA certificates
+  truststore-password:                       # Optional: Truststore password (required if truststore-path is set)
   automatic-reconnect: true                  # Enable automatic reconnection on connection loss
-  clean-session: false                       # Persistent session (false) vs clean session (true)
+  clean-session: true                        # Persistent session (false) vs clean session (true)
   qos: 1                                     # Quality of Service level (0=at most once, 1=at least once, 2=exactly once)
   connection-timeout: 30                     # Connection timeout in seconds
   keep-alive-interval: 60                    # Keep-alive interval in seconds

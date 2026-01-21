@@ -33,7 +33,13 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 // Require authentication for all requests
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .authorizeHttpRequests(
+                        auth ->
+                                auth. // Allow unauthenticated access to health endpoint
+                                        requestMatchers("/actuator/health", "/actuator/health/**")
+                                        .permitAll()
+                                        .anyRequest()
+                                        .authenticated())
                 // Enable HTTP Basic Authentication
                 .httpBasic(Customizer.withDefaults())
                 // Disable CSRF for API (enable if you have a web UI with forms)
