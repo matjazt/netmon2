@@ -20,6 +20,12 @@ spring:
         show_sql: false
     open-in-view: false
 
+server:
+  port: 8080
+  servlet:
+    context-path: /netmon2
+  forward-headers-strategy: framework # Trust X-Forwarded-* headers
+
 # Actuator configuration for health checks and monitoring
 management:
   endpoints:
