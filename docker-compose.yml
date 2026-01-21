@@ -1,0 +1,21 @@
+services:
+  # Network Monitor Application
+  netmon2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: netmon2
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./log:/app/log
+    restart: unless-stopped
+    healthcheck:
+      test:
+        ["CMD", "curl", "-f", "http://127.0.0.1:8080/actuator/health/liveness"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
