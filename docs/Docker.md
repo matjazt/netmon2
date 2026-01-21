@@ -207,7 +207,7 @@ The same applies to `.env` files.
 
 ### Transferring Image to Server
 
-**Option 1: Docker Registry**
+#### Option 1: Docker Registry
 
 ```powershell
 # Tag image
@@ -221,7 +221,7 @@ docker pull registry.example.com/netmon2:1.0.0
 docker compose up -d
 ```
 
-**Option 2: Save/Load (no registry)**
+#### Option 2: Save/Load (no registry)
 
 ```powershell
 # On Windows: save image to file
@@ -554,12 +554,3 @@ curl http://localhost:8080/actuator/health
 - **Docker Documentation**: <https://docs.docker.com/>
 - **Docker Compose Reference**: <https://docs.docker.com/compose/compose-file/>
 - **Spring Boot Docker Guide**: <https://spring.io/guides/topicals/spring-boot-docker/>
-
-## Additional Resources
-
-umentation**: <<https://www.postgresql.org/docs/>
-
-- **Docker Documentation**: <https://docs.docker.com/>
-- **Docker Compose Reference**: <https://docs.docker.com/compose/compose-file/>
-- **Spring Boot Docker Guide**: <https://spring.io/guides/topicals/spring-boot-docker/>
-- **PostgreSQL Docker Hub**: <https://hub.docker.com/_/postgres>

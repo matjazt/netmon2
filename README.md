@@ -1,4 +1,4 @@
-# Network Monitor 2
+# NetMon2
 
 A Spring Boot application for monitoring network devices via MQTT with automated alerting, user authentication, and a REST API.
 
