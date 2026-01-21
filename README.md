@@ -134,6 +134,20 @@ This creates `build/libs/netmon2-0.0.1-SNAPSHOT.jar` - an executable JAR file.
 java -jar build/libs/netmon2-0.0.1-SNAPSHOT.jar
 ```
 
+### Run with Docker
+
+The project includes Docker configuration for containerized deployment. See [docs/Docker.md](docs/Docker.md) for complete Docker setup and usage instructions.
+
+Quick start:
+
+```powershell
+# Build and run with Docker Compose
+docker compose up -d
+
+# View logs
+docker compose logs -f
+```
+
 ### Application URLs
 
 - Application: `http://localhost:8080/`
@@ -250,10 +264,15 @@ Users authenticate via Spring Security:
 netmon2/
 ├── build.gradle.kts                 # Gradle project configuration
 ├── settings.gradle.kts              # Gradle settings
+├── Dockerfile                       # Docker image configuration
+├── docker-compose.yml               # Docker Compose configuration
+├── .dockerignore                    # Docker build exclusions
+├── .env                             # Environment variables (not in git)
 ├── database/                        # Database scripts
 │   └── schema.sql                   # Database schema DDL
 ├── docs/                            # Documentation
-│   └── MqttMessageFormat.md         # MQTT message format and examples
+│   ├── MqttMessageFormat.md         # MQTT message format and examples
+│   └── Docker.md                    # Docker setup and usage guide
 ├── network-scanners/                # Network scanner implementations
 │   └── RouterOS/                    # MikroTik RouterOS scanner
 │       ├── networkScan.rsc          # RouterOS script
