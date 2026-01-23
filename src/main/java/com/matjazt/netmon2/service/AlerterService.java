@@ -1,5 +1,15 @@
 package com.matjazt.netmon2.service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.matjazt.netmon2.config.AlerterProperties;
 import com.matjazt.netmon2.entity.AlertEntity;
 import com.matjazt.netmon2.entity.AlertType;
@@ -9,22 +19,7 @@ import com.matjazt.netmon2.entity.NetworkEntity;
 import com.matjazt.netmon2.repository.AlertRepository;
 import com.matjazt.netmon2.repository.DeviceRepository;
 import com.matjazt.netmon2.repository.DeviceStatusHistoryRepository;
-import com.matjazt.netmon2.repository.NetworkRepository;
 import com.matjazt.tools.SimpleTools;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Background service for processing alerts and sending email notifications.
@@ -38,8 +33,7 @@ public class AlerterService {
     private static final Logger logger = LoggerFactory.getLogger(AlerterService.class);
 
     private final DeviceRepository deviceRepository;
-    private final NetworkRepository networkRepository;
-    private final DeviceStatusHistoryRepository deviceStatusHistoryRepository;
+        private final DeviceStatusHistoryRepository deviceStatusHistoryRepository;
     private final AlertRepository alertRepository;
 
     // private static final DateTimeFormatter TIME_FORMATTER =
@@ -58,13 +52,11 @@ public class AlerterService {
             AlerterProperties properties,
             JavaMailSender mailSender,
             DeviceRepository deviceRepository,
-            NetworkRepository networkRepository,
             DeviceStatusHistoryRepository deviceStatusHistoryRepository,
             AlertRepository alertRepository) {
         this.properties = properties;
         this.mailSender = mailSender;
         this.deviceRepository = deviceRepository;
-        this.networkRepository = networkRepository;
         this.deviceStatusHistoryRepository = deviceStatusHistoryRepository;
         this.alertRepository = alertRepository;
     }
@@ -181,10 +173,10 @@ public class AlerterService {
         // store it also in the entity
         if (device == null) {
             network.setActiveAlertId(alert.getId());
-            networkRepository.save(network);
+            // Hibernate will auto-UPDATE at commit: networkRepository.save(network);
         } else {
             device.setActiveAlertId(alert.getId());
-            deviceRepository.save(device);
+            // Hibernate will auto-UPDATE at commit: deviceRepository.save(device);
         }
 
         // send alert notification
@@ -212,15 +204,15 @@ public class AlerterService {
 
         // close alert in database
         alert.setClosureTimestamp(LocalDateTime.now(ZoneOffset.UTC));
-        alertRepository.save(alert);
+        // Hibernate will auto-UPDATE at commit: alertRepository.save(alert);
 
         // close it also in the entity
         if (device == null) {
             network.setActiveAlertId(null);
-            networkRepository.save(network);
+            // Hibernate will auto-UPDATE at commit: networkRepository.save(network);
         } else {
             device.setActiveAlertId(null);
-            deviceRepository.save(device);
+            // Hibernate will auto-UPDATE at commit: deviceRepository.save(device);
         }
 
         // append the information about the alert we are closing to the message: alert
@@ -246,30 +238,8 @@ public class AlerterService {
         return alert;
     }
 
-    /**
-     * Scheduled method that runs at fixed rate based on configuration. @Scheduled uses SpEL (Spring
-     * Expression Language) to read interval from properties. fixedRateString: runs every X seconds
-     * (interval between start times) initialDelayString: waits X seconds before first execution
-     *
-     * <p>Alternative annotations: - @Scheduled(cron = "0 0 * * * *") - runs at the top of every
-     * hour - @Scheduled(fixedDelay = 60000) - waits 60s between end of one execution and start of
-     * next
-     */
-    @Scheduled(
-            fixedRateString = "#{@alerterProperties.intervalSeconds * 1000}",
-            initialDelayString = "#{@alerterProperties.initialDelaySeconds * 1000}",
-            timeUnit = TimeUnit.MILLISECONDS)
-    public void processAlerts() {
-        logger.info("AlerterService: Running scheduled alert processing...");
-
-        // process networks one by one
-        for (NetworkEntity network : networkRepository.findAll()) {
-            processNetworkAlerts(network);
-        }
-    }
-
     @Transactional
-    private void processNetworkAlerts(NetworkEntity network) {
+    public void processNetworkAlerts(NetworkEntity network) {
 
         // see if the entire network is down or up
 

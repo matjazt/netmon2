@@ -13,9 +13,9 @@ import com.matjazt.netmon2.repository.NetworkRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import tools.jackson.databind.ObjectMapper;
 
@@ -91,11 +91,11 @@ public class MqttService {
      * updates network last-seen timestamp, records device state changes (online/offline), and
      * triggers alerts for unauthorized devices.
      *
-     * @param messagex Spring Integration message containing MQTT payload and headers
+     * @param mqttMessage Spring Integration message containing MQTT payload and headers
      */
-    @ServiceActivator(inputChannel = "mqttInputChannel")
-    public void handle(Message<String> messagex) {
-        org.springframework.messaging.MessageHeaders headers = messagex.getHeaders();
+    @Transactional
+    public void processMqttMessage(Message<String> mqttMessage) {
+        org.springframework.messaging.MessageHeaders headers = mqttMessage.getHeaders();
         String topic =
                 headers.get(
                         org.springframework.integration.mqtt.support.MqttHeaders.RECEIVED_TOPIC,
@@ -116,14 +116,14 @@ public class MqttService {
         logger.info(
                 "Received MQTT message: payload='{}', topic='{}', qos={}, retained={},"
                         + " duplicate={}, headers={}",
-                messagex.getPayload(),
+                mqttMessage.getPayload(),
                 topic,
                 qos,
                 retained,
                 duplicate,
                 headers);
 
-        // if (topic != "testiram") {
+        // if (topic != "rubbish") {
         //    return;
         // }
 
@@ -134,14 +134,14 @@ public class MqttService {
             String networkName = extractNetworkName(topic);
 
             // Parse JSON payload to Java object
-            NetworkStatusMessageDto message = parseMessage(messagex.getPayload());
+            NetworkStatusMessageDto message = parseMessage(mqttMessage.getPayload());
 
             var messageTimestamp = LocalDateTime.ofInstant(message.getTimestamp(), ZoneOffset.UTC);
 
             // Get or create network record
             NetworkEntity network = getOrCreateNetwork(networkName);
             network.setLastSeen(messageTimestamp);
-            networkRepository.save(network);
+            // Hibernate will auto-UPDATE at commit: networkRepository.save(network);
 
             /*
              * // Get list of currently online MACs from message
@@ -155,8 +155,8 @@ public class MqttService {
             var knownDevices = deviceRepository.findByNetwork_Id(network.getId());
 
             // load all previously online devices for this network
-            var previouslyOnlineDevices =
-                    deviceStatusHistoryRepository.findCurrentlyOnlineDevices(network.getId());
+            // var previouslyOnlineDevices =
+            //        deviceStatusHistoryRepository.findCurrentlyOnlineDevices(network.getId());
 
             List<Long> processedDevices = new ArrayList<>();
 
@@ -218,6 +218,8 @@ public class MqttService {
                     device = knownDeviceOpt.get();
                     processedDevices.add(device.getId());
 
+                    boolean wasOnline = device.getOnline();
+
                     // in all cases, update device's current online status and last seen
                     device.setOnline(true);
                     device.setLastSeen(messageTimestamp);
@@ -234,17 +236,18 @@ public class MqttService {
                                 "device was seen before");
                     } else {
                         // openAlert saves the device, so only save if no alert was opened
-                        deviceRepository.save(device);
+                        // Hibernate will auto-UPDATE at commit: deviceRepository.save(device);
                     }
 
                     // check last known status - search in previouslyOnlineDevices
-                    var deviceId = device.getId();
-                    var lastOnlineStatus =
-                            previouslyOnlineDevices.stream()
-                                    .filter(d -> d.getDevice().getId() == deviceId)
-                                    .findFirst();
+                    // var deviceId = device.getId();
+                    // var lastOnlineStatus =
+                    //         previouslyOnlineDevices.stream()
+                    //                 .filter(d -> d.getDevice().getId() == deviceId)
+                    //                 .findFirst();
 
-                    if (lastOnlineStatus.isPresent()) {
+                    // if (lastOnlineStatus.isPresent()) {
+                    if (wasOnline) {
                         // device was already online, no change, don't record
                         logger.info(
                                 "Device is still online: "
@@ -287,34 +290,38 @@ public class MqttService {
                     continue; // already processed
                 }
 
-                // in all cases, update device's current online status and last seen
+                // if the device is online, according to our database, it went offline
+                if (!knownDevice.getOnline()) {
+                    continue; // already offline in the database, no change
+                }
+
                 knownDevice.setOnline(false);
-                deviceRepository.save(knownDevice);
+                // Hibernate will auto-UPDATE at commit: deviceRepository.save(knownDevice);
 
                 // check if the device was previously online
-                var lastOnlineStatus =
-                        previouslyOnlineDevices.stream()
-                                .filter(d -> d.getDevice().getId() == knownDevice.getId())
-                                .findFirst();
+                // var lastOnlineStatus =
+                //         previouslyOnlineDevices.stream()
+                //                 .filter(d -> d.getDevice().getId() == knownDevice.getId())
+                //                 .findFirst();
 
-                if (lastOnlineStatus.isPresent()) {
-                    // device went offline
-                    logger.info(
-                            "Device went offline: "
-                                    + knownDevice.getBasicInfo()
-                                    + " on "
-                                    + network.getName());
+                // if (lastOnlineStatus.isPresent()) {
+                // device went offline
+                logger.info(
+                        "Device went offline: "
+                                + knownDevice.getBasicInfo()
+                                + " on "
+                                + network.getName());
 
-                    // Record offline status with last known IP
-                    var offlineStatus =
-                            new DeviceStatusHistoryEntity(
-                                    network,
-                                    knownDevice,
-                                    knownDevice.getIpAddress(),
-                                    false,
-                                    messageTimestamp);
-                    deviceStatusHistoryRepository.save(offlineStatus);
-                }
+                // Record offline status with last known IP
+                var offlineStatus =
+                        new DeviceStatusHistoryEntity(
+                                network,
+                                knownDevice,
+                                knownDevice.getIpAddress(),
+                                false,
+                                messageTimestamp);
+                deviceStatusHistoryRepository.save(offlineStatus);
+                // }
             }
 
         } catch (Exception e) {

@@ -8,7 +8,7 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "com.matjazt.netmon2.Netmon2Application",
             "projectName": "netmon2",
-            "args": "",
+            "vmArgs": "-Dfile.encoding=UTF-8",
             "envFile": "${workspaceFolder}/.env"
         }
     ]

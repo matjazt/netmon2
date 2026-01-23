@@ -98,7 +98,10 @@ public interface DeviceStatusHistoryRepository
     DeviceStatusHistoryEntity findLatestHistoryEntryByDevice(
             @Param("networkId") Long networkId, @Param("deviceId") Long deviceId);
 
-    /** CUSTOM QUERY: Get currently online devices on a network */
+    /**
+     * CUSTOM QUERY: Get currently online devices on a network NOTE: index or query optimization
+     * needed, but since this method is currentlynot used, we skip it for now.
+     */
     @Query(
             "SELECT h FROM DeviceStatusHistoryEntity h "
                     + "WHERE h.network.id = :networkId "

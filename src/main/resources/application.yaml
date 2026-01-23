@@ -5,20 +5,39 @@ spring:
   profiles:
     active: local
 
+  mandatory-file-encoding: UTF-8
+
   datasource:
     url: changeit
     username: changeit
     password: changeit
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      auto-commit: false
 
   jpa:
     hibernate:
       ddl-auto: none        # important for DB-first
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
         show_sql: false
+        generate_statistics: false
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+        flush_mode: COMMIT
     open-in-view: false
+
+logging:
+  level:
+    org.hibernate.SQL: OFF
+    # org.hibernate.SQL: DEBUG
+    # org.hibernate.stat: DEBUG
+    # org.hibernate.orm.jdbc.bind: TRACE
 
 server:
   port: 8080

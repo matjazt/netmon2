@@ -1,5 +1,15 @@
 package com.matjazt.netmon2.service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.matjazt.netmon2.dto.DeviceDto;
 import com.matjazt.netmon2.entity.DeviceEntity;
 import com.matjazt.netmon2.entity.DeviceOperationMode;
@@ -9,18 +19,6 @@ import com.matjazt.netmon2.mapper.DeviceMapper;
 import com.matjazt.netmon2.repository.DeviceRepository;
 import com.matjazt.netmon2.repository.DeviceStatusHistoryRepository;
 import com.matjazt.netmon2.repository.NetworkRepository;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Example Service demonstrating how to use Spring Data JPA repositories.
@@ -54,7 +52,7 @@ public class DeviceService {
     // Dependencies injected via constructor
     private final DeviceRepository deviceRepository;
     private final NetworkRepository networkRepository;
-    private final DeviceStatusHistoryRepository statusHistoryRepository;
+    private final DeviceStatusHistoryRepository deviceStatusHistoryRepository;
     private final DeviceMapper deviceMapper;
 
     /**
@@ -75,7 +73,7 @@ public class DeviceService {
             DeviceMapper deviceMapper) {
         this.deviceRepository = deviceRepository;
         this.networkRepository = networkRepository;
-        this.statusHistoryRepository = statusHistoryRepository;
+        this.deviceStatusHistoryRepository = statusHistoryRepository;
         this.deviceMapper = deviceMapper;
     }
 
@@ -207,7 +205,7 @@ public class DeviceService {
             DeviceStatusHistoryEntity history =
                     new DeviceStatusHistoryEntity(
                             network, device, ipAddress, online, LocalDateTime.now(ZoneOffset.UTC));
-            statusHistoryRepository.save(history);
+            deviceStatusHistoryRepository.save(history);
         }
 
         return device;
@@ -268,7 +266,7 @@ public class DeviceService {
     public List<DeviceStatusHistoryEntity> getDeviceHistory(Long deviceId, int limit) {
         Pageable pageable = PageRequest.of(0, limit, Sort.by("timestamp").descending());
         Page<DeviceStatusHistoryEntity> page =
-                statusHistoryRepository.findByDevice_Id(deviceId, pageable);
+                deviceStatusHistoryRepository.findByDevice_Id(deviceId, pageable);
         return page.getContent();
     }
 
