@@ -41,17 +41,14 @@ public class TimingProxy {
 
     private static final Logger logger = LoggerFactory.getLogger(TimingProxy.class);
 
-    private final AlerterProperties alerterProperties;
     private final NetworkRepository networkRepository;
     private final AlerterService alerterService;
     private final MqttService mqttService;
 
     public TimingProxy(
-            AlerterProperties alerterProperties,
             NetworkRepository networkRepository,
             AlerterService alerterService,
             MqttService mqttService) {
-        this.alerterProperties = alerterProperties;
         this.networkRepository = networkRepository;
         this.alerterService = alerterService;
         this.mqttService = mqttService;

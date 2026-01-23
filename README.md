@@ -2,15 +2,13 @@
 
 A Spring Boot application for monitoring network devices via MQTT with automated alerting, user authentication, and a REST API.
 
-> **Note**: This is a Spring Boot port of the [original Jakarta EE/TomEE version](https://github.com/matjazt/NetworkMonitor). Core functionality is implemented, but the project is still under active development.
-
 ## Overview
 
 This application subscribes to MQTT topics that publish network device lists, detects when devices go online or offline, stores state changes in a PostgreSQL database, triggers email alerts for critical events, and provides an authenticated REST API to query device status. It supports multi-user access with role-based account management and configurable device monitoring policies (unauthorized, authorized, always-on).
 
 ## Technology Stack
 
-- **Spring Boot 4.0.1**: Modern Java application framework
+- **Spring Boot 4.0.2**: Modern Java application framework
 - **Spring Data JPA**: Database persistence with Hibernate
 - **Spring Security**: Authentication and authorization with BCrypt
 - **Spring Integration MQTT**: MQTT connectivity with Eclipse Paho client
@@ -18,10 +16,11 @@ This application subscribes to MQTT topics that publish network device lists, de
 - **Gradle**: Build tool and dependency management
 - **PostgreSQL**: Relational database for storing device history
 - **MapStruct**: DTO mapping framework
+- **Docker**: Containerized deployment with Docker Compose
 
 ## Prerequisites
 
-- JDK 17 (Adoptium recommended)
+- JDK 21 (Adoptium recommended)
 - Gradle (wrapper included)
 - PostgreSQL server
 
@@ -57,6 +56,36 @@ This creates the following tables:
 **Note**: `database/NetworkMonitor.sql` contains development queries and should NOT be executed.
 
 ## Configuration
+
+### Environment Variables (.env file)
+
+The application supports configuration via environment variables using a `.env` file in the project root. This file is excluded from version control (`.gitignore`) to protect sensitive credentials.
+
+Create a `.env` file with the following structure:
+
+```bash
+# Database Configuration
+SPRING_DATASOURCE_URL=jdbc:postgresql://your-server:5432/your-database?currentSchema=your-schema&tcpKeepAlive=true
+SPRING_DATASOURCE_USERNAME=your-db-username
+SPRING_DATASOURCE_PASSWORD=your-db-password
+
+# MQTT Configuration
+MQTT_URL=ssl://broker.example.com:8883
+MQTT_CLIENT_ID=netmon2
+MQTT_USERNAME=your-mqtt-username
+MQTT_PASSWORD=your-mqtt-password
+
+# Email/SMTP Configuration
+ALERTER_SMTP_HOST=smtp.example.com
+ALERTER_SMTP_PORT=587
+ALERTER_SMTP_USERNAME=alerts@example.com
+ALERTER_SMTP_PASSWORD=your-smtp-password
+ALERTER_SMTP_START_TLS=true
+ALERTER_SMTP_AUTH=true
+ALERTER_FROM_EMAIL=alerts@example.com
+```
+
+These environment variables override the defaults in `application.yaml` and are automatically loaded when using Docker Compose or can be sourced in your shell before running the application.
 
 ### Application Configuration
 
@@ -150,9 +179,9 @@ docker compose logs -f
 
 ### Application URLs
 
-- Application: `http://localhost:8080/`
-- REST API: `http://localhost:8080/api/devices`
-- OpenAPI/Swagger UI: `http://localhost:8080/swagger-ui.html`
+- Application: `http://127.0.0.1/netmon2/`
+- REST API: `http://127.0.0.1/netmon2/api/devices`
+- OpenAPI/Swagger UI: `http://127.0.0.1/netmon2/swagger-ui.html`
 
 ## REST API Endpoints
 
@@ -295,46 +324,6 @@ netmon2/
     └── test/                        # Unit and integration tests
 ```
 
-## Development Tips
-
-### Running in IDE
-
-Import as Gradle project in your IDE (IntelliJ IDEA, VS Code with Java extensions). Use Spring Boot run configuration.
-
-### Hot Reload
-
-Spring Boot DevTools enables automatic restart on code changes. Add dependency:
-
-```kotlin
-developmentOnly("org.springframework.boot:spring-boot-devtools")
-```
-
-### Testing MQTT Connection
-
-Test by publishing to your MQTT topics using an MQTT client like `mosquitto_pub`:
-
-```powershell
-mosquitto_pub -h your-broker -p 8883 -t network/TestNetwork `
-  -u username -P password --cafile ca.crt `
-  -m '{"hostname":"Test","timestamp":"2026-01-20T15:00:00+01:00","devices":[{"ip":"192.168.1.1","mac":"AA:BB:CC:DD:EE:FF"}]}'
-```
-
-### Viewing Logs
-
-Application logs to console and `log/netmon2.log` (configured in `logback-spring.xml`).
-
-## Common Issues
-
-**MQTT Connection Fails**: Check broker URL, credentials, and TLS settings in configuration. Verify firewall rules. Check application logs for connection errors.
-
-**Database Connection Fails**: Ensure PostgreSQL is running and credentials in configuration are correct. Verify database exists and schema is loaded.
-
-**Alert Emails Not Sending**: Verify SMTP configuration. Check server, port, credentials. Review application logs for email errors.
-
-**Dependency Issues**: Run `./gradlew clean build --refresh-dependencies` to refresh Gradle cache.
-
-**Authentication fails**: Ensure accounts exist in database with correct BCrypt hashed passwords. Check network access in `account_network` table.
-
 ## Features
 
 ✅ **MQTT Integration**: Subscribe to device scan results from network scanners  
@@ -350,4 +339,4 @@ Application logs to console and `log/netmon2.log` (configured in `logback-spring
 
 ## License
 
-This is a personal learning/demonstration project.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

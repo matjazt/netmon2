@@ -67,7 +67,7 @@ mqtt:
   truststore-path:                           # Optional: Path to JKS truststore for self-signed CA certificates
   truststore-password:                       # Optional: Truststore password (required if truststore-path is set)
   automatic-reconnect: true                  # Enable automatic reconnection on connection loss
-  clean-session: true                        # Persistent session (false) vs clean session (true)
+  clean-session: false                       # Persistent session (false) vs clean session (true)
   qos: 1                                     # Quality of Service level (0=at most once, 1=at least once, 2=exactly once)
   connection-timeout: 30                     # Connection timeout in seconds
   keep-alive-interval: 60                    # Keep-alive interval in seconds
