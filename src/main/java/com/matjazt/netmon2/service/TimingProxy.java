@@ -110,7 +110,9 @@ public class TimingProxy {
         for (NetworkEntity network : networkRepository.findAll()) {
             // Time each network separately to identify performance bottlenecks
             long startTime = System.currentTimeMillis();
-            alerterService.processNetworkAlerts(network);
+            // we should not pass the entire network entity because it was loaded outside the
+            // (future) transaction
+            alerterService.processNetworkAlerts(network.getId());
             long endTime = System.currentTimeMillis();
             logger.info(
                     "Processed alerts for network '{}' in {} ms",

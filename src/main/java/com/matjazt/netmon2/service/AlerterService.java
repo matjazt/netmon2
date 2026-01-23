@@ -9,6 +9,7 @@ import com.matjazt.netmon2.entity.NetworkEntity;
 import com.matjazt.netmon2.repository.AlertRepository;
 import com.matjazt.netmon2.repository.DeviceRepository;
 import com.matjazt.netmon2.repository.DeviceStatusHistoryRepository;
+import com.matjazt.netmon2.repository.NetworkRepository;
 import com.matjazt.tools.SimpleTools;
 
 import org.slf4j.Logger;
@@ -40,15 +41,16 @@ public class AlerterService {
 
     private static final Logger logger = LoggerFactory.getLogger(AlerterService.class);
 
+    private final AlerterProperties properties;
+    private final JavaMailSender mailSender;
+
+    private final NetworkRepository networkRepository;
     private final DeviceRepository deviceRepository;
     private final DeviceStatusHistoryRepository deviceStatusHistoryRepository;
     private final AlertRepository alertRepository;
 
     // private static final DateTimeFormatter TIME_FORMATTER =
     //        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-    private final AlerterProperties properties;
-    private final JavaMailSender mailSender;
 
     private static final Map<AlertType, String> ALERT_TYPE_MESSAGES =
             Map.ofEntries(
@@ -59,11 +61,13 @@ public class AlerterService {
     public AlerterService(
             AlerterProperties properties,
             JavaMailSender mailSender,
+            NetworkRepository networkRepository,
             DeviceRepository deviceRepository,
             DeviceStatusHistoryRepository deviceStatusHistoryRepository,
             AlertRepository alertRepository) {
         this.properties = properties;
         this.mailSender = mailSender;
+        this.networkRepository = networkRepository;
         this.deviceRepository = deviceRepository;
         this.deviceStatusHistoryRepository = deviceStatusHistoryRepository;
         this.alertRepository = alertRepository;
@@ -247,9 +251,17 @@ public class AlerterService {
     }
 
     @Transactional
-    public void processNetworkAlerts(NetworkEntity network) {
+    public void processNetworkAlerts(long networkId) {
 
         // see if the entire network is down or up
+
+        var network =
+                networkRepository
+                        .findById(networkId)
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "Network with ID " + networkId + " not found"));
 
         var now = LocalDateTime.now(ZoneOffset.UTC);
         var alertingThreshold = now.minusSeconds(network.getAlertingDelay());
