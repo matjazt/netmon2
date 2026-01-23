@@ -27,9 +27,10 @@ import java.util.List;
 /**
  * Service for processing MQTT messages containing network device scan results.
  *
- * <p>Receives messages from the {@code mqttInputChannel} via Spring Integration and processes
- * device status updates. Tracks device state changes (online/offline transitions) and stores
- * historical data in the database.
+ * <p>This service handles the core business logic for processing device status updates. The actual
+ * MQTT message reception and performance timing is managed by {@link TimingProxy}, which serves as
+ * the {@code @ServiceActivator} entry point and wraps calls to {@link #processMqttMessage(Message)}
+ * to measure execution time outside the transactional boundary.
  *
  * <p>Message Flow:
  *
@@ -37,8 +38,8 @@ import java.util.List;
  *   <li>MQTT broker publishes device scan results to topics
  *   <li>MqttPahoMessageDrivenChannelAdapter receives messages
  *   <li>Messages delivered to mqttInputChannel
- *   <li>This service's {@code @ServiceActivator} method processes messages
- *   <li>Device state changes recorded in database
+ *   <li>{@link TimingProxy#processMqttMessage(Message)} receives and times the processing
+ *   <li>This service processes messages and records device state changes in database
  * </ol>
  *
  * <p>Expected message format:
@@ -81,17 +82,18 @@ public class MqttService {
     }
 
     /**
-     * Handles incoming MQTT messages from the mqttInputChannel.
+     * Handles incoming MQTT messages containing device scan results.
      *
-     * <p>The {@code @ServiceActivator} annotation registers this method as a message handler for
-     * the specified input channel. Spring Integration automatically invokes this method when
-     * messages arrive.
+     * <p>This method contains the core business logic for processing MQTT messages. It is called by
+     * {@link TimingProxy#processMqttMessage(Message)}, which serves as the actual
+     * {@code @ServiceActivator} and measures execution time outside the transactional boundary.
      *
      * <p>Processes device scan results: extracts network name from topic, parses JSON payload,
      * updates network last-seen timestamp, records device state changes (online/offline), and
      * triggers alerts for unauthorized devices.
      *
      * @param mqttMessage Spring Integration message containing MQTT payload and headers
+     * @see TimingProxy#processMqttMessage(Message)
      */
     @Transactional
     public void processMqttMessage(Message<String> mqttMessage) {

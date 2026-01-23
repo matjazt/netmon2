@@ -1,15 +1,5 @@
 package com.matjazt.netmon2.service;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import com.matjazt.netmon2.config.AlerterProperties;
 import com.matjazt.netmon2.entity.AlertEntity;
 import com.matjazt.netmon2.entity.AlertType;
@@ -21,11 +11,29 @@ import com.matjazt.netmon2.repository.DeviceRepository;
 import com.matjazt.netmon2.repository.DeviceStatusHistoryRepository;
 import com.matjazt.tools.SimpleTools;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Map;
+
 /**
  * Background service for processing alerts and sending email notifications.
  *
- * <p>Uses @Scheduled for periodic execution (requires @EnableScheduling on application class). Uses
- * Spring's JavaMailSender for email delivery.
+ * <p>This service handles the core business logic for alert management. The actual scheduled
+ * execution and performance timing is managed by {@link TimingProxy}, which wraps calls to {@link
+ * #processNetworkAlerts(NetworkEntity)} to measure execution time outside the transactional
+ * boundary.
+ *
+ * <p>Uses Spring's {@link JavaMailSender} for email delivery.
+ *
+ * @see TimingProxy#processAlerts()
  */
 @Service
 public class AlerterService {
@@ -33,7 +41,7 @@ public class AlerterService {
     private static final Logger logger = LoggerFactory.getLogger(AlerterService.class);
 
     private final DeviceRepository deviceRepository;
-        private final DeviceStatusHistoryRepository deviceStatusHistoryRepository;
+    private final DeviceStatusHistoryRepository deviceStatusHistoryRepository;
     private final AlertRepository alertRepository;
 
     // private static final DateTimeFormatter TIME_FORMATTER =
