@@ -81,6 +81,10 @@ public class DeviceEntity {
     @Column(name = "active_alert_id", nullable = true)
     private Long activeAlertId;
 
+    /** Vendor name of the device (from MAC address lookup). */
+    @Column(name = "vendor", nullable = true)
+    private String vendor;
+
     // JPA requires no-arg constructor
     public DeviceEntity() {}
 
@@ -196,5 +200,13 @@ public class DeviceEntity {
 
     public void setActiveAlertId(Long activeAlertId) {
         this.activeAlertId = activeAlertId;
+    }
+
+    public String getVendor() {
+        return vendor;
+    }
+
+    public void setVendor(String vendor) {
+        this.vendor = vendor;
     }
 }

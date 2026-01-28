@@ -10,6 +10,13 @@ SELECT
     *
 FROM
     device_status_history
+where device_id = 49
+order by "timestamp" desc 
+
+SELECT
+    *
+FROM
+    device_status_history
 ORDER BY
     mac_address,
     timestamp DESC;
@@ -38,6 +45,79 @@ ORDER BY
     offline_count DESC,
     n.name,
     d.mac_address;
+
+select de1_0.id,de1_0.active_alert_id,de1_0.device_operation_mode_id,de1_0.device_operation_mode_id,de1_0.first_seen,de1_0.ip_address,de1_0.last_seen,de1_0.mac_address,de1_0.name,de1_0.network_id,de1_0.online from device de1_0 where de1_0.network_id=1
+
+-- dodaj indeks
+select
+	dshe1_0.id,
+	dshe1_0.device_id,
+	dshe1_0.ip_address,
+	dshe1_0.network_id,
+	dshe1_0.online,
+	dshe1_0.timestamp
+from
+	device_status_history dshe1_0
+where
+	dshe1_0.network_id = 1
+	and dshe1_0.online = true
+	and dshe1_0.timestamp =(
+	select
+		max(dshe2_0.timestamp)
+	from
+		device_status_history dshe2_0
+	where
+		dshe2_0.device_id = dshe1_0.device_id)
+order by
+	dshe1_0.timestamp desc
+
+	
+select
+	dshe1_0.id,
+	dshe1_0.device_id,
+	dshe1_0.ip_address,
+	dshe1_0.network_id,
+	dshe1_0.online,
+	dshe1_0.timestamp
+from
+	device_status_history dshe1_0
+where
+	dshe1_0.network_id = 1
+	and dshe1_0.online = true
+	and dshe1_0.timestamp =(
+	select
+		max(dshe2_0.timestamp)
+	from
+		device_status_history dshe2_0
+	where
+		dshe2_0.device_id = dshe1_0.device_id)
+order by
+	dshe1_0.timestamp desc
+	
+select
+		dshe2_0.device_id, max(dshe2_0.timestamp)
+	from
+		device_status_history dshe2_0
+		group by dshe2_0.device_id 
+
+SELECT * FROM device_status_history h 
+WHERE h.network_id = 2
+AND h.device_id = 42
+ORDER BY h.timestamp DESC
+LIMIT 1
+
+SELECT * FROM device_status_history h 
+WHERE h.network_id = 1
+order by h."timestamp" desc
+
+select * from alert a 
+where a.network_id = 1
+and a.device_id is null
+order by a."timestamp" desc
+
+select * from network n 
+
+select * from alert order by id desc
 
 select
     *
@@ -148,3 +228,25 @@ update device set active_alert_id = null, last_seen = first_seen ;
 delete from alert where device_id in (82,84,77, 78, 81);
 delete from device_status_history where device_id in (82,84,77, 78, 81);
 delete from device where id in (82,84,77, 78, 81);
+
+
+-- changes 2026-01-28
+------------------------------------------------------------------------
+
+ALTER TABLE network ADD COLUMN configuration varchar;
+UPDATE network SET configuration = '{}';
+ALTER TABLE network ALTER COLUMN configuration SET NOT NULL;
+
+ALTER TABLE device ADD COLUMN vendor varchar;
+
+ALTER TABLE network ADD COLUMN reporting_interval_ema int;
+UPDATE network SET reporting_interval_ema = 0;
+ALTER TABLE network ALTER COLUMN reporting_interval_ema SET NOT NULL;
+
+ALTER TABLE alert ADD COLUMN last_notification_timestamp timestamp;
+UPDATE alert SET last_notification_timestamp = "timestamp";
+ALTER TABLE alert ALTER COLUMN last_notification_timestamp SET NOT NULL;
+
+ALTER TABLE network ADD COLUMN back_online_time  timestamp;
+
+------------------------------------------------------------------------

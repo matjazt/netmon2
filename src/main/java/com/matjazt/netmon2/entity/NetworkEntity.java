@@ -58,6 +58,18 @@ public class NetworkEntity {
     @Column(name = "active_alert_id", nullable = true)
     private Long activeAlertId;
 
+    /** JSON configuration for this network. */
+    @Column(name = "configuration", nullable = false)
+    private String configuration = "{}";
+
+    /** Exponential moving average of reporting interval in seconds. */
+    @Column(name = "reporting_interval_ema", nullable = false)
+    private Integer reportingIntervalEma = 0;
+
+    /** Timestamp when the network came back online after being down. */
+    @Column(name = "back_online_time", nullable = true, columnDefinition = "TIMESTAMP")
+    private LocalDateTime backOnlineTime;
+
     // JPA requires a no-argument constructor
     public NetworkEntity() {}
 
@@ -125,5 +137,29 @@ public class NetworkEntity {
 
     public void setActiveAlertId(Long activeAlertId) {
         this.activeAlertId = activeAlertId;
+    }
+
+    public String getConfiguration() {
+        return configuration;
+    }
+
+    public void setConfiguration(String configuration) {
+        this.configuration = configuration;
+    }
+
+    public Integer getReportingIntervalEma() {
+        return reportingIntervalEma;
+    }
+
+    public void setReportingIntervalEma(Integer reportingIntervalEma) {
+        this.reportingIntervalEma = reportingIntervalEma;
+    }
+
+    public LocalDateTime getBackOnlineTime() {
+        return backOnlineTime;
+    }
+
+    public void setBackOnlineTime(LocalDateTime backOnlineTime) {
+        this.backOnlineTime = backOnlineTime;
     }
 }

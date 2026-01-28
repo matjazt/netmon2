@@ -61,6 +61,9 @@ CREATE TABLE network (
 	last_seen timestamp NOT NULL,
 	"name" varchar(100) NOT NULL,
 	active_alert_id int8 NULL,
+	configuration varchar NOT NULL,
+	reporting_interval_ema int4 NOT NULL,
+	back_online_time timestamp,
 	CONSTRAINT pk_network PRIMARY KEY (id),
 	CONSTRAINT uk_network_name UNIQUE (name)
 );
@@ -83,6 +86,7 @@ CREATE TABLE device (
 	network_id int8 NOT NULL,
 	device_operation_mode_id int4 NOT NULL,
 	active_alert_id int8 NULL,
+	vendor varchar NULL,
 	CONSTRAINT pk_device PRIMARY KEY (id),
 	CONSTRAINT fk_device_device_operation_mode FOREIGN KEY (device_operation_mode_id) REFERENCES device_operation_mode(id),
 	CONSTRAINT fk_device_network FOREIGN KEY (network_id) REFERENCES network(id)
@@ -173,6 +177,7 @@ CREATE TABLE alert (
 	"timestamp" timestamp NOT NULL,
 	device_id int8 NULL,
 	network_id int8 NOT NULL,
+	last_notification_timestamp timestamp NOT NULL,
 	CONSTRAINT pk_alert PRIMARY KEY (id),
 	CONSTRAINT fk_alert_alert_type FOREIGN KEY (alert_type_id) REFERENCES alert_type(id),
 	CONSTRAINT fk_alert_device FOREIGN KEY (device_id) REFERENCES device(id),

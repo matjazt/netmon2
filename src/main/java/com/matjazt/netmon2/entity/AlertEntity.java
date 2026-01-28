@@ -73,6 +73,10 @@ public class AlertEntity {
     @Column(name = "closure_timestamp", nullable = true, columnDefinition = "TIMESTAMP")
     private LocalDateTime closureTimestamp;
 
+    /** Last time a notification was sent for this alert. */
+    @Column(name = "last_notification_timestamp", nullable = false, columnDefinition = "TIMESTAMP")
+    private LocalDateTime lastNotificationTimestamp;
+
     // JPA requires no-arg constructor
     public AlertEntity() {}
 
@@ -87,6 +91,7 @@ public class AlertEntity {
         this.device = device;
         this.alertType = alertType;
         this.message = message;
+        this.lastNotificationTimestamp = timestamp;
     }
 
     // Getters and setters
@@ -145,5 +150,13 @@ public class AlertEntity {
 
     public void setClosureTimestamp(LocalDateTime closureTimestamp) {
         this.closureTimestamp = closureTimestamp;
+    }
+
+    public LocalDateTime getLastNotificationTimestamp() {
+        return lastNotificationTimestamp;
+    }
+
+    public void setLastNotificationTimestamp(LocalDateTime lastNotificationTimestamp) {
+        this.lastNotificationTimestamp = lastNotificationTimestamp;
     }
 }
