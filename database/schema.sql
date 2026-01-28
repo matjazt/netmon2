@@ -63,7 +63,7 @@ CREATE TABLE network (
 	active_alert_id int8 NULL,
 	configuration varchar NOT NULL,
 	reporting_interval_ema int4 NOT NULL,
-	back_online_time timestamp,
+	back_online_time timestamp NULL,
 	CONSTRAINT pk_network PRIMARY KEY (id),
 	CONSTRAINT uk_network_name UNIQUE (name)
 );
@@ -171,7 +171,7 @@ CREATE UNIQUE INDEX uk_account_network ON account_network USING btree (account_i
 
 CREATE TABLE alert (
 	id bigserial NOT NULL,
-	alert_type_id int2 NULL,
+	alert_type_id int2 NOT NULL,
 	closure_timestamp timestamp NULL,
 	message varchar(500) NULL,
 	"timestamp" timestamp NOT NULL,
