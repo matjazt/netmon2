@@ -4,28 +4,32 @@ import com.matjazt.tools.SvcWatchDogClient;
 
 import jakarta.annotation.PreDestroy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.health.actuate.endpoint.HealthEndpoint;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
-
-import java.util.concurrent.TimeUnit;
 
 @Configuration
 @EnableScheduling
 public class WatchDogConfig {
 
-    private static String MAIN_TASK_NAME = "SpringBootApp";
+    private static String MAIN_TASK_NAME = "WatchDogConfig";
 
-    // private static final Logger logger = LoggerFactory.getLogger(WatchDogConfig.class);
+    private static final Logger logger = LoggerFactory.getLogger(WatchDogConfig.class);
+
+    private Thread monitoringThread;
+    private volatile boolean running = false;
 
     @Autowired private HealthEndpoint healthEndpoint;
 
-    // @Autowired private ApplicationContext context;
+    @Autowired private ApplicationContext context;
 
     @Bean
     public SvcWatchDogClient watchdogClient() {
@@ -37,24 +41,34 @@ public class WatchDogConfig {
     public void onApplicationReady() {
         SvcWatchDogClient.getInstance().ping(MAIN_TASK_NAME, 20);
         SvcWatchDogClient.getInstance().start();
+        startMonitoringThread();
     }
 
-    @Scheduled(fixedRate = 5, timeUnit = TimeUnit.SECONDS)
-    public void checkHealthAndPing() {
+    private void startMonitoringThread() {
+        running = true;
+        monitoringThread =
+                new Thread(
+                        () -> {
+                            logger.info("Monitoring thread started");
+                            while (running) {
+                                checkHealthAndPing();
+                            }
+                            logger.info("Monitoring thread stopped");
+                        },
+                        "HealthMonitorThread");
+        monitoringThread.start();
+    }
+
+    private void checkHealthAndPing() {
         var wd = SvcWatchDogClient.getInstance();
 
-        /* NOTE: this code works as expected, but it is a bit too aggressive in terminating the
-        application upon detecting a timeout, especially without knowing if there's anyone to restart it.
-        Therefore, for now, we just ping the watchdog if the app is healthy. If the app becomes unhealthy,
-        the watchdog will not be pinged and will eventually time out, resulting in not pinging the external
-        SvcWatchDog service, which can then take appropriate action (like restarting the whole service).
-
-        // first check if watchdog has detected a timeout (freeze of some kind), and if it has, exit
-        // the app.
-        if (wd.isTimedOut()) {
-            // Watchdog has timed out, meaning that at least one registered task has exceeded its
-            // timeout. The application is therefore considered unhealthy.
-            logger.error("SvcWatchDogClient has detected a timed out task - exiting application");
+        // First check if watchdog has detected a shutdown request.
+        // This is a slow polling operation, so we use a timeout of 5 seconds
+        if (wd.waitForShutdownEvent(5000)) {
+            logger.error(
+                    "SvcWatchDogClient has detected an external shutdown request - exiting"
+                            + " application");
+            running = false;
 
             // we need to exit in a separate thread to avoid blocking the current scheduled task
             new Thread(
@@ -64,7 +78,8 @@ public class WatchDogConfig {
                             })
                     .start();
         }
-        */
+
+        // ping only if application is healthy
         if (isAppHealthy()) {
             wd.ping(MAIN_TASK_NAME, 20);
         }
@@ -77,6 +92,16 @@ public class WatchDogConfig {
 
     @PreDestroy
     public void onShutdown() {
+        running = false;
+        if (monitoringThread != null) {
+            monitoringThread.interrupt();
+            try {
+                monitoringThread.join(2000); // Wait up to 2 seconds for thread to finish
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.warn("Interrupted while waiting for monitoring thread to stop");
+            }
+        }
         SvcWatchDogClient.getInstance().stop();
     }
 }

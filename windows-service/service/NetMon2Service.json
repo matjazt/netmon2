@@ -1,0 +1,24 @@
+{
+  "log": {
+    "minConsoleLevel": 99,
+    "minFileLevel": 0,
+    "filePath": "log\\NetMon2Service.log",
+    "maxFileSize": 10000000,
+    "maxOldFiles": 5,
+    "maxWriteDelay": 500,
+    "logThreadId": false
+  },
+  "svcWatchDog": {
+    "workDir": "..",
+    "args": [
+      "java.exe",
+	  "-jar",
+      "bin\\netmon2-0.0.1-SNAPSHOT.jar"
+    ],
+    "usePath": true,
+    "autoStart": true,
+    "restartDelay": 5000,
+    "shutdownTime": 15000,
+    "watchdogTimeout": 60000
+  }
+}

@@ -39,7 +39,7 @@ import java.util.logging.Logger;
  */
 public class SvcWatchDogClient implements Closeable {
 
-    private static final Logger log = Logger.getLogger(SvcWatchDogClient.class.getName());
+    private static final Logger logger = Logger.getLogger(SvcWatchDogClient.class.getName());
 
     // Runtime fields
     private final Object lock = new Object();
@@ -74,7 +74,7 @@ public class SvcWatchDogClient implements Closeable {
     /** Initializes a new instance of the {@code SvcWatchDogClient} class. */
     public SvcWatchDogClient() {
         enabled = SimpleTools.getConfigBoolean("svcwatchdog.enabled", true);
-        log.info("SvcWatchDogClient initialized, enabled=" + enabled);
+        logger.info("SvcWatchDogClient initialized, enabled=" + enabled);
     }
 
     /**
@@ -95,11 +95,11 @@ public class SvcWatchDogClient implements Closeable {
         shutdownEvent = SimpleTools.getConfigString("SHUTDOWN_EVENT", null);
 
         if (!enabled) {
-            log.info("SvcWatchDogClient not enabled");
+            logger.info("SvcWatchDogClient not enabled");
             return;
         }
 
-        log.info("Starting SvcWatchDogClient");
+        logger.info("Starting SvcWatchDogClient");
 
         udpPingInterval = SimpleTools.getConfigInteger("svcwatchdog.udpPingInterval", 10) * 1000;
 
@@ -119,10 +119,10 @@ public class SvcWatchDogClient implements Closeable {
                     udpAddress = InetAddress.getByName("127.0.0.1");
                     // Schedule the first immediate ping
                     tasks.put(udpPingTaskName, 1L);
-                    log.fine("UDP pinging configured");
+                    logger.fine("UDP pinging configured");
                 }
             } catch (Exception e) {
-                log.log(Level.WARNING, "Failed to configure UDP pinging", e);
+                logger.log(Level.WARNING, "Failed to configure UDP pinging", e);
             }
         }
 
@@ -133,12 +133,12 @@ public class SvcWatchDogClient implements Closeable {
         backgroundThread.setDaemon(true);
         backgroundThread.start();
 
-        log.info("SvcWatchDogClient started");
+        logger.info("SvcWatchDogClient started");
     }
 
     /** Stops the background monitoring loop and releases resources. */
     public void stop() {
-        log.info("Stopping SvcWatchDogClient");
+        logger.info("Stopping SvcWatchDogClient");
         stopped.set(true);
 
         synchronized (trigger) {
@@ -165,7 +165,7 @@ public class SvcWatchDogClient implements Closeable {
             shutdownEventHandle = null;
         }
 
-        log.info("SvcWatchDogClient stopped");
+        logger.info("SvcWatchDogClient stopped");
     }
 
     /**
@@ -176,7 +176,7 @@ public class SvcWatchDogClient implements Closeable {
      * @return True if the shutdown event was signaled; otherwise, false
      */
     public boolean waitForShutdownEvent(int millisecondsTimeout) {
-        if (shutdownEvent == null || shutdownEvent.isEmpty()) {
+        if (shutdownEvent == null || shutdownEvent.isEmpty() || !Platform.isWindows()) {
             try {
                 Thread.sleep(millisecondsTimeout);
             } catch (InterruptedException e) {
@@ -186,48 +186,38 @@ public class SvcWatchDogClient implements Closeable {
         }
 
         // On Windows, use Win32 events
-        if (Platform.isWindows()) {
-            try {
-                // Create or open a global event
+
+        try {
+            // Create or open a global event
+            if (shutdownEventHandle == null) {
+                shutdownEventHandle =
+                        Kernel32.INSTANCE.CreateEvent(
+                                null,
+                                true, // Manual reset
+                                false, // Initial state (not signaled)
+                                shutdownEvent);
+
                 if (shutdownEventHandle == null) {
-                    shutdownEventHandle =
-                            Kernel32.INSTANCE.CreateEvent(
-                                    null,
-                                    true, // Manual reset
-                                    false, // Initial state (not signaled)
-                                    shutdownEvent);
-
-                    if (shutdownEventHandle == null) {
-                        log.warning("Failed to create/open shutdown event: " + shutdownEvent);
-                        Thread.sleep(millisecondsTimeout);
-                        return false;
-                    }
-                }
-
-                int result =
-                        Kernel32.INSTANCE.WaitForSingleObject(
-                                shutdownEventHandle, millisecondsTimeout);
-                boolean shutdownRequested = (result == WinBase.WAIT_OBJECT_0);
-
-                if (shutdownRequested) {
-                    log.info("Shutdown requested via Win32 event");
-                }
-
-                return shutdownRequested;
-            } catch (Exception e) {
-                log.log(Level.WARNING, "Error waiting for shutdown event", e);
-                try {
+                    logger.warning("Failed to create/open shutdown event: " + shutdownEvent);
                     Thread.sleep(millisecondsTimeout);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
+                    return false;
                 }
-                return false;
             }
-        } else {
-            // On non-Windows platforms, just sleep (no event support)
+
+            int result =
+                    Kernel32.INSTANCE.WaitForSingleObject(shutdownEventHandle, millisecondsTimeout);
+            boolean shutdownRequested = (result == WinBase.WAIT_OBJECT_0);
+
+            if (shutdownRequested) {
+                logger.info("Shutdown requested via Win32 event");
+            }
+
+            return shutdownRequested;
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Error waiting for shutdown event", e);
             try {
                 Thread.sleep(millisecondsTimeout);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
             }
             return false;
@@ -269,7 +259,7 @@ public class SvcWatchDogClient implements Closeable {
      * @param timeoutSeconds The timeout duration in seconds
      */
     public void ping(String taskName, int timeoutSeconds) {
-        log.finest("ping: taskName=" + taskName + ", timeoutSeconds=" + timeoutSeconds);
+        logger.finest("ping: taskName=" + taskName + ", timeoutSeconds=" + timeoutSeconds);
 
         if (!enabled) {
             return;
@@ -298,7 +288,7 @@ public class SvcWatchDogClient implements Closeable {
      * @param taskName The name of the task to remove
      */
     public void closeTimeout(String taskName) {
-        log.finest("closeTimeout: taskName=" + taskName);
+        logger.finest("closeTimeout: taskName=" + taskName);
         tasks.remove(taskName);
     }
 
@@ -307,7 +297,7 @@ public class SvcWatchDogClient implements Closeable {
      * intervals.
      */
     private void backgroundLoop() {
-        log.fine("Background loop starting");
+        logger.fine("Background loop starting");
 
         try {
             // Ignore timeouts for the initial half second
@@ -325,14 +315,14 @@ public class SvcWatchDogClient implements Closeable {
                     // sleep mode or hibernation
                     if (timeSkewRecoveryTime < now) {
                         if ((expectedLoopTime + 5000) < now) {
-                            log.info(
+                            logger.info(
                                     "Time skew detected, ignoring timeouts for the next "
                                             + timeSkewRecoveryInterval
                                             + " seconds");
                             timeSkewRecoveryTime = now + (timeSkewRecoveryInterval * 1000);
                         } else if (timeSkewRecoveryTime > 0) {
                             timeSkewRecoveryTime = 0;
-                            log.info(
+                            logger.info(
                                     "TimeSkewRecoveryInterval is over, monitoring timeouts"
                                             + " normally");
                         }
@@ -383,7 +373,7 @@ public class SvcWatchDogClient implements Closeable {
 
                 // Perform logging and UDP ping outside the critical section
                 if (timeoutDetected) {
-                    log.severe("Timed out tasks: " + String.join(", ", timedOutTasks));
+                    logger.severe("Timed out tasks: " + String.join(", ", timedOutTasks));
                 } else if (udpPingNeeded) {
                     sendUdpPing();
                 }
@@ -404,10 +394,10 @@ public class SvcWatchDogClient implements Closeable {
             }
         } catch (Exception ex) {
             // This should never happen, but if it does, we need to know about it
-            log.log(Level.SEVERE, "Exception/bug in background loop, PLEASE CHECK AND FIX", ex);
+            logger.log(Level.SEVERE, "Exception/bug in background loop, PLEASE CHECK AND FIX", ex);
         }
 
-        log.fine("Background loop done");
+        logger.fine("Background loop done");
     }
 
     /** Sends a UDP ping to the watchdog. */
@@ -420,9 +410,9 @@ public class SvcWatchDogClient implements Closeable {
             DatagramPacket packet =
                     new DatagramPacket(watchdogSecret, watchdogSecret.length, udpAddress, udpPort);
             socket.send(packet);
-            log.finest("UDP ping sent");
+            logger.finest("UDP ping sent");
         } catch (Exception e) {
-            log.log(Level.WARNING, "Failed to send UDP ping", e);
+            logger.log(Level.WARNING, "Failed to send UDP ping", e);
         }
     }
 
