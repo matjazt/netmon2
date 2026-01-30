@@ -28,6 +28,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-mail")
 	implementation("org.springframework.integration:spring-integration-mqtt:7.0.1")
 	implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
+	implementation("net.java.dev.jna:jna:5.14.0")
+    implementation("net.java.dev.jna:jna-platform:5.14.0")
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
 	runtimeOnly("org.postgresql:postgresql") 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
