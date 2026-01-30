@@ -249,4 +249,6 @@ ALTER TABLE alert ALTER COLUMN last_notification_timestamp SET NOT NULL;
 
 ALTER TABLE network ADD COLUMN back_online_time  timestamp;
 
+ALTER TABLE alert ALTER COLUMN alert_type_id SET NOT NULL;
+
 ------------------------------------------------------------------------
