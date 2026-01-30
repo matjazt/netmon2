@@ -84,11 +84,9 @@ class SvcWatchDogClientTests {
     void watchDogTest1() throws InterruptedException {
         System.out.println("Starting watchDogTest1");
 
-        // Arrange
-        System.setProperty("svcwatchdog.enabled", "true");
-
         // Get client and reset for testing
-        SvcWatchDogClient wd = getClientForTesting();
+        SvcWatchDogClient wd = SvcWatchDogClient.getInstance();
+        wd.resetForTesting(true);
 
         // Act & assert
         String task1 = "task1";
@@ -129,6 +127,7 @@ class SvcWatchDogClientTests {
 
         // Cleanup
         wd.stop();
+        wd.resetForTesting(false);
     }
 
     /**
@@ -141,9 +140,9 @@ class SvcWatchDogClientTests {
 
         // Arrange
         shutdownEventHandle = simulateExternalWatchdog();
-        System.setProperty("svcwatchdog.enabled", "false");
 
-        SvcWatchDogClient wd = getClientForTesting();
+        SvcWatchDogClient wd = SvcWatchDogClient.getInstance();
+        wd.resetForTesting(false);
 
         // Act & assert
         String task1 = "task1";
@@ -177,6 +176,7 @@ class SvcWatchDogClientTests {
 
         // Cleanup
         wd.stop();
+        wd.resetForTesting(false);
     }
 
     /**
@@ -191,9 +191,8 @@ class SvcWatchDogClientTests {
         System.clearProperty("WATCHDOG_SECRET");
         System.clearProperty("WATCHDOG_PORT");
 
-        System.setProperty("svcwatchdog.enabled", "true");
-
-        SvcWatchDogClient wd = getClientForTesting();
+        SvcWatchDogClient wd = SvcWatchDogClient.getInstance();
+        wd.resetForTesting(true);
 
         // Act & assert
         String task1 = "task1";
@@ -227,6 +226,7 @@ class SvcWatchDogClientTests {
 
         // Cleanup
         wd.stop();
+        wd.resetForTesting(false);
     }
 
     /**
@@ -255,10 +255,8 @@ class SvcWatchDogClientTests {
 
         System.out.println("Starting shutdownEventTest");
 
-        // Arrange
-        System.setProperty("svcwatchdog.enabled", "true");
-
-        SvcWatchDogClient wd = getClientForTesting();
+        SvcWatchDogClient wd = SvcWatchDogClient.getInstance();
+        wd.resetForTesting(true);
 
         // Create the shutdown event
         WinNT.HANDLE eventHandle =
@@ -295,6 +293,7 @@ class SvcWatchDogClientTests {
 
             // Cleanup
             wd.stop();
+            wd.resetForTesting(false);
         } finally {
             // Clean up the event handle
             Kernel32.INSTANCE.CloseHandle(eventHandle);
@@ -309,10 +308,8 @@ class SvcWatchDogClientTests {
     void timeoutDetectorNamedTest() throws InterruptedException {
         System.out.println("Starting timeoutDetectorNamedTest");
 
-        // Arrange
-        System.setProperty("svcwatchdog.enabled", "true");
-
-        SvcWatchDogClient wd = getClientForTesting();
+        SvcWatchDogClient wd = SvcWatchDogClient.getInstance();
+        wd.resetForTesting(true);
 
         // Act & assert
         wd.start();
@@ -332,6 +329,7 @@ class SvcWatchDogClientTests {
 
         // Cleanup
         wd.stop();
+        wd.resetForTesting(false);
     }
 
     /**
@@ -342,10 +340,8 @@ class SvcWatchDogClientTests {
     void multipleTimeoutDetectorsTest() throws InterruptedException {
         System.out.println("Starting multipleTimeoutDetectorsTest");
 
-        // Arrange
-        System.setProperty("svcwatchdog.enabled", "true");
-
-        SvcWatchDogClient wd = getClientForTesting();
+        SvcWatchDogClient wd = SvcWatchDogClient.getInstance();
+        wd.resetForTesting(true);
 
         // Act & assert
         wd.start();
@@ -369,12 +365,6 @@ class SvcWatchDogClientTests {
 
         // Cleanup
         wd.stop();
-    }
-
-    /** Helper method to get the SvcWatchDogClient instance for testing and reset its state. */
-    private SvcWatchDogClient getClientForTesting() {
-        SvcWatchDogClient client = SvcWatchDogClient.getInstance();
-        client.resetForTesting();
-        return client;
+        wd.resetForTesting(false);
     }
 }

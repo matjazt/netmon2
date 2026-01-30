@@ -81,7 +81,7 @@ public class SvcWatchDogClient implements Closeable {
      * Resets the client state for testing purposes. Package-private for test access only. WARNING:
      * This method is not thread-safe and should only be used in tests.
      */
-    void resetForTesting() {
+    void resetForTesting(boolean enabled) {
         if (backgroundThread != null && backgroundThread.isAlive()) {
             stop();
         }
@@ -90,7 +90,13 @@ public class SvcWatchDogClient implements Closeable {
         stopped.set(false);
         nextCheck.set(Long.MAX_VALUE);
         shutdownEventHandle = null;
-        enabled = SimpleTools.getConfigBoolean("svcwatchdog.enabled", true);
+        this.enabled = enabled;
+        udpPingInterval = 0;
+        shutdownEvent = null;
+        watchdogSecret = new byte[0];
+        udpAddress = null;
+        udpPort = 0;
+        timeSkewRecoveryInterval = 60; // seconds
     }
 
     /**
