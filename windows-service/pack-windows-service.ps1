@@ -38,6 +38,31 @@ try {
     # Copy .env 
     Copy-Item -Path ".env" -Destination "windows-service\.env" -Force
 
+    # Download SvcWatchDog
+    $zipUrl = "https://github.com/matjazt/SvcWatchDog/releases/download/v1.1.0/SvcWatchDog.v1.1.0.zip"
+    $zipPath = Join-Path $env:TEMP "SvcWatchDog.v1.1.0.zip"
+    $extractPath = Join-Path $env:TEMP "SvcWatchDog_Extract"
+    
+    Write-Host "Downloading SvcWatchDog..."
+    Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath
+    
+    # Extract zip
+    if (Test-Path $extractPath) {
+        Remove-Item $extractPath -Recurse -Force
+    }
+    Expand-Archive -Path $zipPath -DestinationPath $extractPath -Force
+    
+    # Find and copy exe
+    $exeFile = Get-ChildItem -Path $extractPath -Filter "*.exe" -Recurse | Select-Object -First 1
+    if (-not $exeFile) {
+        throw "No exe file found in downloaded zip"
+    }
+    Copy-Item -Path $exeFile.FullName -Destination "windows-service\service\NetMon2Service.exe" -Force
+    
+    # Cleanup
+    Remove-Item $zipPath -Force
+    Remove-Item $extractPath -Recurse -Force
+
     Write-Host "Packaging completed successfully"
 }
 catch {
