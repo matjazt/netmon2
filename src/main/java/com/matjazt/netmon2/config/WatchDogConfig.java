@@ -4,13 +4,9 @@ import com.matjazt.tools.SvcWatchDogClient;
 
 import jakarta.annotation.PreDestroy;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.health.actuate.endpoint.HealthEndpoint;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
@@ -25,11 +21,11 @@ public class WatchDogConfig {
 
     private static String MAIN_TASK_NAME = "SpringBootApp";
 
-    private static final Logger logger = LoggerFactory.getLogger(WatchDogConfig.class);
+    // private static final Logger logger = LoggerFactory.getLogger(WatchDogConfig.class);
 
     @Autowired private HealthEndpoint healthEndpoint;
 
-    @Autowired private ApplicationContext context;
+    // @Autowired private ApplicationContext context;
 
     @Bean
     public SvcWatchDogClient watchdogClient() {
@@ -47,6 +43,12 @@ public class WatchDogConfig {
     public void checkHealthAndPing() {
         var wd = SvcWatchDogClient.getInstance();
 
+        /* NOTE: this code works as expected, but it is a bit too aggressive in terminating the
+        application upon detecting a timeout, especially without knowing if there's anyone to restart it.
+        Therefore, for now, we just ping the watchdog if the app is healthy. If the app becomes unhealthy,
+        the watchdog will not be pinged and will eventually time out, resulting in not pinging the external
+        SvcWatchDog service, which can then take appropriate action (like restarting the whole service).
+
         // first check if watchdog has detected a timeout (freeze of some kind), and if it has, exit
         // the app.
         if (wd.isTimedOut()) {
@@ -62,7 +64,7 @@ public class WatchDogConfig {
                             })
                     .start();
         }
-
+        */
         if (isAppHealthy()) {
             wd.ping(MAIN_TASK_NAME, 20);
         }
