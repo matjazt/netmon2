@@ -162,13 +162,13 @@ The client uses `SimpleTools.getConfigValue()` which checks **environment variab
 **Configuration Properties:**
 
 | Property Name | Env Var Name | Type | Default | Description |
-|--------------|--------------|------|---------|-------------|
+| ------------ | ------------ | ---- | ------- | ----------- |
 | `svcwatchdog.enabled` | `SVCWATCHDOG_ENABLED` | Boolean | `true` | Enable/disable the watchdog client |
 | `svcwatchdog.udpPingInterval` | `SVCWATCHDOG_UDPPINGINTERVAL` | Integer | `10` | UDP ping interval in seconds |
 | `svcwatchdog.timeSkewRecoveryInterval` | `SVCWATCHDOG_TIMESKEWRECOVERYINTERVAL` | Long | `60` | Time skew recovery interval in seconds |
-| **`SHUTDOWN_EVENT`** | **`SHUTDOWN_EVENT`** | String | `null` | **Environment variable only** (not a property)<br/>Win32 event name for shutdown signaling (Windows only) |
-| **`WATCHDOG_PORT`** | **`WATCHDOG_PORT`** | String | `null` | **Environment variable only** (not a property)<br/>UDP port for sending watchdog pings |
-| **`WATCHDOG_SECRET`** | **`WATCHDOG_SECRET`** | String | `null` | **Environment variable only** (not a property)<br/>Secret string to include in UDP pings |
+| **`SHUTDOWN_EVENT`** | **`SHUTDOWN_EVENT`** | String | `null` | **Environment variable only** (not really a property)<br>Win32 event name for shutdown signaling (Windows only) |
+| **`WATCHDOG_PORT`** | **`WATCHDOG_PORT`** | String | `null` | **Environment variable only** (not really a property)<br>UDP port for sending watchdog pings |
+| **`WATCHDOG_SECRET`** | **`WATCHDOG_SECRET`** | String | `null` | **Environment variable only** (not really a property)<br>Secret string to include in UDP pings |
 
 **Examples:**
 

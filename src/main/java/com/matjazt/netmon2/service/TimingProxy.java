@@ -3,6 +3,7 @@ package com.matjazt.netmon2.service;
 import com.matjazt.netmon2.config.AlerterProperties;
 import com.matjazt.netmon2.entity.NetworkEntity;
 import com.matjazt.netmon2.repository.NetworkRepository;
+import com.matjazt.tools.SvcWatchDogClient;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,14 +45,17 @@ public class TimingProxy {
     private final NetworkRepository networkRepository;
     private final AlerterService alerterService;
     private final MqttService mqttService;
+    private final AlerterProperties alerterProperties;
 
     public TimingProxy(
             NetworkRepository networkRepository,
             AlerterService alerterService,
-            MqttService mqttService) {
+            MqttService mqttService,
+            AlerterProperties alerterProperties) {
         this.networkRepository = networkRepository;
         this.alerterService = alerterService;
         this.mqttService = mqttService;
+        this.alerterProperties = alerterProperties;
     }
 
     /**
@@ -102,6 +106,12 @@ public class TimingProxy {
             initialDelayString = "#{@alerterProperties.initialDelaySeconds * 1000}",
             timeUnit = TimeUnit.MILLISECONDS)
     public void processAlerts() {
+        // ping the watchdog with a timeout generously longer than the interval - the purpose is to
+        // ensure that if processing takes longer than expected, the watchdog can detect it, but at
+        // the same
+        // time avoid false positives due to normal processing delays
+        SvcWatchDogClient.getInstance()
+                .ping("AlerterService", (int) (alerterProperties.getIntervalSeconds() + 60));
 
         // Process networks one by one, each in its own transaction
         for (NetworkEntity network : networkRepository.findAll()) {
