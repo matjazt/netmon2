@@ -30,7 +30,8 @@ dependencies {
 	implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
 	implementation("net.java.dev.jna:jna:5.14.0")
     implementation("net.java.dev.jna:jna-platform:5.14.0")
-	implementation("io.github.cdimascio:dotenv-java:3.0.2")
+    implementation("me.paulschwarz:springboot4-dotenv:5.1.0")
+
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
 	runtimeOnly("org.postgresql:postgresql") 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -39,5 +40,4 @@ dependencies {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
-	maxParallelForks = 1
 }

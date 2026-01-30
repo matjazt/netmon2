@@ -84,50 +84,49 @@ class SvcWatchDogClientTests {
     void watchDogTest1() throws InterruptedException {
         System.out.println("Starting watchDogTest1");
 
-        // Get client and reset for testing
-        SvcWatchDogClient wd = SvcWatchDogClient.getInstance();
-        wd.resetForTesting(true);
+        System.setProperty("svcwatchdog.enabled", "true");
+        try (var wd = new SvcWatchDogClient()) {
+            // Act & assert
+            String task1 = "task1";
+            String task2 = "task2";
 
-        // Act & assert
-        String task1 = "task1";
-        String task2 = "task2";
+            assertFalse(wd.isTimedOut());
+            assertTrue(wd.getTaskList().isEmpty());
 
-        assertFalse(wd.isTimedOut());
-        assertTrue(wd.getTaskList().isEmpty());
+            wd.start();
+            // Note: UDP pinging may or may not be active depending on whether WATCHDOG_PORT env var
+            // is
+            // set
+            // This is set externally by SvcWatchDog when running as a Windows service
+            assertTrue(wd.getTaskList().size() <= 1); // 0 or 1 (UDP ping task if env vars are set)
+            assertFalse(wd.isTimedOut());
 
-        wd.start();
-        // Note: UDP pinging may or may not be active depending on whether WATCHDOG_PORT env var is
-        // set
-        // This is set externally by SvcWatchDog when running as a Windows service
-        assertTrue(wd.getTaskList().size() <= 1); // 0 or 1 (UDP ping task if env vars are set)
-        assertFalse(wd.isTimedOut());
-
-        wd.ping(task1, 5);
-        Thread.sleep(1000);
-        assertTrue(wd.getTaskList().size() >= 1); // At least task1
-        assertFalse(wd.isTimedOut());
-
-        try (SvcWatchDogClient.TimeoutDetector detector =
-                new SvcWatchDogClient.TimeoutDetector(task2, 2)) {
-            assertTrue(wd.getTaskList().size() >= 2); // At least task1 and task2
+            wd.ping(task1, 5);
             Thread.sleep(1000);
+            assertTrue(wd.getTaskList().size() >= 1); // At least task1
+            assertFalse(wd.isTimedOut());
+
+            try (SvcWatchDogClient.TimeoutDetector detector =
+                    new SvcWatchDogClient.TimeoutDetector(task2, 2, wd)) {
+                assertTrue(wd.getTaskList().size() >= 2); // At least task1 and task2
+                Thread.sleep(1000);
+            }
+
+            assertTrue(wd.getTaskList().size() >= 1); // At least task1
+            assertFalse(wd.isTimedOut());
+
+            Thread.sleep(2000);
+            // task2 should be removed (via try-with-resources)
+            // task1 might still be active or timed out depending on timing
+            assertFalse(wd.isTimedOut());
+
+            Thread.sleep(3000);
+            // Now task1 should have timed out
+            assertTrue(wd.isTimedOut());
+
+            // Cleanup
+            wd.stop();
         }
-
-        assertTrue(wd.getTaskList().size() >= 1); // At least task1
-        assertFalse(wd.isTimedOut());
-
-        Thread.sleep(2000);
-        // task2 should be removed (via try-with-resources)
-        // task1 might still be active or timed out depending on timing
-        assertFalse(wd.isTimedOut());
-
-        Thread.sleep(3000);
-        // Now task1 should have timed out
-        assertTrue(wd.isTimedOut());
-
-        // Cleanup
-        wd.stop();
-        wd.resetForTesting(false);
     }
 
     /**
@@ -141,42 +140,41 @@ class SvcWatchDogClientTests {
         // Arrange
         shutdownEventHandle = simulateExternalWatchdog();
 
-        SvcWatchDogClient wd = SvcWatchDogClient.getInstance();
-        wd.resetForTesting(false);
+        System.setProperty("svcwatchdog.enabled", "false");
+        try (var wd = new SvcWatchDogClient()) {
+            // Act & assert
+            String task1 = "task1";
+            String task2 = "task2";
 
-        // Act & assert
-        String task1 = "task1";
-        String task2 = "task2";
+            assertFalse(wd.isUdpPingingActive());
+            assertFalse(wd.isTimedOut());
+            assertTrue(wd.getTaskList().isEmpty());
 
-        assertFalse(wd.isUdpPingingActive());
-        assertFalse(wd.isTimedOut());
-        assertTrue(wd.getTaskList().isEmpty());
+            wd.start();
+            assertTrue(wd.getTaskList().isEmpty());
+            assertFalse(wd.isUdpPingingActive());
+            assertFalse(wd.isTimedOut());
 
-        wd.start();
-        assertTrue(wd.getTaskList().isEmpty());
-        assertFalse(wd.isUdpPingingActive());
-        assertFalse(wd.isTimedOut());
+            wd.ping(task1, 1);
+            assertTrue(wd.getTaskList().isEmpty());
 
-        wd.ping(task1, 1);
-        assertTrue(wd.getTaskList().isEmpty());
+            Thread.sleep(1200);
+            assertTrue(wd.getTaskList().isEmpty());
+            assertFalse(wd.isUdpPingingActive());
+            assertFalse(wd.isTimedOut());
 
-        Thread.sleep(1200);
-        assertTrue(wd.getTaskList().isEmpty());
-        assertFalse(wd.isUdpPingingActive());
-        assertFalse(wd.isTimedOut());
+            try (SvcWatchDogClient.TimeoutDetector detector =
+                    new SvcWatchDogClient.TimeoutDetector(task2, 3, wd)) {
+                Thread.sleep(1000);
+            }
 
-        try (SvcWatchDogClient.TimeoutDetector detector =
-                new SvcWatchDogClient.TimeoutDetector(task2, 3)) {
-            Thread.sleep(1000);
+            assertTrue(wd.getTaskList().isEmpty());
+            assertFalse(wd.isUdpPingingActive());
+            assertFalse(wd.isTimedOut());
+
+            // Cleanup
+            wd.stop();
         }
-
-        assertTrue(wd.getTaskList().isEmpty());
-        assertFalse(wd.isUdpPingingActive());
-        assertFalse(wd.isTimedOut());
-
-        // Cleanup
-        wd.stop();
-        wd.resetForTesting(false);
     }
 
     /**
@@ -191,42 +189,45 @@ class SvcWatchDogClientTests {
         System.clearProperty("WATCHDOG_SECRET");
         System.clearProperty("WATCHDOG_PORT");
 
-        SvcWatchDogClient wd = SvcWatchDogClient.getInstance();
-        wd.resetForTesting(true);
+        System.setProperty("svcwatchdog.enabled", "true");
+        try (var wd = new SvcWatchDogClient()) {
+            // Act & assert
+            String task1 = "task1";
+            String task2 = "task2";
 
-        // Act & assert
-        String task1 = "task1";
-        String task2 = "task2";
+            assertFalse(wd.isUdpPingingActive());
+            assertFalse(wd.isTimedOut());
+            assertTrue(wd.getTaskList().isEmpty());
 
-        assertFalse(wd.isUdpPingingActive());
-        assertFalse(wd.isTimedOut());
-        assertTrue(wd.getTaskList().isEmpty());
+            wd.start();
+            assertTrue(wd.getTaskList().isEmpty());
+            assertFalse(wd.isUdpPingingActive());
+            assertFalse(wd.isTimedOut());
 
-        wd.start();
-        assertTrue(wd.getTaskList().isEmpty());
-        assertFalse(wd.isUdpPingingActive());
-        assertFalse(wd.isTimedOut());
+            System.out.println("Pinging task1");
 
-        wd.ping(task1, 1);
-        assertEquals(1, wd.getTaskList().size());
+            wd.ping(task1, 1);
+            assertEquals(1, wd.getTaskList().size());
 
-        Thread.sleep(1200);
-        assertTrue(wd.getTaskList().isEmpty());
-        assertFalse(wd.isUdpPingingActive());
-        assertTrue(wd.isTimedOut());
-
-        try (SvcWatchDogClient.TimeoutDetector detector =
-                new SvcWatchDogClient.TimeoutDetector(task2, 1)) {
+            System.out.println("Sleeping 1200 ms");
             Thread.sleep(1200);
+            System.out.println("End Sleeping 1200 ms");
+            assertTrue(wd.getTaskList().isEmpty());
+            assertFalse(wd.isUdpPingingActive());
+            assertTrue(wd.isTimedOut());
+
+            try (SvcWatchDogClient.TimeoutDetector detector =
+                    new SvcWatchDogClient.TimeoutDetector(task2, 1, wd)) {
+                Thread.sleep(1200);
+            }
+
+            assertTrue(wd.getTaskList().isEmpty());
+            assertFalse(wd.isUdpPingingActive());
+            assertTrue(wd.isTimedOut());
+
+            // Cleanup
+            wd.stop();
         }
-
-        assertTrue(wd.getTaskList().isEmpty());
-        assertFalse(wd.isUdpPingingActive());
-        assertTrue(wd.isTimedOut());
-
-        // Cleanup
-        wd.stop();
-        wd.resetForTesting(false);
     }
 
     /**
@@ -243,60 +244,52 @@ class SvcWatchDogClientTests {
             return;
         }
 
-        String shutdownEventName = System.getenv("SHUTDOWN_EVENT");
-        if (shutdownEventName == null || shutdownEventName.isEmpty()) {
-            System.out.println(
-                    "Skipping shutdownEventTest - SHUTDOWN_EVENT environment variable not set");
-            System.out.println(
-                    "To test this functionality, set SHUTDOWN_EVENT environment variable before"
-                            + " starting JVM");
-            return;
-        }
-
         System.out.println("Starting shutdownEventTest");
 
-        SvcWatchDogClient wd = SvcWatchDogClient.getInstance();
-        wd.resetForTesting(true);
+        System.setProperty("svcwatchdog.enabled", "true");
+        try (var wd = new SvcWatchDogClient()) {
+            // Create the shutdown event
+            WinNT.HANDLE eventHandle =
+                    Kernel32.INSTANCE.CreateEvent(
+                            null,
+                            true, // Manual reset
+                            false, // Initial state (not signaled)
+                            SHUTDOWN_EVENT_NAME);
 
-        // Create the shutdown event
-        WinNT.HANDLE eventHandle =
-                Kernel32.INSTANCE.CreateEvent(
-                        null,
-                        true, // Manual reset
-                        false, // Initial state (not signaled)
-                        shutdownEventName);
+            if (eventHandle == null) {
+                System.out.println("Skipping shutdownEventTest - Could not create Win32 event");
+                return;
+            }
 
-        if (eventHandle == null) {
-            System.out.println("Skipping shutdownEventTest - Could not create Win32 event");
-            return;
-        }
+            try {
+                // Act & assert
+                wd.start();
 
-        try {
-            // Act & assert
-            wd.start();
+                // Test that waiting without signal times out
+                long start = System.currentTimeMillis();
+                assertFalse(wd.waitForShutdownEvent(500));
+                long elapsed = System.currentTimeMillis() - start;
+                assertTrue(
+                        elapsed >= 450 && elapsed <= 750,
+                        "Wait should take ~500ms, took: " + elapsed);
 
-            // Test that waiting without signal times out
-            long start = System.currentTimeMillis();
-            assertFalse(wd.waitForShutdownEvent(500));
-            long elapsed = System.currentTimeMillis() - start;
-            assertTrue(
-                    elapsed >= 450 && elapsed <= 750, "Wait should take ~500ms, took: " + elapsed);
+                // Signal the event
+                Kernel32.INSTANCE.SetEvent(eventHandle);
 
-            // Signal the event
-            Kernel32.INSTANCE.SetEvent(eventHandle);
+                // Test that waiting with signal returns immediately
+                start = System.currentTimeMillis();
+                assertTrue(wd.waitForShutdownEvent(5000));
+                elapsed = System.currentTimeMillis() - start;
+                assertTrue(elapsed < 200, "Wait should return immediately, took: " + elapsed);
 
-            // Test that waiting with signal returns immediately
-            start = System.currentTimeMillis();
-            assertTrue(wd.waitForShutdownEvent(5000));
-            elapsed = System.currentTimeMillis() - start;
-            assertTrue(elapsed < 200, "Wait should return immediately, took: " + elapsed);
+                // Cleanup
+                wd.stop();
 
-            // Cleanup
-            wd.stop();
-            wd.resetForTesting(false);
-        } finally {
-            // Clean up the event handle
-            Kernel32.INSTANCE.CloseHandle(eventHandle);
+                System.out.println("ShutdownEventTest completed");
+            } finally {
+                // Clean up the event handle
+                Kernel32.INSTANCE.CloseHandle(eventHandle);
+            }
         }
     }
 
@@ -308,28 +301,27 @@ class SvcWatchDogClientTests {
     void timeoutDetectorNamedTest() throws InterruptedException {
         System.out.println("Starting timeoutDetectorNamedTest");
 
-        SvcWatchDogClient wd = SvcWatchDogClient.getInstance();
-        wd.resetForTesting(true);
+        System.setProperty("svcwatchdog.enabled", "true");
+        try (var wd = new SvcWatchDogClient()) {
+            // Act & assert
+            wd.start();
 
-        // Act & assert
-        wd.start();
+            String taskName = "namedTask";
 
-        String taskName = "namedTask";
+            try (SvcWatchDogClient.TimeoutDetector detector =
+                    new SvcWatchDogClient.TimeoutDetector(taskName, 2, false, wd)) {
+                assertEquals(taskName, detector.getName());
+                assertTrue(wd.getTaskList().size() >= 1); // At least the named task
+                assertTrue(wd.getTaskList().contains(taskName));
+            }
 
-        try (SvcWatchDogClient.TimeoutDetector detector =
-                new SvcWatchDogClient.TimeoutDetector(taskName, 2, false)) {
-            assertEquals(taskName, detector.getName());
-            assertTrue(wd.getTaskList().size() >= 1); // At least the named task
-            assertTrue(wd.getTaskList().contains(taskName));
+            // After closing, task should be removed
+            Thread.sleep(100);
+            assertFalse(wd.getTaskList().contains(taskName));
+
+            // Cleanup
+            wd.stop();
         }
-
-        // After closing, task should be removed
-        Thread.sleep(100);
-        assertFalse(wd.getTaskList().contains(taskName));
-
-        // Cleanup
-        wd.stop();
-        wd.resetForTesting(false);
     }
 
     /**
@@ -340,31 +332,31 @@ class SvcWatchDogClientTests {
     void multipleTimeoutDetectorsTest() throws InterruptedException {
         System.out.println("Starting multipleTimeoutDetectorsTest");
 
-        SvcWatchDogClient wd = SvcWatchDogClient.getInstance();
-        wd.resetForTesting(true);
+        System.setProperty("svcwatchdog.enabled", "true");
+        try (var wd = new SvcWatchDogClient()) {
+            // Act & assert
+            wd.start();
 
-        // Act & assert
-        wd.start();
+            try (SvcWatchDogClient.TimeoutDetector detector1 =
+                            new SvcWatchDogClient.TimeoutDetector("task1", 10, wd);
+                    SvcWatchDogClient.TimeoutDetector detector2 =
+                            new SvcWatchDogClient.TimeoutDetector("task2", 10, wd);
+                    SvcWatchDogClient.TimeoutDetector detector3 =
+                            new SvcWatchDogClient.TimeoutDetector("task3", 10, wd)) {
 
-        try (SvcWatchDogClient.TimeoutDetector detector1 =
-                        new SvcWatchDogClient.TimeoutDetector("task1", 10);
-                SvcWatchDogClient.TimeoutDetector detector2 =
-                        new SvcWatchDogClient.TimeoutDetector("task2", 10);
-                SvcWatchDogClient.TimeoutDetector detector3 =
-                        new SvcWatchDogClient.TimeoutDetector("task3", 10)) {
+                // Should have at least 3 tasks (the 3 timeout detectors, maybe + UDP ping)
+                assertTrue(wd.getTaskList().size() >= 3);
+                assertFalse(wd.isTimedOut());
+            }
 
-            // Should have at least 3 tasks (the 3 timeout detectors, maybe + UDP ping)
-            assertTrue(wd.getTaskList().size() >= 3);
+            // After closing all, tasks should be removed
+            Thread.sleep(100);
+            assertTrue(
+                    wd.getTaskList().size() <= 1); // Should have 0 or 1 (UDP ping if env vars set)
             assertFalse(wd.isTimedOut());
+
+            // Cleanup
+            wd.stop();
         }
-
-        // After closing all, tasks should be removed
-        Thread.sleep(100);
-        assertTrue(wd.getTaskList().size() <= 1); // Should have 0 or 1 (UDP ping if env vars set)
-        assertFalse(wd.isTimedOut());
-
-        // Cleanup
-        wd.stop();
-        wd.resetForTesting(false);
     }
 }

@@ -72,31 +72,9 @@ public class SvcWatchDogClient implements Closeable {
     }
 
     /** Initializes a new instance of the {@code SvcWatchDogClient} class. */
-    private SvcWatchDogClient() {
+    public SvcWatchDogClient() {
         enabled = SimpleTools.getConfigBoolean("svcwatchdog.enabled", true);
         log.info("SvcWatchDogClient initialized, enabled=" + enabled);
-    }
-
-    /**
-     * Resets the client state for testing purposes. Package-private for test access only. WARNING:
-     * This method is not thread-safe and should only be used in tests.
-     */
-    void resetForTesting(boolean enabled) {
-        if (backgroundThread != null && backgroundThread.isAlive()) {
-            stop();
-        }
-        tasks.clear();
-        timedOutTasks.clear();
-        stopped.set(false);
-        nextCheck.set(Long.MAX_VALUE);
-        shutdownEventHandle = null;
-        this.enabled = enabled;
-        udpPingInterval = 0;
-        shutdownEvent = null;
-        watchdogSecret = new byte[0];
-        udpAddress = null;
-        udpPort = 0;
-        timeSkewRecoveryInterval = 60; // seconds
     }
 
     /**
@@ -421,7 +399,6 @@ public class SvcWatchDogClient implements Closeable {
                         trigger.wait(waitTime);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
-                        break;
                     }
                 }
             }
@@ -463,6 +440,35 @@ public class SvcWatchDogClient implements Closeable {
 
         private final String name;
         private boolean closed = false;
+        private final SvcWatchDogClient client;
+
+        /**
+         * Initializes a new instance of the {@code TimeoutDetector} class and registers it with the
+         * watchdog client.
+         *
+         * @param name The base name of the task to monitor
+         * @param timeoutSeconds The timeout in seconds for the task
+         * @param namePostfix If true, appends a unique UUID to the task name to ensure uniqueness
+         * @param client The SvcWatchDogClient instance to use
+         */
+        public TimeoutDetector(
+                String name, int timeoutSeconds, boolean namePostfix, SvcWatchDogClient client) {
+            this.name = namePostfix ? name + "_" + UUID.randomUUID() : name;
+            this.client = client;
+            client.ping(this.name, timeoutSeconds);
+        }
+
+        /**
+         * Initializes a new instance of the {@code TimeoutDetector} class with a unique name
+         * postfix.
+         *
+         * @param name The base name of the task to monitor
+         * @param timeoutSeconds The timeout in seconds for the task
+         * @param client The SvcWatchDogClient instance to use
+         */
+        public TimeoutDetector(String name, int timeoutSeconds, SvcWatchDogClient client) {
+            this(name, timeoutSeconds, true, client);
+        }
 
         /**
          * Initializes a new instance of the {@code TimeoutDetector} class and registers it with the
@@ -473,8 +479,7 @@ public class SvcWatchDogClient implements Closeable {
          * @param namePostfix If true, appends a unique UUID to the task name to ensure uniqueness
          */
         public TimeoutDetector(String name, int timeoutSeconds, boolean namePostfix) {
-            this.name = namePostfix ? name + "_" + UUID.randomUUID() : name;
-            SvcWatchDogClient.getInstance().ping(this.name, timeoutSeconds);
+            this(name, timeoutSeconds, namePostfix, SvcWatchDogClient.getInstance());
         }
 
         /**
@@ -485,7 +490,7 @@ public class SvcWatchDogClient implements Closeable {
          * @param timeoutSeconds The timeout in seconds for the task
          */
         public TimeoutDetector(String name, int timeoutSeconds) {
-            this(name, timeoutSeconds, true);
+            this(name, timeoutSeconds, true, SvcWatchDogClient.getInstance());
         }
 
         /**
@@ -509,7 +514,7 @@ public class SvcWatchDogClient implements Closeable {
         /** Closes the timeout (removes the task from SvcWatchDogClient). */
         public void closeTimeout() {
             if (!closed) {
-                SvcWatchDogClient.getInstance().closeTimeout(name);
+                client.closeTimeout(name);
                 closed = true;
             }
         }

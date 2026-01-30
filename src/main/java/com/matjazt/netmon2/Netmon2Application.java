@@ -1,11 +1,7 @@
 package com.matjazt.netmon2;
 
-import com.matjazt.tools.SpringBootTools;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
-import org.springframework.context.ApplicationListener;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -47,16 +43,6 @@ public class Netmon2Application {
     public static void main(String[] args) {
 
         SpringApplication app = new SpringApplication(Netmon2Application.class);
-
-        // Add dotenv listener to load .env before environment is prepared
-        // Keep in mind that dotenv will not override existing environment variables, and also that
-        // it will include them in its list. It is therefore correct to inject dotenv variables into
-        // Spring Environment with the addFirst method.
-        app.addListeners(
-                (ApplicationListener<ApplicationEnvironmentPreparedEvent>)
-                        event -> {
-                            SpringBootTools.loadDotenvIntoSpringEnvironment(event.getEnvironment());
-                        });
 
         app.run(args);
     }
