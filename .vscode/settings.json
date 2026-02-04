@@ -14,5 +14,6 @@
     "java.compile.nullAnalysis.mode": "automatic",
     "spring-boot.ls.problem.application-yaml.YAML_SHOULD_ESCAPE": "HINT",
     "spring-boot.ls.problem.application-yaml.YAML_UNKNOWN_PROPERTY": "HINT",
-    "java.format.settings.google.extra": "--aosp"
+    "java.format.settings.google.extra": "--aosp",
+    "java.format.settings.google.mode": "jar-file"
 }
