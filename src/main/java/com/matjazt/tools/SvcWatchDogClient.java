@@ -138,8 +138,10 @@ public class SvcWatchDogClient implements Closeable {
 
     /** Stops the background monitoring loop and releases resources. */
     public void stop() {
-        logger.info("Stopping SvcWatchDogClient");
-        stopped.set(true);
+        boolean wasRunning = stopped.compareAndSet(false, true);
+        if (wasRunning) {
+            logger.info("Stopping SvcWatchDogClient");
+        }
 
         synchronized (trigger) {
             trigger.notifyAll();
@@ -165,7 +167,9 @@ public class SvcWatchDogClient implements Closeable {
             shutdownEventHandle = null;
         }
 
-        logger.info("SvcWatchDogClient stopped");
+        if (wasRunning) {
+            logger.info("SvcWatchDogClient stopped");
+        }
     }
 
     /**
@@ -231,6 +235,16 @@ public class SvcWatchDogClient implements Closeable {
      */
     public boolean isTimedOut() {
         return enabled && !timedOutTasks.isEmpty();
+    }
+
+    /**
+     * True if an external watchdog is detected (either via UDP pinging or shutdown event);
+     * otherwise, false.
+     *
+     * @return true if an external watchdog is detected; otherwise, false
+     */
+    public boolean isExternalWatchdogDetected() {
+        return enabled && (udpAddress != null || shutdownEvent != null);
     }
 
     /**

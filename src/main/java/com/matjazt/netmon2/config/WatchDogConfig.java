@@ -14,10 +14,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
-@EnableScheduling
 public class WatchDogConfig {
 
     private static String MAIN_TASK_NAME = "WatchDogConfig";
@@ -27,7 +25,8 @@ public class WatchDogConfig {
     private Thread monitoringThread;
     private volatile boolean running = false;
 
-    @Autowired private HealthEndpoint healthEndpoint;
+    @Autowired(required = false)
+    private HealthEndpoint healthEndpoint;
 
     @Autowired private ApplicationContext context;
 
@@ -39,6 +38,11 @@ public class WatchDogConfig {
 
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationReady() {
+        if (healthEndpoint == null) {
+            logger.warn(
+                    "HealthEndpoint bean not found — WatchDog will assume the application is"
+                            + " healthy unless a timeout or freeze is detected.");
+        }
         SvcWatchDogClient.getInstance().ping(MAIN_TASK_NAME, 20);
         SvcWatchDogClient.getInstance().start();
         startMonitoringThread();
@@ -69,23 +73,42 @@ public class WatchDogConfig {
                     "SvcWatchDogClient has detected an external shutdown request - exiting"
                             + " application");
             running = false;
-
-            // we need to exit in a separate thread to avoid blocking the current scheduled task
-            new Thread(
-                            () -> {
-                                int exitCode = SpringApplication.exit(context, () -> 1);
-                                System.exit(exitCode);
-                            })
-                    .start();
+            startShutdownProcedure();
+            return;
         }
 
         // ping only if application is healthy
         if (isAppHealthy()) {
             wd.ping(MAIN_TASK_NAME, 20);
         }
+
+        // check watchdog status, and exit if watchdog has marked the application as unhealthy
+        // AND external watchdog is detected
+        if (wd.isTimedOut() && wd.isExternalWatchdogDetected()) {
+            logger.error(
+                    "SvcWatchDogClient has marked the application as unhealthy - exiting"
+                            + " application, since it will be restarted by the external watchdog");
+            running = false;
+            startShutdownProcedure();
+        }
+    }
+
+    private void startShutdownProcedure() {
+        // we need to exit in a separate thread to avoid blocking the current task
+        new Thread(
+                        () -> {
+                            int exitCode = SpringApplication.exit(context, () -> 1);
+                            System.exit(exitCode);
+                        })
+                .start();
     }
 
     private boolean isAppHealthy() {
+        if (healthEndpoint == null) {
+            // HealthEndpoint not available - assuming application is healthy
+            return true;
+        }
+
         var descriptor = healthEndpoint.healthForPath("liveness");
         return descriptor != null && descriptor.getStatus().getCode().equalsIgnoreCase("UP");
     }
