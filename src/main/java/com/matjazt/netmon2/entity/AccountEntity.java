@@ -11,6 +11,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Objects;
@@ -22,6 +26,9 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "account")
+@Getter
+@Setter
+@NoArgsConstructor
 public class AccountEntity {
 
     @Id
@@ -50,9 +57,6 @@ public class AccountEntity {
     @Column(name = "last_seen")
     private LocalDateTime lastSeen;
 
-    // Constructors
-    public AccountEntity() {}
-
     /**
      * Creates a new account with the specified details.
      *
@@ -77,71 +81,6 @@ public class AccountEntity {
         if (createdAt == null) {
             createdAt = LocalDateTime.now(ZoneOffset.UTC);
         }
-    }
-
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public AccountTypeEntity getAccountType() {
-        return accountType;
-    }
-
-    public void setAccountType(AccountTypeEntity accountType) {
-        this.accountType = accountType;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getLastSeen() {
-        return lastSeen;
-    }
-
-    public void setLastSeen(LocalDateTime lastSeen) {
-        this.lastSeen = lastSeen;
     }
 
     @Override

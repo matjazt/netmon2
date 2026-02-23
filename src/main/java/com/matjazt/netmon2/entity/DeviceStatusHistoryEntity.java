@@ -10,6 +10,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 /**
@@ -22,6 +26,9 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "device_status_history")
+@Getter
+@Setter
+@NoArgsConstructor
 public class DeviceStatusHistoryEntity {
 
     @Id
@@ -65,9 +72,6 @@ public class DeviceStatusHistoryEntity {
     @Column(nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime timestamp;
 
-    // JPA requires no-arg constructor
-    public DeviceStatusHistoryEntity() {}
-
     public DeviceStatusHistoryEntity(
             NetworkEntity network,
             DeviceEntity device,
@@ -78,56 +82,6 @@ public class DeviceStatusHistoryEntity {
         this.device = device;
         this.ipAddress = ipAddress;
         this.online = online;
-        this.timestamp = timestamp;
-    }
-
-    // Getters and setters
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public NetworkEntity getNetwork() {
-        return network;
-    }
-
-    public void setNetwork(NetworkEntity network) {
-        this.network = network;
-    }
-
-    public DeviceEntity getDevice() {
-        return device;
-    }
-
-    public void setDevice(DeviceEntity device) {
-        this.device = device;
-    }
-
-    public String getIpAddress() {
-        return ipAddress;
-    }
-
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
-    }
-
-    public Boolean getOnline() {
-        return online;
-    }
-
-    public void setOnline(Boolean online) {
-        this.online = online;
-    }
-
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
 }

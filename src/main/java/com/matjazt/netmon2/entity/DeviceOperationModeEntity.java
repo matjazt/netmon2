@@ -4,6 +4,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * JPA entity for device_operation_mode reference table.
@@ -14,6 +17,9 @@ import jakarta.persistence.Table;
  */
 @Entity
 @Table(name = "device_operation_mode")
+@Getter
+@Setter
+@NoArgsConstructor
 public class DeviceOperationModeEntity {
 
     @Id

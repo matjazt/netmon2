@@ -7,6 +7,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
@@ -21,6 +25,9 @@ import java.time.ZoneOffset;
  */
 @Entity // Marks this class as a database entity
 @Table(name = "network") // Maps to "network" table in database
+@Getter
+@Setter
+@NoArgsConstructor
 public class NetworkEntity {
 
     @Id // Primary key
@@ -70,96 +77,9 @@ public class NetworkEntity {
     @Column(name = "back_online_time", nullable = true, columnDefinition = "TIMESTAMP")
     private LocalDateTime backOnlineTime;
 
-    // JPA requires a no-argument constructor
-    public NetworkEntity() {}
-
     public NetworkEntity(String name) {
         this.name = name;
         this.firstSeen = LocalDateTime.now(ZoneOffset.UTC);
         this.lastSeen = LocalDateTime.now(ZoneOffset.UTC);
-    }
-
-    // Getters and setters - standard Java bean pattern
-    // In Java, private fields are accessed via public methods (encapsulation)
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public LocalDateTime getFirstSeen() {
-        return firstSeen;
-    }
-
-    public void setFirstSeen(LocalDateTime firstSeen) {
-        this.firstSeen = firstSeen;
-    }
-
-    public LocalDateTime getLastSeen() {
-        return lastSeen;
-    }
-
-    public void setLastSeen(LocalDateTime lastSeen) {
-        this.lastSeen = lastSeen;
-    }
-
-    public Integer getAlertingDelay() {
-        return alertingDelay;
-    }
-
-    public void setAlertingDelay(Integer alertingDelay) {
-        this.alertingDelay = alertingDelay;
-    }
-
-    public String getEmailAddress() {
-        return emailAddress;
-    }
-
-    /** Sets the email address for alerts, automatically trimming whitespace. */
-    public void setEmailAddress(String emailAddress) {
-        this.emailAddress = emailAddress != null ? emailAddress.trim() : null;
-    }
-
-    public Long getActiveAlertId() {
-        return activeAlertId;
-    }
-
-    public void setActiveAlertId(Long activeAlertId) {
-        this.activeAlertId = activeAlertId;
-    }
-
-    public String getConfiguration() {
-        return configuration;
-    }
-
-    public void setConfiguration(String configuration) {
-        this.configuration = configuration;
-    }
-
-    public Integer getReportingIntervalEma() {
-        return reportingIntervalEma;
-    }
-
-    public void setReportingIntervalEma(Integer reportingIntervalEma) {
-        this.reportingIntervalEma = reportingIntervalEma;
-    }
-
-    public LocalDateTime getBackOnlineTime() {
-        return backOnlineTime;
-    }
-
-    public void setBackOnlineTime(LocalDateTime backOnlineTime) {
-        this.backOnlineTime = backOnlineTime;
     }
 }

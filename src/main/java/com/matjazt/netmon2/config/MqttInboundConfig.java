@@ -2,8 +2,9 @@ package com.matjazt.netmon2.config;
 
 import com.matjazt.netmon2.repository.NetworkRepository;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.DirectChannel;
@@ -33,15 +34,11 @@ import org.springframework.messaging.MessageChannel;
  * annotation.
  */
 @Configuration
+@Slf4j
+@RequiredArgsConstructor
 public class MqttInboundConfig {
 
-    private static final Logger logger = LoggerFactory.getLogger(MqttInboundConfig.class);
-
     private final NetworkRepository networkRepository;
-
-    public MqttInboundConfig(NetworkRepository networkRepository) {
-        this.networkRepository = networkRepository;
-    }
 
     /**
      * Creates direct message channel for MQTT messages.

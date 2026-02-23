@@ -9,6 +9,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -19,6 +23,9 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "account_network")
+@Getter
+@Setter
+@NoArgsConstructor
 public class AccountNetworkEntity implements Serializable {
 
     @Id
@@ -34,35 +41,8 @@ public class AccountNetworkEntity implements Serializable {
     private NetworkEntity network;
 
     // Constructors
-    public AccountNetworkEntity() {}
-
     public AccountNetworkEntity(AccountEntity account, NetworkEntity network) {
         this.account = account;
-        this.network = network;
-    }
-
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public AccountEntity getAccount() {
-        return account;
-    }
-
-    public void setAccount(AccountEntity account) {
-        this.account = account;
-    }
-
-    public NetworkEntity getNetwork() {
-        return network;
-    }
-
-    public void setNetwork(NetworkEntity network) {
         this.network = network;
     }
 
@@ -76,7 +56,7 @@ public class AccountNetworkEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(account, network);
+        return Objects.hash(id);
     }
 
     @Override

@@ -5,6 +5,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 /**
  * JPA entity for alert_type reference table.
  *
@@ -14,6 +18,9 @@ import jakarta.persistence.Table;
  */
 @Entity
 @Table(name = "alert_type")
+@Getter
+@Setter
+@NoArgsConstructor
 public class AlertTypeEntity {
 
     @Id
@@ -25,6 +32,4 @@ public class AlertTypeEntity {
 
     @Column(name = "description", columnDefinition = "text")
     private String description;
-
-    // No getters/setters needed - this entity is never used in runtime code
 }

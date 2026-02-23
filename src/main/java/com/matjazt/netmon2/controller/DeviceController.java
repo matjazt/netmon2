@@ -8,6 +8,9 @@ import com.matjazt.netmon2.entity.DeviceStatusHistoryEntity;
 import com.matjazt.netmon2.mapper.DeviceApiMapper;
 import com.matjazt.netmon2.service.DeviceService;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -64,20 +67,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/devices")
 @PreAuthorize("hasAnyRole('admin', 'user')")
+@Slf4j
+@RequiredArgsConstructor
 public class DeviceController {
 
     private final DeviceService deviceService;
     private final DeviceApiMapper deviceApiMapper;
-
-    /**
-     * Constructor injection of service layer.
-     *
-     * <p>Service contains business logic and uses repositories.
-     */
-    public DeviceController(DeviceService deviceService, DeviceApiMapper deviceApiMapper) {
-        this.deviceService = deviceService;
-        this.deviceApiMapper = deviceApiMapper;
-    }
 
     // ========== GET ENDPOINTS (retrieve data) ==========
 

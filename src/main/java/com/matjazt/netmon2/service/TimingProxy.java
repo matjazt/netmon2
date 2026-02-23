@@ -5,8 +5,9 @@ import com.matjazt.netmon2.entity.NetworkEntity;
 import com.matjazt.netmon2.repository.NetworkRepository;
 import com.matjazt.tools.SvcWatchDogClient;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -38,25 +39,14 @@ import java.util.concurrent.TimeUnit;
  * </ol>
  */
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class TimingProxy {
-
-    private static final Logger logger = LoggerFactory.getLogger(TimingProxy.class);
 
     private final NetworkRepository networkRepository;
     private final AlerterService alerterService;
     private final MqttService mqttService;
     private final AlerterProperties alerterProperties;
-
-    public TimingProxy(
-            NetworkRepository networkRepository,
-            AlerterService alerterService,
-            MqttService mqttService,
-            AlerterProperties alerterProperties) {
-        this.networkRepository = networkRepository;
-        this.alerterService = alerterService;
-        this.mqttService = mqttService;
-        this.alerterProperties = alerterProperties;
-    }
 
     /**
      * Processes incoming MQTT messages with execution time measurement.

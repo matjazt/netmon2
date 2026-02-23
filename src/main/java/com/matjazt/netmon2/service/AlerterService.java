@@ -12,8 +12,9 @@ import com.matjazt.netmon2.repository.DeviceStatusHistoryRepository;
 import com.matjazt.netmon2.repository.NetworkRepository;
 import com.matjazt.tools.SimpleTools;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -37,9 +38,9 @@ import java.util.Map;
  * @see TimingProxy#processAlerts()
  */
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class AlerterService {
-
-    private static final Logger logger = LoggerFactory.getLogger(AlerterService.class);
 
     private final AlerterProperties properties;
     private final JavaMailSender mailSender;
@@ -57,21 +58,6 @@ public class AlerterService {
                     Map.entry(AlertType.NETWORK_DOWN, "Network is unavailable"),
                     Map.entry(AlertType.DEVICE_DOWN, "Device is offline"),
                     Map.entry(AlertType.DEVICE_UNAUTHORIZED, "Unauthorized device detected"));
-
-    public AlerterService(
-            AlerterProperties properties,
-            JavaMailSender mailSender,
-            NetworkRepository networkRepository,
-            DeviceRepository deviceRepository,
-            DeviceStatusHistoryRepository deviceStatusHistoryRepository,
-            AlertRepository alertRepository) {
-        this.properties = properties;
-        this.mailSender = mailSender;
-        this.networkRepository = networkRepository;
-        this.deviceRepository = deviceRepository;
-        this.deviceStatusHistoryRepository = deviceStatusHistoryRepository;
-        this.alertRepository = alertRepository;
-    }
 
     private void sendAlert(
             AlertEntity alert,

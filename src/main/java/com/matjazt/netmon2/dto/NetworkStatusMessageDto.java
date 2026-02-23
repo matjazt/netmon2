@@ -1,5 +1,9 @@
 package com.matjazt.netmon2.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.Instant;
 import java.util.List;
 
@@ -12,6 +16,9 @@ import java.util.List;
  * <p>Jakarta JSON-B (JSON Binding) automatically maps JSON to these objects, similar to
  * System.Text.Json in .NET.
  */
+@Getter
+@Setter
+@NoArgsConstructor
 public class NetworkStatusMessageDto {
 
     /** Network hostname from MQTT message. */
@@ -23,59 +30,12 @@ public class NetworkStatusMessageDto {
     /** List of currently online devices. */
     private List<DeviceInfo> devices;
 
-    public NetworkStatusMessageDto() {
-        // No-arg constructor required for JSON-B deserialization
-    }
-
-    // Getters and setters
-
-    public String getHostname() {
-        return hostname;
-    }
-
-    public void setHostname(String hostname) {
-        this.hostname = hostname;
-    }
-
-    public Instant getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Instant timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public List<DeviceInfo> getDevices() {
-        return devices;
-    }
-
-    public void setDevices(List<DeviceInfo> devices) {
-        this.devices = devices;
-    }
-
     /** Nested class for device information in the JSON. */
+    @Getter
+    @Setter
+    @NoArgsConstructor
     public static class DeviceInfo {
         private String ip;
         private String mac;
-
-        public DeviceInfo() {
-            // No-arg constructor required for JSON-B deserialization
-        }
-
-        public String getIp() {
-            return ip;
-        }
-
-        public void setIp(String ip) {
-            this.ip = ip;
-        }
-
-        public String getMac() {
-            return mac;
-        }
-
-        public void setMac(String mac) {
-            this.mac = mac;
-        }
     }
 }

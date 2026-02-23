@@ -2,6 +2,8 @@ package com.matjazt.netmon2.controller;
 
 import com.matjazt.netmon2.dto.response.GreetingResponseDto;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
+@Slf4j
 public class GreetingController {
 
     @Value("${greeting.template}")

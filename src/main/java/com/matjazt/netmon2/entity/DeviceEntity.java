@@ -12,6 +12,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
@@ -23,6 +27,9 @@ import java.time.ZoneOffset;
  */
 @Entity
 @Table(name = "device")
+@Getter
+@Setter
+@NoArgsConstructor
 public class DeviceEntity {
 
     @Id
@@ -85,9 +92,6 @@ public class DeviceEntity {
     @Column(name = "vendor", nullable = true)
     private String vendor;
 
-    // JPA requires no-arg constructor
-    public DeviceEntity() {}
-
     public DeviceEntity(
             NetworkEntity network, String macAddress, String ipAddress, Boolean online) {
         this.network = network;
@@ -96,28 +100,6 @@ public class DeviceEntity {
         this.online = online;
         this.firstSeen = LocalDateTime.now(ZoneOffset.UTC);
         this.lastSeen = LocalDateTime.now(ZoneOffset.UTC);
-    }
-
-    // Getters and setters
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public NetworkEntity getNetwork() {
-        return network;
-    }
-
-    public void setNetwork(NetworkEntity network) {
-        this.network = network;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public String getNameOrUnknown() {
@@ -138,75 +120,7 @@ public class DeviceEntity {
         return getNameOrUnknown() + " (mac: " + macAddress + ", ip: " + ipAddress + ")";
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getMacAddress() {
-        return macAddress;
-    }
-
-    public void setMacAddress(String macAddress) {
-        this.macAddress = macAddress;
-    }
-
-    public String getIpAddress() {
-        return ipAddress;
-    }
-
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
-    }
-
-    public DeviceOperationMode getDeviceOperationMode() {
-        return deviceOperationMode;
-    }
-
-    public void setDeviceOperationMode(DeviceOperationMode operationMode) {
-        this.deviceOperationMode = operationMode;
-    }
-
-    public Boolean getOnline() {
-        return online;
-    }
-
-    public void setOnline(Boolean online) {
-        this.online = online;
-    }
-
-    public LocalDateTime getFirstSeen() {
-        return firstSeen;
-    }
-
-    public void setFirstSeen(LocalDateTime firstSeen) {
-        this.firstSeen = firstSeen;
-    }
-
-    public LocalDateTime getLastSeen() {
-        return lastSeen;
-    }
-
-    public void setLastSeen(LocalDateTime lastSeen) {
-        this.lastSeen = lastSeen;
-    }
-
     public void updateLastSeen() {
         this.lastSeen = LocalDateTime.now(ZoneOffset.UTC);
-    }
-
-    public Long getActiveAlertId() {
-        return activeAlertId;
-    }
-
-    public void setActiveAlertId(Long activeAlertId) {
-        this.activeAlertId = activeAlertId;
-    }
-
-    public String getVendor() {
-        return vendor;
-    }
-
-    public void setVendor(String vendor) {
-        this.vendor = vendor;
     }
 }

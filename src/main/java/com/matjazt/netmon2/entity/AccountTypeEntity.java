@@ -7,6 +7,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.Objects;
 
 /**
@@ -16,6 +20,9 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "account_type")
+@Getter
+@Setter
+@NoArgsConstructor
 public class AccountTypeEntity {
 
     @Id
@@ -29,35 +36,8 @@ public class AccountTypeEntity {
     private String description;
 
     // Constructors
-    public AccountTypeEntity() {}
-
     public AccountTypeEntity(String name, String description) {
         this.name = name;
-        this.description = description;
-    }
-
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
         this.description = description;
     }
 

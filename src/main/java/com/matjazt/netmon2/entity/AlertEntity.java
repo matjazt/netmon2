@@ -12,6 +12,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 /**
@@ -22,6 +26,9 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "alert")
+@Getter
+@Setter
+@NoArgsConstructor
 public class AlertEntity {
 
     @Id
@@ -77,9 +84,6 @@ public class AlertEntity {
     @Column(name = "last_notification_timestamp", nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime lastNotificationTimestamp;
 
-    // JPA requires no-arg constructor
-    public AlertEntity() {}
-
     public AlertEntity(
             LocalDateTime timestamp,
             NetworkEntity network,
@@ -92,71 +96,5 @@ public class AlertEntity {
         this.alertType = alertType;
         this.message = message;
         this.lastNotificationTimestamp = timestamp;
-    }
-
-    // Getters and setters
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public NetworkEntity getNetwork() {
-        return network;
-    }
-
-    public void setNetwork(NetworkEntity network) {
-        this.network = network;
-    }
-
-    public DeviceEntity getDevice() {
-        return device;
-    }
-
-    public void setDevice(DeviceEntity device) {
-        this.device = device;
-    }
-
-    public AlertType getAlertType() {
-        return alertType;
-    }
-
-    public void setAlertType(AlertType alertType) {
-        this.alertType = alertType;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public LocalDateTime getClosureTimestamp() {
-        return closureTimestamp;
-    }
-
-    public void setClosureTimestamp(LocalDateTime closureTimestamp) {
-        this.closureTimestamp = closureTimestamp;
-    }
-
-    public LocalDateTime getLastNotificationTimestamp() {
-        return lastNotificationTimestamp;
-    }
-
-    public void setLastNotificationTimestamp(LocalDateTime lastNotificationTimestamp) {
-        this.lastNotificationTimestamp = lastNotificationTimestamp;
     }
 }

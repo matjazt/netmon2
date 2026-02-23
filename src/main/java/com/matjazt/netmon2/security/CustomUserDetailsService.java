@@ -2,8 +2,9 @@ package com.matjazt.netmon2.security;
 
 import com.matjazt.netmon2.repository.AccountRepository;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,15 +21,11 @@ import org.springframework.stereotype.Service;
  * (e.g., database lookup, LDAP, external API, etc.)
  */
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private static final Logger logger = LoggerFactory.getLogger(CustomUserDetailsService.class);
-
     private final AccountRepository accountRepository;
-
-    public CustomUserDetailsService(AccountRepository accountRepository) {
-        this.accountRepository = accountRepository;
-    }
 
     /**
      * Load user by username. Called by Spring Security during authentication.

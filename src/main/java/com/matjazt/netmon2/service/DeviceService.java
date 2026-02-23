@@ -1,15 +1,5 @@
 package com.matjazt.netmon2.service;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Optional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import com.matjazt.netmon2.dto.DeviceDto;
 import com.matjazt.netmon2.entity.DeviceEntity;
 import com.matjazt.netmon2.entity.DeviceOperationMode;
@@ -19,6 +9,21 @@ import com.matjazt.netmon2.mapper.DeviceMapper;
 import com.matjazt.netmon2.repository.DeviceRepository;
 import com.matjazt.netmon2.repository.DeviceStatusHistoryRepository;
 import com.matjazt.netmon2.repository.NetworkRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Example Service demonstrating how to use Spring Data JPA repositories.
@@ -47,6 +52,8 @@ import com.matjazt.netmon2.repository.NetworkRepository;
  * </ol>
  */
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class DeviceService {
 
     // Dependencies injected via constructor
@@ -54,28 +61,6 @@ public class DeviceService {
     private final NetworkRepository networkRepository;
     private final DeviceStatusHistoryRepository deviceStatusHistoryRepository;
     private final DeviceMapper deviceMapper;
-
-    /**
-     * Constructor injection - Spring automatically provides the implementations.
-     *
-     * <p>This is preferred over @Autowired field injection because:
-     *
-     * <ul>
-     *   <li>Makes dependencies explicit and testable
-     *   <li>Allows final fields (immutability)
-     *   <li>Easier to mock in unit tests
-     * </ul>
-     */
-    public DeviceService(
-            DeviceRepository deviceRepository,
-            NetworkRepository networkRepository,
-            DeviceStatusHistoryRepository statusHistoryRepository,
-            DeviceMapper deviceMapper) {
-        this.deviceRepository = deviceRepository;
-        this.networkRepository = networkRepository;
-        this.deviceStatusHistoryRepository = statusHistoryRepository;
-        this.deviceMapper = deviceMapper;
-    }
 
     // ========== BASIC CRUD OPERATIONS ==========
 

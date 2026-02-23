@@ -1,5 +1,8 @@
 package com.matjazt.netmon2.config;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +30,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @ConfigurationProperties(prefix = "alerter")
+@Getter
+@Setter
 public class AlerterProperties {
 
     private String smtpHost;
@@ -40,86 +45,4 @@ public class AlerterProperties {
 
     private long intervalSeconds = 20;
     private long initialDelaySeconds = 30;
-
-    // Getters and setters
-
-    public String getSmtpHost() {
-        return smtpHost;
-    }
-
-    public void setSmtpHost(String smtpHost) {
-        this.smtpHost = smtpHost;
-    }
-
-    public int getSmtpPort() {
-        return smtpPort;
-    }
-
-    public void setSmtpPort(int smtpPort) {
-        this.smtpPort = smtpPort;
-    }
-
-    public String getSmtpUsername() {
-        return smtpUsername;
-    }
-
-    public void setSmtpUsername(String smtpUsername) {
-        this.smtpUsername = smtpUsername;
-    }
-
-    public String getSmtpPassword() {
-        return smtpPassword;
-    }
-
-    public void setSmtpPassword(String smtpPassword) {
-        this.smtpPassword = smtpPassword;
-    }
-
-    public boolean isSmtpStartTls() {
-        return smtpStartTls;
-    }
-
-    public void setSmtpStartTls(boolean smtpStartTls) {
-        this.smtpStartTls = smtpStartTls;
-    }
-
-    public boolean isSmtpAuth() {
-        return smtpAuth;
-    }
-
-    public void setSmtpAuth(boolean smtpAuth) {
-        this.smtpAuth = smtpAuth;
-    }
-
-    public String getFromEmail() {
-        return fromEmail;
-    }
-
-    public void setFromEmail(String fromEmail) {
-        this.fromEmail = fromEmail;
-    }
-
-    public String getFromName() {
-        return fromName;
-    }
-
-    public void setFromName(String fromName) {
-        this.fromName = fromName;
-    }
-
-    public long getIntervalSeconds() {
-        return intervalSeconds;
-    }
-
-    public void setIntervalSeconds(long intervalSeconds) {
-        this.intervalSeconds = intervalSeconds;
-    }
-
-    public long getInitialDelaySeconds() {
-        return initialDelaySeconds;
-    }
-
-    public void setInitialDelaySeconds(long initialDelaySeconds) {
-        this.initialDelaySeconds = initialDelaySeconds;
-    }
 }

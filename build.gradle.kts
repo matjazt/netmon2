@@ -32,6 +32,15 @@ dependencies {
     implementation("net.java.dev.jna:jna-platform:5.14.0")
     implementation("me.paulschwarz:springboot4-dotenv:5.1.0")
 
+   	compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
+
+    // Important when using MapStruct + Lombok together
+    //annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+
+    testCompileOnly("org.projectlombok:lombok")
+    testAnnotationProcessor("org.projectlombok:lombok")
+
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
 	runtimeOnly("org.postgresql:postgresql") 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

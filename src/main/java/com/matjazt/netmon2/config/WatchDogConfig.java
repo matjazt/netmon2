@@ -4,8 +4,8 @@ import com.matjazt.tools.SvcWatchDogClient;
 
 import jakarta.annotation.PreDestroy;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -16,11 +16,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 
 @Configuration
+@Slf4j
 public class WatchDogConfig {
 
     private static String MAIN_TASK_NAME = "WatchDogConfig";
-
-    private static final Logger logger = LoggerFactory.getLogger(WatchDogConfig.class);
 
     private Thread monitoringThread;
     private volatile boolean running = false;

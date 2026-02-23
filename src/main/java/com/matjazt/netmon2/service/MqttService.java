@@ -6,13 +6,13 @@ import com.matjazt.netmon2.entity.DeviceEntity;
 import com.matjazt.netmon2.entity.DeviceOperationMode;
 import com.matjazt.netmon2.entity.DeviceStatusHistoryEntity;
 import com.matjazt.netmon2.entity.NetworkEntity;
-import com.matjazt.netmon2.repository.AlertRepository;
 import com.matjazt.netmon2.repository.DeviceRepository;
 import com.matjazt.netmon2.repository.DeviceStatusHistoryRepository;
 import com.matjazt.netmon2.repository.NetworkRepository;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,28 +58,15 @@ import java.util.List;
  * created. This minimizes database writes while preserving complete state history.
  */
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class MqttService {
-
-    private static final Logger logger = LoggerFactory.getLogger(MqttService.class);
 
     private final DeviceRepository deviceRepository;
     private final NetworkRepository networkRepository;
     private final DeviceStatusHistoryRepository deviceStatusHistoryRepository;
 
     private final AlerterService alerterService;
-
-    public MqttService(
-            DeviceRepository deviceRepository,
-            NetworkRepository networkRepository,
-            DeviceStatusHistoryRepository deviceStatusHistoryRepository,
-            AlertRepository alertRepository,
-            AlerterService alerterService) {
-        this.deviceRepository = deviceRepository;
-        this.networkRepository = networkRepository;
-        this.deviceStatusHistoryRepository = deviceStatusHistoryRepository;
-        this.alerterService = alerterService;
-        logger.info("initialized");
-    }
 
     /**
      * Handles incoming MQTT messages containing device scan results.
