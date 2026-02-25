@@ -219,17 +219,11 @@ public class AlerterService {
         // timestamp and duration
         var duration =
                 java.time.Duration.between(alert.getTimestamp(), alert.getClosureTimestamp());
-        String durationInfo =
-                "Alert opened at: "
-                        + SimpleTools.formatDefault(alert.getTimestamp())
-                        + " UTC\nDuration: "
-                        + String.format(
-                                "%d days, %d hours, %d minutes, %d seconds",
-                                duration.toDaysPart(),
-                                duration.toHoursPart(),
-                                duration.toMinutesPart(),
-                                duration.toSecondsPart());
-        message = (message != null ? message.trim() : "") + "\n" + durationInfo;
+
+        message =
+                (message != null ? message.trim() : "")
+                        + "\n"
+                        + getInfoForExistingAlert(alert, duration);
 
         // send alert notification
         sendAlert(alert, true, false, network, device, message);
@@ -337,21 +331,34 @@ public class AlerterService {
 
                     // append information about the existing alert to the message: alert timestamp
                     // and duration
-                    var duration = java.time.Duration.between(alert.getTimestamp(), now);
-                    String durationInfo =
-                            "\nAlert opened at: "
-                                    + SimpleTools.formatDefault(alert.getTimestamp())
-                                    + " UTC\nDuration: "
-                                    + String.format(
-                                            "%d days, %d hours, %d minutes, %d seconds",
-                                            duration.toDaysPart(),
-                                            duration.toHoursPart(),
-                                            duration.toMinutesPart(),
-                                            duration.toSecondsPart());
-                    sendAlert(alert, false, true, network, alert.getDevice(), durationInfo);
+
+                    var duration =
+                            java.time.Duration.between(
+                                    alert.getTimestamp(), LocalDateTime.now(ZoneOffset.UTC));
+
+                    sendAlert(
+                            alert,
+                            false,
+                            true,
+                            network,
+                            alert.getDevice(),
+                            "\n" + getInfoForExistingAlert(alert, duration));
                 }
             }
         }
+    }
+
+    private String getInfoForExistingAlert(AlertEntity alert, java.time.Duration duration) {
+
+        return "Alert opened at: "
+                + SimpleTools.formatDefault(alert.getTimestamp())
+                + " UTC\nDuration: "
+                + String.format(
+                        "%d days, %d hours, %d minutes, %d seconds",
+                        duration.toDaysPart(),
+                        duration.toHoursPart(),
+                        duration.toMinutesPart(),
+                        duration.toSecondsPart());
     }
 
     /**
