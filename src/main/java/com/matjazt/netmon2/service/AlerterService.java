@@ -76,6 +76,8 @@ public class AlerterService {
             throw new IllegalArgumentException("Unsupported alert type: " + alert.getAlertType());
         }
 
+        var networkConfig = networkConfigurationService.getByNetworkId(network.getId());
+
         var subject = "[" + network.getName() + "] ";
 
         var fullMessageEntries = new ArrayList<String>();
@@ -104,7 +106,9 @@ public class AlerterService {
             fullMessageEntries.add("Device: " + device.getBasicInfo());
             subject += " for " + device.getNameOrMac();
         }
-        fullMessageEntries.add("UTC time: " + SimpleTools.formatDefault(now));
+        fullMessageEntries.add(
+                "Current time: "
+                        + SimpleTools.formatDefaultWithTimeZone(now, networkConfig.getTimezone()));
         fullMessageEntries.add("Alert Type: " + alert.getAlertType());
         fullMessageEntries.add("Alert Id: " + alert.getId());
 
@@ -124,7 +128,6 @@ public class AlerterService {
         logger.warn("fullMessage:\n{}", fullMessage);
 
         // Send email if network has an email address configured
-        var networkConfig = networkConfigurationService.getByNetworkId(network.getId());
         var notificationEmailAddress = networkConfig.getNotificationEmailAddress();
 
         if (notificationEmailAddress != null && !notificationEmailAddress.isEmpty()) {
@@ -313,7 +316,8 @@ public class AlerterService {
         var reminderIntervalDays = networkConfig.getReminderIntervalDays();
 
         // var nowTimeOfDay = LocalDateTime.now(ZoneOffset.UTC).toLocalTime();
-        var localNow = LocalDateTime.now();
+        var localNow =
+                SimpleTools.convertTimeZone(now, ZoneOffset.UTC, networkConfig.getTimezone());
         String hhmm = localNow.format(DateTimeFormatter.ofPattern("HH:mm"));
         if (reminderTimeOfDay != null
                 && reminderIntervalDays != null
@@ -322,9 +326,16 @@ public class AlerterService {
             // example, if reminderIntervalDays is 1,
             // we will send reminders for alerts that have been open since yesterday (regardless of
             // the time). We basically count midnights, not days.
+            // NOTE: all the timestamp math should be done in the network's local timezone, not UTC,
+            // hence the conversions.
+            //
+
             var reminderThreshold = localNow.toLocalDate().minusDays(reminderIntervalDays - 1);
             for (AlertEntity alert : alertRepository.findOpenAlertsByNetworkId(networkId)) {
-                if (alert.getLastNotificationTimestamp()
+                if (SimpleTools.convertTimeZone(
+                                alert.getLastNotificationTimestamp(),
+                                ZoneOffset.UTC,
+                                networkConfig.getTimezone())
                         .toLocalDate()
                         .isBefore(reminderThreshold)) {
                     // send reminder email
@@ -332,9 +343,7 @@ public class AlerterService {
                     // append information about the existing alert to the message: alert timestamp
                     // and duration
 
-                    var duration =
-                            java.time.Duration.between(
-                                    alert.getTimestamp(), LocalDateTime.now(ZoneOffset.UTC));
+                    var duration = java.time.Duration.between(alert.getTimestamp(), now);
 
                     sendAlert(
                             alert,
@@ -351,8 +360,12 @@ public class AlerterService {
     private String getInfoForExistingAlert(AlertEntity alert, java.time.Duration duration) {
 
         return "Alert opened at: "
-                + SimpleTools.formatDefault(alert.getTimestamp())
-                + " UTC\nDuration: "
+                + SimpleTools.formatDefaultWithTimeZone(
+                        alert.getTimestamp(),
+                        networkConfigurationService
+                                .getByNetworkId(alert.getNetwork().getId())
+                                .getTimezone())
+                + "\nDuration: "
                 + String.format(
                         "%d days, %d hours, %d minutes, %d seconds",
                         duration.toDaysPart(),

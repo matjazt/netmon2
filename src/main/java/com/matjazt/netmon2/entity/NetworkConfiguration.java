@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.ZoneId;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Getter
 @Setter
@@ -16,4 +18,6 @@ public class NetworkConfiguration {
 
     String reminderTimeOfDay;
     Integer reminderIntervalDays;
+
+    ZoneId timezone = ZoneId.of("UTC");
 }

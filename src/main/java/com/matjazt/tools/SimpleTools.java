@@ -1,6 +1,9 @@
 package com.matjazt.tools;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class SimpleTools {
@@ -8,8 +11,24 @@ public class SimpleTools {
     private static final DateTimeFormatter DEFAULT_LOCAL_DATE_TIME_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    private static final DateTimeFormatter DEFAULT_LOCAL_DATE_TIME_FORMATTER_WITH_TIMEZONE =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
+
     public static String formatDefault(LocalDateTime timestamp) {
         return timestamp.format(DEFAULT_LOCAL_DATE_TIME_FORMATTER);
+    }
+
+    public static String formatDefaultWithTimeZone(LocalDateTime utcTimestamp, ZoneId zoneId) {
+        ZonedDateTime utcZoned = utcTimestamp.atZone(ZoneOffset.UTC);
+        ZonedDateTime localZoned = utcZoned.withZoneSameInstant(zoneId);
+        return localZoned.format(DEFAULT_LOCAL_DATE_TIME_FORMATTER_WITH_TIMEZONE);
+    }
+
+    public static LocalDateTime convertTimeZone(
+            LocalDateTime timestamp, ZoneId sourceZoneId, ZoneId targetZoneId) {
+        ZonedDateTime sourceZoned = timestamp.atZone(sourceZoneId);
+        ZonedDateTime targetZoned = sourceZoned.withZoneSameInstant(targetZoneId);
+        return targetZoned.toLocalDateTime();
     }
 
     /**
