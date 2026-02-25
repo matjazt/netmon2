@@ -13,4 +13,7 @@ public class NetworkConfiguration {
     Integer alertingDelay = 300; // in seconds, default 5 minutes
 
     String notificationEmailAddress;
+
+    String reminderTimeOfDay;
+    Integer reminderIntervalDays;
 }

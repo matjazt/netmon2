@@ -125,6 +125,22 @@ public interface AlertRepository extends JpaRepository<AlertEntity, Long> {
     Page<AlertEntity> findByNetwork_Id(Long networkId, Pageable pageable);
 
     /**
+     * CUSTOM QUERY: Find open alerts for a network
+     *
+     * <p>Example of custom JPQL query. Finds all open alerts for a network ordered by ID. Useful
+     * for showing active issues on network dashboard.
+     *
+     * @param networkId the network ID
+     * @return list of open alerts for the network ordered by ID
+     */
+    @Query(
+            "SELECT a FROM AlertEntity a "
+                    + "WHERE a.network.id = :networkId "
+                    + "AND a.closureTimestamp IS NULL "
+                    + "ORDER BY a.id ")
+    List<AlertEntity> findOpenAlertsByNetworkId(@Param("networkId") Long networkId);
+
+    /**
      * CUSTOM QUERY: Find recent open alerts across all networks
      *
      * <p>Useful for dashboard overview. JOIN FETCH loads network eagerly to avoid N+1 queries.

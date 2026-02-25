@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -63,9 +64,12 @@ public class AlerterService {
     private void sendAlert(
             AlertEntity alert,
             boolean closure,
+            boolean reminder,
             NetworkEntity network,
             DeviceEntity device,
             String message) {
+
+        var now = LocalDateTime.now(ZoneOffset.UTC);
 
         String baseMessage = ALERT_TYPE_MESSAGES.get(alert.getAlertType());
         if (baseMessage == null) {
@@ -85,6 +89,9 @@ public class AlerterService {
         if (closure) {
             fullMessageEntries.add("ALERT CLOSED");
             subject += " alert closure";
+        } else if (reminder) {
+            fullMessageEntries.add("ALERT REMINDER");
+            subject += " alert reminder";
         } else {
             fullMessageEntries.add("ALERT TRIGGERED");
             subject += " alert";
@@ -97,8 +104,7 @@ public class AlerterService {
             fullMessageEntries.add("Device: " + device.getBasicInfo());
             subject += " for " + device.getNameOrMac();
         }
-        fullMessageEntries.add(
-                "UTC time: " + SimpleTools.formatDefault(LocalDateTime.now(ZoneOffset.UTC)));
+        fullMessageEntries.add("UTC time: " + SimpleTools.formatDefault(now));
         fullMessageEntries.add("Alert Type: " + alert.getAlertType());
         fullMessageEntries.add("Alert Id: " + alert.getId());
 
@@ -125,6 +131,7 @@ public class AlerterService {
             try {
                 sendEmail(notificationEmailAddress, subject, fullMessage);
                 logger.info("Alert email sent to: {}", notificationEmailAddress);
+                alert.setLastNotificationTimestamp(now);
             } catch (Exception e) {
                 logger.error("Failed to send alert email", e);
                 throw new RuntimeException(
@@ -173,7 +180,7 @@ public class AlerterService {
         }
 
         // send alert notification
-        sendAlert(alert, false, network, device, message);
+        sendAlert(alert, false, false, network, device, message);
 
         // return created alert (including its ID)
         return alert;
@@ -225,7 +232,7 @@ public class AlerterService {
         message = (message != null ? message.trim() : "") + "\n" + durationInfo;
 
         // send alert notification
-        sendAlert(alert, true, network, device, message);
+        sendAlert(alert, true, false, network, device, message);
 
         // return closed alert
         return alert;
@@ -303,6 +310,45 @@ public class AlerterService {
                         // recovery alert
                         closeAlert(network, device, null);
                     }
+                }
+            }
+        }
+
+        var networkConfig = networkConfigurationService.getByNetworkId(networkId);
+        var reminderTimeOfDay = networkConfig.getReminderTimeOfDay();
+        var reminderIntervalDays = networkConfig.getReminderIntervalDays();
+
+        // var nowTimeOfDay = LocalDateTime.now(ZoneOffset.UTC).toLocalTime();
+        var localNow = LocalDateTime.now();
+        String hhmm = localNow.format(DateTimeFormatter.ofPattern("HH:mm"));
+        if (reminderTimeOfDay != null
+                && reminderIntervalDays != null
+                && hhmm.compareTo(reminderTimeOfDay) >= 0) {
+            // it's time to send reminders for any open alerts that have been open long enough - for
+            // example, if reminderIntervalDays is 1,
+            // we will send reminders for alerts that have been open since yesterday (regardless of
+            // the time). We basically count midnights, not days.
+            var reminderThreshold = localNow.toLocalDate().minusDays(reminderIntervalDays - 1);
+            for (AlertEntity alert : alertRepository.findOpenAlertsByNetworkId(networkId)) {
+                if (alert.getLastNotificationTimestamp()
+                        .toLocalDate()
+                        .isBefore(reminderThreshold)) {
+                    // send reminder email
+
+                    // append information about the existing alert to the message: alert timestamp
+                    // and duration
+                    var duration = java.time.Duration.between(alert.getTimestamp(), now);
+                    String durationInfo =
+                            "\nAlert opened at: "
+                                    + SimpleTools.formatDefault(alert.getTimestamp())
+                                    + " UTC\nDuration: "
+                                    + String.format(
+                                            "%d days, %d hours, %d minutes, %d seconds",
+                                            duration.toDaysPart(),
+                                            duration.toHoursPart(),
+                                            duration.toMinutesPart(),
+                                            duration.toSecondsPart());
+                    sendAlert(alert, false, true, network, alert.getDevice(), durationInfo);
                 }
             }
         }
