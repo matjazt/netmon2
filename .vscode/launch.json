@@ -2,13 +2,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Debug (Gradle bootRun)",
             "type": "java",
-            "name": "Debug Netmon2 Application",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "mainClass": "com.matjazt.netmon2.Netmon2Application",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5005,
             "projectName": "netmon2",
-            "vmArgs": "-Dfile.encoding=UTF-8"
+            "preLaunchTask": "gradle-bootRun-debug"
         }
     ]
 }

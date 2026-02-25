@@ -55,12 +55,6 @@ public class NetworkEntity {
     @Column(name = "last_seen", nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime lastSeen;
 
-    @Column(name = "alerting_delay", nullable = false, columnDefinition = "INTEGER DEFAULT 300")
-    private Integer alertingDelay = 300; // in seconds, default 5 minutes
-
-    @Column(name = "email_address", nullable = true, length = 1000)
-    private String emailAddress;
-
     /** If there's an active alert for this network, references the alert ID. */
     @Column(name = "active_alert_id", nullable = true)
     private Long activeAlertId;

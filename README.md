@@ -8,7 +8,7 @@ This application subscribes to MQTT topics that publish network device lists, de
 
 ## Technology Stack
 
-- **Spring Boot 4.0.2**: Modern Java application framework
+- **Spring Boot 4.0.3**: Modern Java application framework
 - **Spring Data JPA**: Database persistence with Hibernate
 - **Spring Security**: Authentication and authorization with BCrypt
 - **Spring Integration MQTT**: MQTT connectivity with Eclipse Paho client

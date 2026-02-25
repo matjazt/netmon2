@@ -49,6 +49,7 @@ public class AlerterService {
     private final DeviceRepository deviceRepository;
     private final DeviceStatusHistoryRepository deviceStatusHistoryRepository;
     private final AlertRepository alertRepository;
+    private final NetworkConfigurationService networkConfigurationService;
 
     // private static final DateTimeFormatter TIME_FORMATTER =
     //        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -90,12 +91,11 @@ public class AlerterService {
         }
         fullMessageEntries.add(""); // empty line
 
-        if (network != null) {
-            fullMessageEntries.add("Network: " + network.getName());
-        }
+        fullMessageEntries.add("Network: " + network.getName());
 
         if (device != null) {
             fullMessageEntries.add("Device: " + device.getBasicInfo());
+            subject += " for " + device.getNameOrMac();
         }
         fullMessageEntries.add(
                 "UTC time: " + SimpleTools.formatDefault(LocalDateTime.now(ZoneOffset.UTC)));
@@ -118,22 +118,17 @@ public class AlerterService {
         logger.warn("fullMessage:\n{}", fullMessage);
 
         // Send email if network has an email address configured
-        if (network != null
-                && network.getEmailAddress() != null
-                && !network.getEmailAddress().isEmpty()) {
-            // figure out email subject
+        var networkConfig = networkConfigurationService.getByNetworkId(network.getId());
+        var notificationEmailAddress = networkConfig.getNotificationEmailAddress();
 
-            if (device != null) {
-                subject += " for " + device.getNameOrMac();
-            }
-
+        if (notificationEmailAddress != null && !notificationEmailAddress.isEmpty()) {
             try {
-                sendEmail(network.getEmailAddress(), subject, fullMessage);
-                logger.info("Alert email sent to: {}", network.getEmailAddress());
+                sendEmail(notificationEmailAddress, subject, fullMessage);
+                logger.info("Alert email sent to: {}", notificationEmailAddress);
             } catch (Exception e) {
                 logger.error("Failed to send alert email", e);
                 throw new RuntimeException(
-                        "Failed to send alert email to " + network.getEmailAddress(), e);
+                        "Failed to send alert email to " + notificationEmailAddress, e);
             }
         }
     }
@@ -250,9 +245,10 @@ public class AlerterService {
                                                 "Network with ID " + networkId + " not found"));
 
         var now = LocalDateTime.now(ZoneOffset.UTC);
-        var alertingThreshold = now.minusSeconds(network.getAlertingDelay());
-        var closureThreshold =
-                alertingThreshold.plusSeconds(Math.min(30, network.getAlertingDelay() / 10));
+        var alertingDelay =
+                networkConfigurationService.getByNetworkId(networkId).getAlertingDelay();
+        var alertingThreshold = now.minusSeconds(alertingDelay);
+        var closureThreshold = alertingThreshold.plusSeconds(Math.min(30, alertingDelay / 10));
 
         if (network.getLastSeen().isBefore(alertingThreshold)) {
             // network is down

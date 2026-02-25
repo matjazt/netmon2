@@ -19,7 +19,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none        # important for DB-first
+      ddl-auto: none # important for DB-first
     properties:
       hibernate:
         format_sql: false
@@ -31,6 +31,12 @@ spring:
         order_updates: true
         flush_mode: COMMIT
     open-in-view: false
+
+netmon:
+  cache:
+    network-config:
+      maximum-size: 1000
+      expire-after-write: 5m
 
 logging:
   level:
@@ -51,7 +57,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info     # Expose only health and info endpoints
+        include: health,info # Expose only health and info endpoints
   endpoint:
     health:
       show-details: always
@@ -65,24 +71,24 @@ mqtt:
   username: changeit
   password: changeit
   topic-template: network/{networkName}/scan
-  truststore-path:                           # Optional: Path to JKS truststore for self-signed CA certificates
-  truststore-password:                       # Optional: Truststore password (required if truststore-path is set)
-  automatic-reconnect: true                  # Enable automatic reconnection on connection loss
-  clean-session: false                       # Persistent session (false) vs clean session (true)
-  qos: 1                                     # Quality of Service level (0=at most once, 1=at least once, 2=exactly once)
-  connection-timeout: 30                     # Connection timeout in seconds
-  keep-alive-interval: 60                    # Keep-alive interval in seconds
-  completion-timeout: 5000                   # Completion timeout in milliseconds
-  ssl-verify-hostname: true                  # Verify SSL hostname (disable only for testing)
+  truststore-path: # Optional: Path to JKS truststore for self-signed CA certificates
+  truststore-password: # Optional: Truststore password (required if truststore-path is set)
+  automatic-reconnect: true # Enable automatic reconnection on connection loss
+  clean-session: false # Persistent session (false) vs clean session (true)
+  qos: 1 # Quality of Service level (0=at most once, 1=at least once, 2=exactly once)
+  connection-timeout: 30 # Connection timeout in seconds
+  keep-alive-interval: 60 # Keep-alive interval in seconds
+  completion-timeout: 5000 # Completion timeout in milliseconds
+  ssl-verify-hostname: true # Verify SSL hostname (disable only for testing)
 
 alerter:
-  smtp-host: changeit                        # SMTP server hostname
-  smtp-port: changeit                        # SMTP port (587 for TLS, 465 for SSL, 25 for plain)
-  smtp-username: changeit                    # SMTP username for authentication
-  smtp-password: changeit                    # SMTP password for authentication
-  smtp-start-tls: true                       # Enable STARTTLS (recommended for port 587)
-  smtp-auth: true                            # Enable SMTP authentication
-  from-email: changeit                       # Sender email address
-  from-name: netmon2                         # Sender display name
-  interval-seconds: 20                       # Alert processing interval in seconds
-  initial-delay-seconds: 30                  # Initial delay before first alert processing in seconds
+  smtp-host: changeit # SMTP server hostname
+  smtp-port: changeit # SMTP port (587 for TLS, 465 for SSL, 25 for plain)
+  smtp-username: changeit # SMTP username for authentication
+  smtp-password: changeit # SMTP password for authentication
+  smtp-start-tls: true # Enable STARTTLS (recommended for port 587)
+  smtp-auth: true # Enable SMTP authentication
+  from-email: changeit # Sender email address
+  from-name: netmon2 # Sender display name
+  interval-seconds: 20 # Alert processing interval in seconds
+  initial-delay-seconds: 30 # Initial delay before first alert processing in seconds
