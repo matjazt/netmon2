@@ -1,7 +1,6 @@
 package com.matjazt.netmon2.service;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,10 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Singleton service for MAC address vendor (OUI) lookup.
@@ -52,33 +48,19 @@ public class MacVendorLookupService {
     private volatile Map<String, String> ouiMap = Map.of();
 
     private volatile long lastLoadAttemptMs = 0L;
-    private final ExecutorService loaderExecutor =
-            Executors.newSingleThreadExecutor(
-                    r -> {
-                        Thread thread = new Thread(r, "mac-vendor-loader");
-                        thread.setDaemon(true);
-                        return thread;
-                    });
+    private volatile boolean loadInProgress = false;
 
-    // -------------------------------------------------------------------------
-    // Initialisation
-    // -------------------------------------------------------------------------
-
-    /**
-     * Downloads and parses the OUI CSV file.
-     *
-     * <p>Called automatically by Spring after dependency injection. Failures are logged but never
-     * rethrown — the application starts normally even when offline.
-     */
     @PostConstruct
+    public void init() {
+        triggerAsyncLoadIfAllowed();
+    }
+
+    /** Downloads and parses the OUI CSV file. */
     public void loadVendorData() {
-
-        lastLoadAttemptMs = System.currentTimeMillis();
-
-        logger.info("Downloading IEEE OUI list from {}", OUI_CSV_URL);
-        long startMs = System.currentTimeMillis();
-
         try {
+            logger.info("Downloading IEEE OUI list from {}", OUI_CSV_URL);
+            long startMs = System.currentTimeMillis();
+
             var tmpMap = new HashMap<String, String>(50_000);
             var url = URI.create(OUI_CSV_URL).toURL();
             try (var stream = url.openStream();
@@ -157,21 +139,10 @@ public class MacVendorLookupService {
         } catch (Exception e) {
             logger.warn(
                     "Could not load IEEE OUI list from {}. Cause: {}", OUI_CSV_URL, e.getMessage());
-        }
-    }
-
-    @PreDestroy
-    public void shutdown() {
-        logger.debug("Shutting down MAC vendor loader executor");
-        loaderExecutor.shutdown();
-        try {
-            if (!loaderExecutor.awaitTermination(2, TimeUnit.SECONDS)) {
-                loaderExecutor.shutdownNow();
-                logger.warn("MAC vendor loader executor did not terminate gracefully");
+        } finally {
+            synchronized (this) {
+                loadInProgress = false;
             }
-        } catch (InterruptedException e) {
-            loaderExecutor.shutdownNow();
-            Thread.currentThread().interrupt();
         }
     }
 
@@ -200,7 +171,7 @@ public class MacVendorLookupService {
 
         var mapSnapshot = ouiMap;
         if (mapSnapshot == null || mapSnapshot.isEmpty()) {
-            triggerAsyncLoadIfNeeded();
+            triggerAsyncLoadIfAllowed();
             return null;
         }
 
@@ -222,18 +193,29 @@ public class MacVendorLookupService {
         }
     }
 
-    private void triggerAsyncLoadIfNeeded() {
-        long now = System.currentTimeMillis();
-        if (now - lastLoadAttemptMs < RELOAD_COOLDOWN_MS) {
-            return;
-        }
+    @PostConstruct
+    public void triggerAsyncLoadIfAllowed() {
+        synchronized (this) {
+            if (loadInProgress) {
+                return;
+            }
 
-        lastLoadAttemptMs = now;
+            long now = System.currentTimeMillis();
+            if (now - lastLoadAttemptMs < RELOAD_COOLDOWN_MS) {
+                return;
+            }
 
-        try {
-            loaderExecutor.execute(this::loadVendorData);
-        } catch (RejectedExecutionException ignored) {
-            logger.debug("OUI loader executor rejected a load request.");
+            lastLoadAttemptMs = now;
+            loadInProgress = true;
+
+            try {
+                var thread = new Thread(this::loadVendorData, "mac-lookup-loader");
+                thread.setDaemon(true);
+                thread.start();
+            } catch (RejectedExecutionException ex) {
+                logger.error("Failed to start async OUI loader thread - will retry later", ex);
+                loadInProgress = false;
+            }
         }
     }
 
