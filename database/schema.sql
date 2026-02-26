@@ -55,14 +55,11 @@ CREATE TABLE device_operation_mode (
 
 CREATE TABLE network (
 	id bigserial NOT NULL,
-	alerting_delay int4 DEFAULT 300 NOT NULL,
-	email_address varchar(1000) NULL,
 	first_seen timestamp NOT NULL,
 	last_seen timestamp NOT NULL,
 	"name" varchar(100) NOT NULL,
 	active_alert_id int8 NULL,
 	configuration varchar NOT NULL,
-	reporting_interval_ema int4 NOT NULL,
 	back_online_time timestamp NULL,
 	CONSTRAINT pk_network PRIMARY KEY (id),
 	CONSTRAINT uk_network_name UNIQUE (name)
@@ -191,9 +188,9 @@ CREATE INDEX idx_alert_timestamp ON alert USING btree ("timestamp");
 CREATE TABLE log (
 	id bigserial NOT NULL,
     "timestamp" timestamp NOT NULL,
-    level int2 NOT NULL,
+    level int4 NOT NULL,
     origin varchar(500) NOT NULL,
-    message varchar(500) NOT NULL,
+    message varchar(5000) NOT NULL,
 	device_id int8 NULL,
 	network_id int8 NOT NULL,
 	CONSTRAINT pk_log PRIMARY KEY (id),

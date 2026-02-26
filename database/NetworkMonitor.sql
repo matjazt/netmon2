@@ -258,9 +258,9 @@ ALTER TABLE alert ALTER COLUMN alert_type_id SET NOT NULL;
 CREATE TABLE log (
 	id bigserial NOT NULL,
     "timestamp" timestamp NOT NULL,
-    level int2 NOT NULL,
+    level int4 NOT NULL,
     origin varchar(500) NOT NULL,
-    message varchar(500) NOT NULL,
+    message varchar(5000) NOT NULL,
 	device_id int8 NULL,
 	network_id int8 NOT NULL,
 	CONSTRAINT pk_log PRIMARY KEY (id),
@@ -270,3 +270,8 @@ CREATE TABLE log (
 CREATE INDEX idx_log_device ON log USING btree (device_id);
 CREATE INDEX idx_log_network ON log USING btree (network_id);
 CREATE INDEX idx_log_timestamp ON log USING btree ("timestamp");
+
+ALTER TABLE network DROP COLUMN reporting_interval_ema;
+ALTER TABLE network DROP COLUMN alerting_delay;
+ALTER TABLE network DROP COLUMN email_address;
+

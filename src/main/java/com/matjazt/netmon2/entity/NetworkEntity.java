@@ -75,6 +75,6 @@ public class NetworkEntity {
 
     @Override
     public String toString() {
-        return name + " (id:" + id + ")";
+        return name + " (id: " + id + ")";
     }
 }

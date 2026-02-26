@@ -7,6 +7,7 @@ import com.matjazt.netmon2.entity.DeviceEntity;
 import com.matjazt.netmon2.entity.LogEntity;
 import com.matjazt.netmon2.entity.NetworkEntity;
 import com.matjazt.netmon2.service.LogDbWriterService;
+import com.matjazt.tools.SimpleTools;
 
 import java.time.LocalDateTime;
 
@@ -66,27 +67,27 @@ public class NetworkLogAppender extends AppenderBase<ILoggingEvent> {
             }
 
             // Extract entities from log arguments
-            NetworkEntity networkEntity = null;
-            DeviceEntity deviceEntity = null;
+            NetworkEntity network = null;
+            DeviceEntity device = null;
 
             Object[] args = event.getArgumentArray();
             if (args != null) {
                 for (Object arg : args) {
                     if (arg instanceof NetworkEntity) {
-                        networkEntity = (NetworkEntity) arg;
+                        network = (NetworkEntity) arg;
                     } else if (arg instanceof DeviceEntity) {
-                        deviceEntity = (DeviceEntity) arg;
+                        device = (DeviceEntity) arg;
                     }
                 }
             }
 
             // If we have a device but not a network, get network from device
-            if (networkEntity == null && deviceEntity != null) {
-                networkEntity = deviceEntity.getNetwork();
+            if (network == null && device != null) {
+                network = device.getNetwork();
             }
 
             // Require at least a NetworkEntity for database logging
-            if (networkEntity == null) {
+            if (network == null) {
                 return;
             }
 
@@ -96,10 +97,10 @@ public class NetworkLogAppender extends AppenderBase<ILoggingEvent> {
                             null,
                             LocalDateTime.now(),
                             event.getLevel().toInt(),
-                            event.getLoggerName(),
-                            truncateMessage(event.getFormattedMessage()),
-                            networkEntity,
-                            deviceEntity);
+                            SimpleTools.safeTruncate(event.getLoggerName(), 500),
+                            SimpleTools.safeTruncate(event.getFormattedMessage(), 5000),
+                            network,
+                            device);
 
             // Async write - never blocks
             logDbWriter.writeLogEntry(logEntry);
@@ -108,21 +109,5 @@ public class NetworkLogAppender extends AppenderBase<ILoggingEvent> {
             // Never throw - just log to Logback's internal status manager
             addWarn("Error processing log event: " + e.getMessage());
         }
-    }
-
-    /**
-     * Truncates message to fit database column length (500 chars).
-     *
-     * @param message the log message
-     * @return truncated message if needed
-     */
-    private String truncateMessage(String message) {
-        if (message == null) {
-            return "";
-        }
-        if (message.length() > 500) {
-            return message.substring(0, 497) + "...";
-        }
-        return message;
     }
 }

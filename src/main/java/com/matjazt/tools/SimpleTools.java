@@ -141,4 +141,21 @@ public class SimpleTools {
             return defaultValue;
         }
     }
+
+    /**
+     * Truncates message to fit database column length.
+     *
+     * @param txt the text to truncate
+     * @param maxLength the maximum length of the text
+     * @return truncated text if needed
+     */
+    public static String safeTruncate(String txt, int maxLength) {
+        if (txt == null) {
+            return "";
+        }
+        if (txt.length() > maxLength) {
+            return txt.substring(0, maxLength - 3) + "...";
+        }
+        return txt;
+    }
 }
