@@ -67,8 +67,8 @@ public class MqttService {
     private final NetworkRepository networkRepository;
     private final DeviceStatusHistoryRepository deviceStatusHistoryRepository;
     private final NetworkConfigurationService networkConfigurationService;
-
     private final AlerterService alerterService;
+    private final MacVendorLookupService macVendorLookupService;
 
     /**
      * Handles incoming MQTT messages containing device scan results.
@@ -222,6 +222,7 @@ public class MqttService {
                     device.setOnline(true); // currently online, obviously
                     device.setFirstSeen(messageTimestamp);
                     device.setLastSeen(messageTimestamp);
+                    device.setVendor(macVendorLookupService.lookupVendor(mac));
                     // persist the new device before using it in the alert
                     deviceRepository.save(device);
 
@@ -244,6 +245,9 @@ public class MqttService {
                     device.setOnline(true);
                     device.setLastSeen(messageTimestamp);
                     device.setIpAddress(ip);
+                    if (device.getVendor() == null) {
+                        device.setVendor(macVendorLookupService.lookupVendor(mac));
+                    }
 
                     // see if alert needs to be sent for unauthorized device
                     if (device.getDeviceOperationMode() == DeviceOperationMode.UNAUTHORIZED

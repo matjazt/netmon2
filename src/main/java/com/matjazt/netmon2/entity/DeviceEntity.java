@@ -1,5 +1,7 @@
 package com.matjazt.netmon2.entity;
 
+import com.matjazt.netmon2.service.MacVendorLookupService;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -117,6 +119,18 @@ public class DeviceEntity {
     }
 
     public String getBasicInfo() {
+        if (vendor != null
+                && !vendor.isBlank()
+                && !vendor.equalsIgnoreCase(MacVendorLookupService.UNKNOWN_VENDOR)) {
+            return getNameOrUnknown()
+                    + " (mac: "
+                    + macAddress
+                    + " ["
+                    + vendor
+                    + "], ip: "
+                    + ipAddress
+                    + ")";
+        }
         return getNameOrUnknown() + " (mac: " + macAddress + ", ip: " + ipAddress + ")";
     }
 

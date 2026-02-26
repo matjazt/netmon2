@@ -51,6 +51,7 @@ public class AlerterService {
     private final DeviceStatusHistoryRepository deviceStatusHistoryRepository;
     private final AlertRepository alertRepository;
     private final NetworkConfigurationService networkConfigurationService;
+    private final MacVendorLookupService macVendorLookupService;
 
     // private static final DateTimeFormatter TIME_FORMATTER =
     //        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -318,6 +319,9 @@ public class AlerterService {
 
         for (DeviceEntity device : deviceRepository.findByNetwork_Id(network.getId())) {
 
+            if (device.getVendor() == null) {
+                device.setVendor(macVendorLookupService.lookupVendor(device.getMacAddress()));
+            }
             if (device.getDeviceOperationMode() == DeviceOperationMode.UNAUTHORIZED) {
                 // the device is not allowed on the network
                 // alerts for such cases are sent when the device first appears, so here we can
