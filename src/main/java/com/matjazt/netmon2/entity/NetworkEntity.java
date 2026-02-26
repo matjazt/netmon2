@@ -72,4 +72,9 @@ public class NetworkEntity {
         this.firstSeen = LocalDateTime.now(ZoneOffset.UTC);
         this.lastSeen = LocalDateTime.now(ZoneOffset.UTC);
     }
+
+    @Override
+    public String toString() {
+        return name + " (id:" + id + ")";
+    }
 }

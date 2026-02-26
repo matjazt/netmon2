@@ -137,8 +137,10 @@ public class MqttService {
 
             if (messageTimestamp.isAfter(now.plusSeconds(networkConfig.getReportingInterval()))) {
                 logger.warn(
-                        "Message timestamp is too far in the future: {}, ignoring entire message",
-                        messageTimestamp);
+                        "Message timestamp is too far in the future: {}, ignoring entire message"
+                                + " for network {}",
+                        messageTimestamp,
+                        network);
                 return;
             }
 
@@ -155,9 +157,7 @@ public class MqttService {
             // avoid closing the alert too quickly if the network is flapping.
             if (network.getBackOnlineTime() == null) {
                 logger.info(
-                        "Network {} is back online, setting backOnlineTime to {}",
-                        network.getName(),
-                        now);
+                        "Network {} is back online, setting backOnlineTime to {}", network, now);
                 network.setBackOnlineTime(now);
             }
 
@@ -196,8 +196,8 @@ public class MqttService {
                 var mac = deviceStatus.getMac();
                 if (mac == null || mac.isBlank()) {
                     logger.warn(
-                            "Device with missing or empty MAC address reported on network: "
-                                    + network.getName());
+                            "Device with missing or empty MAC address reported on network {}",
+                            network);
                     continue; // skip devices with missing MAC
                 }
 
@@ -269,29 +269,24 @@ public class MqttService {
                     // if (lastOnlineStatus.isPresent()) {
                     if (wasOnline) {
                         // device was already online, no change, don't record
-                        logger.info(
-                                "Device is still online: "
-                                        + device.getBasicInfo()
-                                        + " on "
-                                        + network.getName());
+                        // NOTE: we don't want these logs in the database, so we use
+                        // toString() explicitly and this way prevent detection as a "network log".
+                        logger.debug(
+                                "Device {} is still online on network {}",
+                                device.toString(),
+                                network.toString());
 
                     } else {
                         // The device was offline, now online
                         shouldRecord = true;
                         if (device.getDeviceOperationMode() == DeviceOperationMode.UNAUTHORIZED) {
-                            logger.info(
-                                    "Device "
-                                            + device.getBasicInfo()
-                                            + " is not allowed on network "
-                                            + network.getName()
-                                            + " but is online!");
+                            logger.warn(
+                                    "Device {} is not allowed on network {} but is online!",
+                                    device,
+                                    network);
+
                         } else {
-                            logger.info(
-                                    String.format(
-                                            "Device came online: "
-                                                    + device.getBasicInfo()
-                                                    + " on "
-                                                    + network.getName()));
+                            logger.info("Device {} came online on network {}", device, network);
                         }
                     }
                 }
@@ -326,11 +321,7 @@ public class MqttService {
 
                 // if (lastOnlineStatus.isPresent()) {
                 // device went offline
-                logger.info(
-                        "Device went offline: "
-                                + knownDevice.getBasicInfo()
-                                + " on "
-                                + network.getName());
+                logger.info("Device {} went offline on network {}", knownDevice, network);
 
                 // Record offline status with last known IP
                 var offlineStatus =

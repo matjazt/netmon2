@@ -50,14 +50,23 @@ public class SpringContextHelper implements ApplicationContextAware {
     public static <T> T getBean(Class<T> beanClass) {
         try {
             if (context == null) {
-                logger.warn(
-                        "Attempted to get bean {} before Spring context initialization",
-                        beanClass.getSimpleName());
+                // this happens a LOT during application startup before Spring is ready
                 return null;
             }
-            return context.getBean(beanClass);
+            var bean = context.getBean(beanClass);
+            if (bean == null) {
+                logger.warn(
+                        "Spring context does not contain bean of type {} at this time",
+                        beanClass.getSimpleName());
+            } else {
+                logger.info(
+                        "Successfully retrieved bean {} from Spring context",
+                        beanClass.getSimpleName());
+            }
+            return bean;
         } catch (Exception e) {
-            logger.warn("Failed to retrieve bean {}: {}", beanClass.getSimpleName(), e.getMessage());
+            logger.warn(
+                    "Failed to retrieve bean {}: {}", beanClass.getSimpleName(), e.getMessage());
             return null;
         }
     }

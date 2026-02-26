@@ -38,48 +38,30 @@ import java.time.LocalDateTime;
  */
 public class NetworkLogAppender extends AppenderBase<ILoggingEvent> {
 
-    private LogDbWriterService logDbWriter;
+    private volatile LogDbWriterService logDbWriter;
+    private volatile boolean writerResolved = false;
 
-    /**
-     * Called by Logback when the appender is started.
-     *
-     * <p>Retrieves the Spring bean for async database writing. If unavailable, logs a warning but
-     * doesn't fail - the appender will just be a no-op.
-     */
-    @Override
-    public void start() {
-        try {
-            logDbWriter = SpringContextHelper.getBean(LogDbWriterService.class);
-            if (logDbWriter == null) {
-                addWarn("LogDbWriterService not available - database logging disabled");
-            } else {
-                addInfo("NetworkLogAppender initialized with database writer");
+    // Do NOT attempt to get Spring beans in start() - Spring is not ready yet
+
+    private LogDbWriterService getWriter() {
+        if (!writerResolved) {
+            synchronized (this) {
+                if (!writerResolved) {
+                    logDbWriter = SpringContextHelper.getBean(LogDbWriterService.class);
+                    if (logDbWriter != null) {
+                        writerResolved = true;
+                    }
+                }
             }
-        } catch (Exception e) {
-            addWarn("Failed to initialize NetworkLogAppender: " + e.getMessage());
         }
-        super.start();
+        return logDbWriter;
     }
 
-    /**
-     * Processes each log event.
-     *
-     * <p>Scans event arguments for NetworkEntity/DeviceEntity, builds a LogEntity, and
-     * asynchronously persists it. Returns immediately if:
-     *
-     * <ul>
-     *   <li>Database writer is unavailable
-     *   <li>No NetworkEntity found in arguments
-     *   <li>Any error occurs during processing
-     * </ul>
-     *
-     * @param event the logging event from Logback
-     */
     @Override
     protected void append(ILoggingEvent event) {
         try {
-            // Quick return if writer not available
-            if (logDbWriter == null) {
+            LogDbWriterService writer = getWriter();
+            if (writer == null) {
                 return;
             }
 

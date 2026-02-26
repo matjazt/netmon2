@@ -125,7 +125,7 @@ public class AlerterService {
         }
 
         var fullMessage = String.join(System.lineSeparator(), fullMessageEntries);
-        logger.warn("fullMessage:\n{}", fullMessage);
+        logger.warn("alert message for network {}:\n{}", network, fullMessage, device);
 
         // Send email if network has an email address configured
         var notificationEmailAddress = networkConfig.getNotificationEmailAddress();
@@ -133,10 +133,14 @@ public class AlerterService {
         if (notificationEmailAddress != null && !notificationEmailAddress.isEmpty()) {
             try {
                 sendEmail(notificationEmailAddress, subject, fullMessage);
-                logger.info("Alert email sent to: {}", notificationEmailAddress);
+                logger.info(
+                        "Alert email for network {} sent to {}",
+                        network,
+                        notificationEmailAddress,
+                        device);
                 alert.setLastNotificationTimestamp(now);
             } catch (Exception e) {
-                logger.error("Failed to send alert email", e);
+                logger.error("Failed to send alert email", network, device, e);
                 throw new RuntimeException(
                         "Failed to send alert email to " + notificationEmailAddress, e);
             }
@@ -147,11 +151,13 @@ public class AlerterService {
             AlertType alertType, NetworkEntity network, DeviceEntity device, String message) {
 
         logger.info(
-                "alertType={}, network={}, device={}, message={}",
+                "opening alert: alertType={}, network={}, device={}, message={}",
                 alertType,
                 network.getName(),
                 device != null ? device.getBasicInfo() : "N/A",
-                message);
+                message,
+                network,
+                device);
 
         // load latest alert for this network/device and check if it's closed
         var latestAlertOpt = alertRepository.findLatestAlert(network, device);
@@ -192,10 +198,12 @@ public class AlerterService {
     public AlertEntity closeAlert(NetworkEntity network, DeviceEntity device, String message) {
 
         logger.info(
-                "network={}, device={}, message={}",
+                "closing alert: network={}, device={}, message={}",
                 network.getName(),
                 device != null ? device.getBasicInfo() : "N/A",
-                message);
+                message,
+                network,
+                device);
 
         // load latest alert for this network/device and check if it's closed
         var latestAlertOpt = alertRepository.findLatestAlert(network, device);
@@ -274,10 +282,10 @@ public class AlerterService {
         if (network.getLastSeen().isBefore(onlineThreshold)) {
             // network failed to report regularly, so we should reset the backOnlineTime to reflect
             // that
-            logger.info(
+            logger.warn(
                     "Network {} failed to report regularly (lastSeen: {}, onlineThreshold: {},"
-                        + " backOnlineTime: {}), resetting backOnlineTime",
-                    network.getName(),
+                            + " backOnlineTime: {}), resetting backOnlineTime",
+                    network,
                     network.getLastSeen(),
                     onlineThreshold,
                     network.getBackOnlineTime());

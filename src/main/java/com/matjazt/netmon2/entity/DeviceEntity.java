@@ -123,4 +123,9 @@ public class DeviceEntity {
     public void updateLastSeen() {
         this.lastSeen = LocalDateTime.now(ZoneOffset.UTC);
     }
+
+    @Override
+    public String toString() {
+        return getBasicInfo();
+    }
 }
