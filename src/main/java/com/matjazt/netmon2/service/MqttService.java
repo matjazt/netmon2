@@ -5,6 +5,7 @@ import com.matjazt.netmon2.entity.AlertType;
 import com.matjazt.netmon2.entity.DeviceEntity;
 import com.matjazt.netmon2.entity.DeviceOperationMode;
 import com.matjazt.netmon2.entity.DeviceStatusHistoryEntity;
+import com.matjazt.netmon2.entity.NetworkConfiguration;
 import com.matjazt.netmon2.entity.NetworkEntity;
 import com.matjazt.netmon2.repository.DeviceRepository;
 import com.matjazt.netmon2.repository.DeviceStatusHistoryRepository;
@@ -65,6 +66,7 @@ public class MqttService {
     private final DeviceRepository deviceRepository;
     private final NetworkRepository networkRepository;
     private final DeviceStatusHistoryRepository deviceStatusHistoryRepository;
+    private final NetworkConfigurationService networkConfigurationService;
 
     private final AlerterService alerterService;
 
@@ -124,12 +126,41 @@ public class MqttService {
 
             // Parse JSON payload to Java object
             NetworkStatusMessageDto message = parseMessage(mqttMessage.getPayload());
+            var now = LocalDateTime.now(ZoneOffset.UTC);
+
+            // obtain network information
+            NetworkEntity network = getOrCreateNetwork(networkName);
+            NetworkConfiguration networkConfig =
+                    networkConfigurationService.getByNetworkId(network.getId());
 
             var messageTimestamp = LocalDateTime.ofInstant(message.getTimestamp(), ZoneOffset.UTC);
 
-            // Get or create network record
-            NetworkEntity network = getOrCreateNetwork(networkName);
+            if (messageTimestamp.isAfter(now.plusSeconds(networkConfig.getReportingInterval()))) {
+                logger.warn(
+                        "Message timestamp is too far in the future: {}, ignoring entire message",
+                        messageTimestamp);
+                return;
+            }
+
+            if (messageTimestamp.isAfter(now)) {
+                // adjust the timestamp silently, as this can happen if the device sending the
+                // message has a slightly incorrect clock.
+                messageTimestamp = now;
+            }
+
             network.setLastSeen(messageTimestamp);
+            // if the network was previously down (backOnlineTime is null) and now it's back up, set
+            // backOnlineTime to current time. This will be used to determine when to close the
+            // alert - we want to wait until the network has been back up for a certain threshold to
+            // avoid closing the alert too quickly if the network is flapping.
+            if (network.getBackOnlineTime() == null) {
+                logger.info(
+                        "Network {} is back online, setting backOnlineTime to {}",
+                        network.getName(),
+                        now);
+                network.setBackOnlineTime(now);
+            }
+
             // Hibernate will auto-UPDATE at commit: networkRepository.save(network);
 
             /*

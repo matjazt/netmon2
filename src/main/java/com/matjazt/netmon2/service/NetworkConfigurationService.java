@@ -11,6 +11,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import tools.jackson.databind.ObjectMapper;
+
 /**
  * Service for managing network configurations with caching.
  *
@@ -22,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class NetworkConfigurationService {
 
     private final NetworkRepository networkRepository;
-    private final NetworkConfigurationMapper mapper;
+    private final ObjectMapper objectMapper;
 
     /**
      * Get network configuration by network ID (cached).
@@ -34,7 +36,10 @@ public class NetworkConfigurationService {
      * @throws IllegalArgumentException if network not found
      */
     @Transactional(readOnly = true)
-    @Cacheable(cacheManager = "networkConfigurationCacheManager", cacheNames = "networkConfigById", key = "#networkId")
+    @Cacheable(
+            cacheManager = "networkConfigurationCacheManager",
+            cacheNames = "networkConfigById",
+            key = "#networkId")
     public NetworkConfiguration getByNetworkId(Long networkId) {
         NetworkEntity entity =
                 networkRepository
@@ -43,7 +48,24 @@ public class NetworkConfigurationService {
                                 () ->
                                         new IllegalArgumentException(
                                                 "Network not found: " + networkId));
-        return mapper.fromJson(entity.getConfiguration());
+
+        String json = entity.getConfiguration();
+        if (json == null || json.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Network configuration JSON cannot be null or blank");
+        }
+
+        try {
+            NetworkConfiguration cfg = objectMapper.readValue(json, NetworkConfiguration.class);
+            if (cfg.IsValid()) {
+                return cfg;
+            }
+        } catch (Exception ex) {
+            throw new IllegalArgumentException(
+                    "Unable to parse network configuration: " + json, ex);
+        }
+
+        throw new IllegalArgumentException("Invalid network configuration: " + json);
     }
 
     /**
@@ -54,7 +76,10 @@ public class NetworkConfigurationService {
      * @throws IllegalArgumentException if network not found
      */
     @Transactional
-    @CacheEvict(cacheManager = "networkConfigurationCacheManager", cacheNames = "networkConfigById", key = "#networkId")
+    @CacheEvict(
+            cacheManager = "networkConfigurationCacheManager",
+            cacheNames = "networkConfigById",
+            key = "#networkId")
     public void update(Long networkId, NetworkConfiguration config) {
         NetworkEntity entity =
                 networkRepository
@@ -63,7 +88,7 @@ public class NetworkConfigurationService {
                                 () ->
                                         new IllegalArgumentException(
                                                 "Network not found: " + networkId));
-        entity.setConfiguration(mapper.toJson(config));
+        entity.setConfiguration(objectMapper.writeValueAsString(config));
         // not needed due to the @Transactional annotation: networkRepository.save(entity);
     }
 }

@@ -63,10 +63,6 @@ public class NetworkEntity {
     @Column(name = "configuration", nullable = false)
     private String configuration = "{}";
 
-    /** Exponential moving average of reporting interval in seconds. */
-    @Column(name = "reporting_interval_ema", nullable = false)
-    private Integer reportingIntervalEma = 0;
-
     /** Timestamp when the network came back online after being down. */
     @Column(name = "back_online_time", nullable = true, columnDefinition = "TIMESTAMP")
     private LocalDateTime backOnlineTime;

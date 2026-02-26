@@ -249,10 +249,8 @@ public class AlerterService {
                                                 "Network with ID " + networkId + " not found"));
 
         var now = LocalDateTime.now(ZoneOffset.UTC);
-        var alertingDelay =
-                networkConfigurationService.getByNetworkId(networkId).getAlertingDelay();
-        var alertingThreshold = now.minusSeconds(alertingDelay);
-        var closureThreshold = alertingThreshold.plusSeconds(Math.min(30, alertingDelay / 10));
+        var networkConfig = networkConfigurationService.getByNetworkId(networkId);
+        var alertingThreshold = now.minusSeconds(networkConfig.getAlertingDelay());
 
         if (network.getLastSeen().isBefore(alertingThreshold)) {
             // network is down
@@ -264,13 +262,52 @@ public class AlerterService {
             return;
         }
 
-        // network is up
+        if (network.getBackOnlineTime() == null) {
+            // network has been already detected as failed to report regularly
+            // there's nothing more we should do here, because if the network didn't report lately,
+            // we shouldn't check the devices
+            return;
+        }
+        // let's use a threshold of 1.5 times the reporting interval to determine if the network
+        // reported regularly
+        var onlineThreshold = now.minusSeconds(networkConfig.getReportingInterval() * 3 / 2);
+        if (network.getLastSeen().isBefore(onlineThreshold)) {
+            // network failed to report regularly, so we should reset the backOnlineTime to reflect
+            // that
+            logger.info(
+                    "Network {} failed to report regularly (lastSeen: {}, onlineThreshold: {},"
+                        + " backOnlineTime: {}), resetting backOnlineTime",
+                    network.getName(),
+                    network.getLastSeen(),
+                    onlineThreshold,
+                    network.getBackOnlineTime());
+            network.setBackOnlineTime(null);
+            // again, there is nothing more we should do here, because if the network didn't report
+            // regularly, we shouldn't check the devices
+            return;
+        }
+
+        // network is up, but it might have been down recently, so we should check if we need to
+        // close the alert
         if (network.getActiveAlertId() != null) {
-            // network was down, now it's back up - send recovery alert
-            closeAlert(network, null, null);
+            if (network.getBackOnlineTime().isBefore(alertingThreshold)) {
+                // network was down, now it's back up and has been up for long enough, so we can
+                // close
+                // the alert
+                closeAlert(network, null, null);
+            } else {
+                // network does seem to be online, but the alert is still open and the network
+                // hasn't been back online for long enough, so we won't check the devices yet,
+                // because the results might be inaccurate while the network is still stabilizing
+                // after coming back online
+                return;
+            }
         }
 
         // now check individual devices
+        var closureThreshold =
+                alertingThreshold.plusSeconds(Math.min(30, networkConfig.getAlertingDelay() / 10));
+
         for (DeviceEntity device : deviceRepository.findByNetwork_Id(network.getId())) {
 
             if (device.getDeviceOperationMode() == DeviceOperationMode.UNAUTHORIZED) {
@@ -311,7 +348,6 @@ public class AlerterService {
             }
         }
 
-        var networkConfig = networkConfigurationService.getByNetworkId(networkId);
         var reminderTimeOfDay = networkConfig.getReminderTimeOfDay();
         var reminderIntervalDays = networkConfig.getReminderIntervalDays();
 

@@ -12,7 +12,8 @@ import java.time.ZoneId;
 @Setter
 public class NetworkConfiguration {
 
-    Integer alertingDelay = 300; // in seconds, default 5 minutes
+    Integer reportingInterval;
+    Integer alertingDelay;
 
     String notificationEmailAddress;
 
@@ -20,4 +21,11 @@ public class NetworkConfiguration {
     Integer reminderIntervalDays;
 
     ZoneId timezone = ZoneId.of("UTC");
+
+    public boolean IsValid() {
+        return reportingInterval != null
+                && reportingInterval > 0
+                && alertingDelay != null
+                && alertingDelay > 0;
+    }
 }
