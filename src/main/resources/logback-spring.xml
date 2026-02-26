@@ -24,8 +24,26 @@
         </encoder>
     </appender>
 
+    <!-- Custom appender for database logging of network/device events -->
+    <appender name="NETWORK_DB" class="com.matjazt.netmon2.config.NetworkLogAppender">
+        <!-- No configuration needed - uses Spring beans -->
+    </appender>
+
+    <!-- Async wrapper to prevent database logging from blocking log threads -->
+    <appender name="ASYNC_NETWORK_DB" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="NETWORK_DB" />
+        <!-- Queue size for async processing -->
+        <queueSize>512</queueSize>
+        <!-- Disable level-based early discarding (messages are dropped only when the queue is
+        completely full, see neverBlock) -->
+        <discardingThreshold>0</discardingThreshold>
+        <!-- Don't block caller if queue is full - drop messages instead -->
+        <neverBlock>true</neverBlock>
+    </appender>
+
     <root level="INFO">
         <appender-ref ref="ROLLING" />
+        <appender-ref ref="ASYNC_NETWORK_DB" />
     </root>
 
 </configuration>
