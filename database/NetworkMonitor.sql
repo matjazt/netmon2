@@ -252,3 +252,21 @@ ALTER TABLE network ADD COLUMN back_online_time  timestamp;
 ALTER TABLE alert ALTER COLUMN alert_type_id SET NOT NULL;
 
 ------------------------------------------------------------------------
+
+-- changes 2026-02-26
+
+CREATE TABLE log (
+	id bigserial NOT NULL,
+    "timestamp" timestamp NOT NULL,
+    level int2 NOT NULL,
+    origin varchar(500) NOT NULL,
+    message varchar(500) NOT NULL,
+	device_id int8 NULL,
+	network_id int8 NOT NULL,
+	CONSTRAINT pk_log PRIMARY KEY (id),
+	CONSTRAINT fk_log_device FOREIGN KEY (device_id) REFERENCES device(id),
+	CONSTRAINT fk_log_network FOREIGN KEY (network_id) REFERENCES network(id)
+);
+CREATE INDEX idx_log_device ON log USING btree (device_id);
+CREATE INDEX idx_log_network ON log USING btree (network_id);
+CREATE INDEX idx_log_timestamp ON log USING btree ("timestamp");

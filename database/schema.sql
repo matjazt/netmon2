@@ -188,6 +188,23 @@ CREATE INDEX idx_alert_network ON alert USING btree (network_id);
 CREATE INDEX idx_alert_timestamp ON alert USING btree ("timestamp");
 
 
+CREATE TABLE log (
+	id bigserial NOT NULL,
+    "timestamp" timestamp NOT NULL,
+    level int2 NOT NULL,
+    origin varchar(500) NOT NULL,
+    message varchar(500) NOT NULL,
+	device_id int8 NULL,
+	network_id int8 NOT NULL,
+	CONSTRAINT pk_log PRIMARY KEY (id),
+	CONSTRAINT fk_log_device FOREIGN KEY (device_id) REFERENCES device(id),
+	CONSTRAINT fk_log_network FOREIGN KEY (network_id) REFERENCES network(id)
+);
+CREATE INDEX idx_log_device ON log USING btree (device_id);
+CREATE INDEX idx_log_network ON log USING btree (network_id);
+CREATE INDEX idx_log_timestamp ON log USING btree ("timestamp");
+
+
 INSERT INTO alert_type (id, name, description) VALUES
     (0, 'NETWORK_DOWN', 'Network connectivity lost or network went offline'),
     (1, 'DEVICE_DOWN', 'Device that should always be online is not responding'),
