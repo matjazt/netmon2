@@ -46,6 +46,7 @@ public class SvcWatchDogClient implements Closeable {
     private Thread backgroundThread;
     private final Object trigger = new Object();
     private final AtomicLong nextCheck = new AtomicLong(Long.MAX_VALUE);
+    private final AtomicBoolean started = new AtomicBoolean(false);
     private final AtomicBoolean stopped = new AtomicBoolean(false);
     private final String udpPingTaskName = "_udpPing." + System.currentTimeMillis();
     private final Map<String, Long> tasks = new ConcurrentHashMap<>();
@@ -61,7 +62,7 @@ public class SvcWatchDogClient implements Closeable {
     private long timeSkewRecoveryInterval = 60; // seconds
 
     // Win32 event handle (only on Windows)
-    private WinNT.HANDLE shutdownEventHandle;
+    private volatile WinNT.HANDLE shutdownEventHandle;
 
     public static SvcWatchDogClient getInstance() {
         return SingletonHolder.INSTANCE;
@@ -84,6 +85,9 @@ public class SvcWatchDogClient implements Closeable {
      * beginning thread monitoring.
      */
     public void start() {
+        if (!started.compareAndSet(false, true)) {
+            throw new IllegalStateException("SvcWatchDogClient is already started.");
+        }
         if (stopped.get()) {
             throw new IllegalStateException(
                     "SvcWatchDogClient is already stopped, not allowed to start it again.");
@@ -193,19 +197,20 @@ public class SvcWatchDogClient implements Closeable {
 
         try {
             // Create or open a global event
-            if (shutdownEventHandle == null) {
-                shutdownEventHandle =
-                        Kernel32.INSTANCE.CreateEvent(
-                                null,
-                                true, // Manual reset
-                                false, // Initial state (not signaled)
-                                shutdownEvent);
-
+            synchronized (this) {
                 if (shutdownEventHandle == null) {
-                    logger.warning("Failed to create/open shutdown event: " + shutdownEvent);
-                    Thread.sleep(millisecondsTimeout);
-                    return false;
+                    shutdownEventHandle =
+                            Kernel32.INSTANCE.CreateEvent(
+                                    null,
+                                    true, // Manual reset
+                                    false, // Initial state (not signaled)
+                                    shutdownEvent);
                 }
+            }
+            if (shutdownEventHandle == null) {
+                logger.warning("Failed to create/open shutdown event: " + shutdownEvent);
+                Thread.sleep(millisecondsTimeout);
+                return false;
             }
 
             int result =

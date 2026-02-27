@@ -229,6 +229,7 @@ delete from alert where device_id in (82,84,77, 78, 81);
 delete from device_status_history where device_id in (82,84,77, 78, 81);
 delete from device where id in (82,84,77, 78, 81);
 
+update device set vendor = null
 
 -- changes 2026-01-28
 ------------------------------------------------------------------------
