@@ -1,9 +1,0 @@
-{
-    "properties": [
-        {
-            "name": "greeting.template",
-            "type": "java.lang.String",
-            "description": "greeting template; it can contain a %s placeholder for the name"
-        }
-    ]
-}

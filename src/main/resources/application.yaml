@@ -63,9 +63,6 @@ management:
     health:
       show-details: always
 
-greeting:
-  template: "Zdravo, %s!"
-
 mqtt:
   url: changeit
   client-id: netmon2
