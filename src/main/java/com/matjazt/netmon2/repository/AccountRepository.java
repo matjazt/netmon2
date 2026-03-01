@@ -2,6 +2,7 @@ package com.matjazt.netmon2.repository;
 
 import com.matjazt.netmon2.entity.AccountEntity;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -37,6 +38,10 @@ public interface AccountRepository extends JpaRepository<AccountEntity, Long> {
      * <p>This generates: SELECT * FROM account WHERE username = ?
      */
     Optional<AccountEntity> findByUsername(String username);
+
+    @Cacheable(cacheNames = "userDetailsCache", key = "#username", sync = true)
+    @Query("SELECT a FROM AccountEntity a WHERE a.username = :username")
+    Optional<AccountEntity> cachedFindByUsername(@Param("username") String username);
 
     /**
      * DERIVED QUERY with multiple conditions using AND

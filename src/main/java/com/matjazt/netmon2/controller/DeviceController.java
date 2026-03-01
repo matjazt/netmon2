@@ -82,6 +82,7 @@ public class DeviceController {
      * <p>Get all devices (careful with large datasets!) Returns 200 OK with JSON array of devices
      */
     @GetMapping
+    @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<DeviceResponseDto> getAllDevices() {
         List<DeviceDto> dtos = deviceService.findAllDeviceSummaries();
         return deviceApiMapper.toResponses(dtos);
@@ -97,6 +98,7 @@ public class DeviceController {
      * <p>defaultValue provides fallback if parameter is missing
      */
     @GetMapping("/paginated")
+    @PreAuthorize("hasAnyRole('admin', 'system')")
     public Page<DeviceResponseDto> getDevicesPaginated(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
@@ -119,6 +121,7 @@ public class DeviceController {
      * </ul>
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
     public ResponseEntity<DeviceEntity> getDeviceById(@PathVariable Long id) {
         return deviceService
                 .findDeviceById(id)
@@ -134,6 +137,7 @@ public class DeviceController {
      * <p>MAC address is part of the URL path
      */
     @GetMapping("/mac/{macAddress}")
+    @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
     public ResponseEntity<DeviceEntity> getDeviceByMac(@PathVariable String macAddress) {
         return deviceService
                 .findDeviceByMac(macAddress)
@@ -147,6 +151,9 @@ public class DeviceController {
      * <p>Get all devices on a specific network
      */
     @GetMapping("/network/{networkId}")
+    @PreAuthorize(
+            "hasAnyRole('admin', 'system') or"
+                + " @networkAuthorizationService.canAccess(authentication, #networkId)")
     public List<DeviceResponseDto> getDevicesByNetwork(@PathVariable Long networkId) {
         List<DeviceDto> dtos = deviceService.findDeviceSummariesByNetwork(networkId);
         return deviceApiMapper.toResponses(dtos);
@@ -158,6 +165,9 @@ public class DeviceController {
      * <p>Get only online devices on a network
      */
     @GetMapping("/network/{networkId}/online")
+    @PreAuthorize(
+            "hasAnyRole('admin', 'system') or"
+                + " @networkAuthorizationService.canAccess(authentication, #networkId)")
     public List<DeviceResponseDto> getOnlineDevices(@PathVariable Long networkId) {
         List<DeviceDto> dtos = deviceService.findOnlineDeviceSummaries(networkId);
         return deviceApiMapper.toResponses(dtos);

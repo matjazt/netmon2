@@ -7,11 +7,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.cache.caffeine.CaffeineCache;
+import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 /**
  * Spring Cache configuration using Caffeine as the cache provider.
@@ -24,31 +26,38 @@ import java.time.Duration;
 @Slf4j
 public class CacheConfig {
 
-    /**
-     * Configure cache manager with Caffeine.
-     *
-     * <p>Cache policies:
-     *
-     * <ul>
-     *   <li>Maximum size: 10,000 entries per cache
-     *   <li>Expiration: 10 minutes after write
-     * </ul>
-     *
-     * @return configured CacheManager
-     */
+    @Value("${netmon.cache.network-config.maximum-size:100}")
+    private long networkMaxSize;
+
+    @Value("${netmon.cache.network-config.expire-after-write:30s}")
+    private Duration networkExpireAfterWrite;
+
+    @Value("${netmon.cache.security.maximum-size:100}")
+    private long securityMaxSize;
+
+    @Value("${netmon.cache.security.expire-after-write:30s}")
+    private Duration securityExpireAfterWrite;
+
     @Bean
-    public CacheManager networkConfigurationCacheManager(
-            @Value("${netmon.cache.network-config.maximum-size:10000}") long maximumSize,
-            @Value("${netmon.cache.network-config.expire-after-write:10m}")
-                    Duration expireAfterWrite) {
-        logger.debug(
-                "Configuring networkConfigurationCacheManager with maxSize={} and"
-                        + " expireAfterWrite={}",
-                maximumSize,
-                expireAfterWrite);
-        CaffeineCacheManager manager = new CaffeineCacheManager("networkConfigById");
-        manager.setCaffeine(
-                Caffeine.newBuilder().maximumSize(maximumSize).expireAfterWrite(expireAfterWrite));
+    public CacheManager cacheManager() {
+        SimpleCacheManager manager = new SimpleCacheManager();
+        manager.setCaches(
+                Arrays.asList(
+                        buildCache("networkConfigCache", networkMaxSize, networkExpireAfterWrite),
+                        buildCache("userDetailsCache", securityMaxSize, securityExpireAfterWrite),
+                        buildCache(
+                                "networkAccessCache", securityMaxSize, securityExpireAfterWrite)));
         return manager;
+    }
+
+    private CaffeineCache buildCache(String name, long maxSize, Duration ttl) {
+        logger.debug("Creating cache '{}' with maxSize={} and TTL={}", name, maxSize, ttl);
+        return new CaffeineCache(
+                name,
+                Caffeine.newBuilder()
+                        .maximumSize(maxSize)
+                        .expireAfterWrite(ttl)
+                        .recordStats()
+                        .build());
     }
 }

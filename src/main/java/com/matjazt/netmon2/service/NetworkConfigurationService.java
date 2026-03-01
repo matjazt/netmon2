@@ -37,9 +37,9 @@ public class NetworkConfigurationService {
      */
     @Transactional(readOnly = true)
     @Cacheable(
-            cacheManager = "networkConfigurationCacheManager",
-            cacheNames = "networkConfigById",
-            key = "#networkId")
+            cacheNames = "networkConfigCache",
+            key = "#networkId",
+            sync = true)
     public NetworkConfiguration getByNetworkId(Long networkId) {
         NetworkEntity entity =
                 networkRepository
@@ -77,8 +77,7 @@ public class NetworkConfigurationService {
      */
     @Transactional
     @CacheEvict(
-            cacheManager = "networkConfigurationCacheManager",
-            cacheNames = "networkConfigById",
+            cacheNames = "networkConfigCache",
             key = "#networkId")
     public void update(Long networkId, NetworkConfiguration config) {
         NetworkEntity entity =
