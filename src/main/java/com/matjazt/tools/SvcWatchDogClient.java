@@ -5,6 +5,8 @@ import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinBase;
 import com.sun.jna.platform.win32.WinNT;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.Closeable;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -20,8 +22,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Provides a watchdog client for monitoring and managing timeouts of registered tasks. The {@code
@@ -37,9 +37,8 @@ import java.util.logging.Logger;
  * <p>It is therefore extremely important to set rather large timeout values, since you probably
  * don't want to restart the service for each minor performance hiccup.
  */
+@Slf4j
 public class SvcWatchDogClient implements Closeable {
-
-    private static final Logger logger = Logger.getLogger(SvcWatchDogClient.class.getName());
 
     // Runtime fields
     private final Object lock = new Object();
@@ -123,10 +122,10 @@ public class SvcWatchDogClient implements Closeable {
                     udpAddress = InetAddress.getByName("127.0.0.1");
                     // Schedule the first immediate ping
                     tasks.put(udpPingTaskName, 1L);
-                    logger.fine("UDP pinging configured");
+                    logger.debug("UDP pinging configured");
                 }
             } catch (Exception e) {
-                logger.log(Level.WARNING, "Failed to configure UDP pinging", e);
+                logger.warn("Failed to configure UDP pinging", e);
             }
         }
 
@@ -208,7 +207,7 @@ public class SvcWatchDogClient implements Closeable {
                 }
             }
             if (shutdownEventHandle == null) {
-                logger.warning("Failed to create/open shutdown event: " + shutdownEvent);
+                logger.warn("Failed to create/open shutdown event: " + shutdownEvent);
                 Thread.sleep(millisecondsTimeout);
                 return false;
             }
@@ -223,7 +222,7 @@ public class SvcWatchDogClient implements Closeable {
 
             return shutdownRequested;
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Error waiting for shutdown event", e);
+            logger.warn("Error waiting for shutdown event", e);
             try {
                 Thread.sleep(millisecondsTimeout);
             } catch (InterruptedException ie) {
@@ -278,7 +277,7 @@ public class SvcWatchDogClient implements Closeable {
      * @param timeoutSeconds The timeout duration in seconds
      */
     public void ping(String taskName, int timeoutSeconds) {
-        logger.finest("ping: taskName=" + taskName + ", timeoutSeconds=" + timeoutSeconds);
+        logger.trace("ping: taskName=" + taskName + ", timeoutSeconds=" + timeoutSeconds);
 
         if (!enabled) {
             return;
@@ -307,7 +306,7 @@ public class SvcWatchDogClient implements Closeable {
      * @param taskName The name of the task to remove
      */
     public void closeTimeout(String taskName) {
-        logger.finest("closeTimeout: taskName=" + taskName);
+        logger.trace("closeTimeout: taskName=" + taskName);
         tasks.remove(taskName);
     }
 
@@ -316,7 +315,7 @@ public class SvcWatchDogClient implements Closeable {
      * intervals.
      */
     private void backgroundLoop() {
-        logger.fine("Background loop starting");
+        logger.debug("Background loop starting");
 
         try {
             // Ignore timeouts for the initial half second
@@ -392,7 +391,7 @@ public class SvcWatchDogClient implements Closeable {
 
                 // Perform logging and UDP ping outside the critical section
                 if (timeoutDetected) {
-                    logger.severe("Timed out tasks: " + String.join(", ", timedOutTasks));
+                    logger.error("Timed out tasks: " + String.join(", ", timedOutTasks));
                 } else if (udpPingNeeded) {
                     sendUdpPing();
                 }
@@ -413,10 +412,10 @@ public class SvcWatchDogClient implements Closeable {
             }
         } catch (Exception ex) {
             // This should never happen, but if it does, we need to know about it
-            logger.log(Level.SEVERE, "Exception/bug in background loop, PLEASE CHECK AND FIX", ex);
+            logger.error("Exception/bug in background loop, PLEASE CHECK AND FIX", ex);
         }
 
-        logger.fine("Background loop done");
+        logger.debug("Background loop done");
     }
 
     /** Sends a UDP ping to the watchdog. */
@@ -429,9 +428,9 @@ public class SvcWatchDogClient implements Closeable {
             DatagramPacket packet =
                     new DatagramPacket(watchdogSecret, watchdogSecret.length, udpAddress, udpPort);
             socket.send(packet);
-            logger.finest("UDP ping sent");
+            logger.trace("UDP ping sent");
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Failed to send UDP ping", e);
+            logger.warn("Failed to send UDP ping", e);
         }
     }
 

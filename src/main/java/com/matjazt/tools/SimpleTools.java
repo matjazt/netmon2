@@ -142,6 +142,40 @@ public class SimpleTools {
         }
     }
 
+    /** Returns a trimmed string, or {@code null} if input is {@code null}. */
+    public static String trimSafely(String value) {
+        return value != null ? value.trim() : null;
+    }
+
+    /** Returns a trimmed string, or {@code defaultValue} if input is {@code null}. */
+    public static String trimOrDefault(String value, String defaultValue) {
+        return value == null ? defaultValue : value.trim();
+    }
+
+    /** Returns {@code true} if string is {@code null} or empty. */
+    public static boolean isEmpty(String string) {
+        return string == null || string.isEmpty();
+    }
+
+    /** Returns {@code true} if string is {@code null}, empty, or only whitespace. */
+    public static boolean isBlank(String string) {
+        if (isEmpty(string)) {
+            return true;
+        } else {
+            for (int i = 0; i < string.length(); ++i) {
+                if (!Character.isWhitespace(string.charAt(i))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    /** Returns {@code defaultValue} when input is {@code null}, otherwise input value. */
+    public static String defaultIfNull(String value, String defaultValue) {
+        return value == null ? defaultValue : value;
+    }
+
     /**
      * Truncates message to fit database column length.
      *

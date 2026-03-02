@@ -17,6 +17,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -121,9 +123,18 @@ public class DeviceService {
     }
 
     /** Get devices by network as DTOs */
-    public List<DeviceDto> findDeviceSummariesByNetwork(Long networkId) {
-        List<DeviceEntity> entities = deviceRepository.findByNetwork_Id(networkId);
-        return deviceMapper.toDtos(entities);
+    @PreAuthorize(
+            "hasAnyRole('admin', 'system') or"
+                    + " @networkAuthorizationService.canAccess(authentication, #networkId)")
+    public List<DeviceDto> getDevicesByNetwork(Long networkId) {
+        logger.trace(
+                "getDevicesByNetwork: user={}, networkId={}",
+                SecurityContextHolder.getContext().getAuthentication().getName(),
+                networkId);
+        var entities = deviceRepository.findByNetwork_Id(networkId);
+        var dtos = deviceMapper.toDtos(entities);
+        logger.trace("getDevicesByNetwork: returning {} devices", dtos.size());
+        return dtos;
     }
 
     /** Get online devices by network as DTOs */
