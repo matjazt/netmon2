@@ -46,11 +46,26 @@ public interface DeviceStatusHistoryRepository
     List<DeviceStatusHistoryEntity> findByNetwork_IdOrderByTimestampDesc(Long networkId);
 
     /**
+     * Find status history for a network with pagination
+     *
+     * <p>Paginated version for networks with lots of history.
+     */
+    Page<DeviceStatusHistoryEntity> findByNetwork_Id(Long networkId, Pageable pageable);
+
+    /**
      * Find status history within a date range
      *
      * <p>Useful for generating reports: "Show me all status changes last week"
      */
     List<DeviceStatusHistoryEntity> findByTimestampBetween(LocalDateTime start, LocalDateTime end);
+
+    /**
+     * Find status history within a date range with pagination
+     *
+     * <p>Paginated version for large time ranges.
+     */
+    Page<DeviceStatusHistoryEntity> findByTimestampBetween(
+            LocalDateTime start, LocalDateTime end, Pageable pageable);
 
     /**
      * Find status history for a device within date range
@@ -59,6 +74,22 @@ public interface DeviceStatusHistoryRepository
      */
     List<DeviceStatusHistoryEntity> findByDevice_IdAndTimestampBetween(
             Long deviceId, LocalDateTime start, LocalDateTime end);
+
+    /**
+     * Find status history for a device within date range with pagination
+     *
+     * <p>Paginated version for devices with lots of history.
+     */
+    Page<DeviceStatusHistoryEntity> findByDevice_IdAndTimestampBetween(
+            Long deviceId, LocalDateTime start, LocalDateTime end, Pageable pageable);
+
+    /**
+     * Find status history for a network within date range with pagination
+     *
+     * <p>Combining network filter with date range.
+     */
+    Page<DeviceStatusHistoryEntity> findByNetwork_IdAndTimestampBetween(
+            Long networkId, LocalDateTime start, LocalDateTime end, Pageable pageable);
 
     /**
      * Find only "went online" events
