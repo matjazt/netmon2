@@ -18,9 +18,15 @@ bin/
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
-.idea
-*.iws
+.idea/
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+!.idea/misc.xml
+!.idea/compiler.xml
+!.idea/vcs.xml
+!.idea/runConfigurations/
 *.iml
+*.iws
 *.ipr
 out/
 !**/src/main/**/out/
