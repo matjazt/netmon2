@@ -156,10 +156,10 @@ public class DeviceController {
             "hasAnyRole('admin', 'system') or"
                     + " @networkAuthorizationService.canAccess(authentication, #networkId)")
     public List<DeviceResponseDto> getDevicesByNetwork(@PathVariable Long networkId) {
-        logger.trace(
-                "getDevicesByNetwork: user={}, networkId={}",
-                SecurityContextHolder.getContext().getAuthentication().getName(),
-                networkId);
+        // TODO: fix null warning logger.trace(
+        // "getDevicesByNetwork: user={}, networkId={}",
+        //        SecurityContextHolder.getContext().getAuthentication().getName(),
+        //        networkId);
         List<DeviceDto> dtos = deviceService.getDevicesByNetwork(networkId);
         var resp = deviceApiMapper.toResponses(dtos);
         logger.trace("getDevicesByNetwork: returning {} devices", resp.size());
