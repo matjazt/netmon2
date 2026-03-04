@@ -15,7 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-//import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -156,10 +156,10 @@ public class DeviceController {
             "hasAnyRole('admin', 'system') or"
                     + " @networkAuthorizationService.canAccess(authentication, #networkId)")
     public List<DeviceResponseDto> getDevicesByNetwork(@PathVariable Long networkId) {
-        // TODO: fix null warning logger.trace(
-        // "getDevicesByNetwork: user={}, networkId={}",
-        //        SecurityContextHolder.getContext().getAuthentication().getName(),
-        //        networkId);
+        logger.trace(
+                "getDevicesByNetwork: user={}, networkId={}",
+                SecurityContextHolder.getContext().getAuthentication().getName(),
+                networkId);
         List<DeviceDto> dtos = deviceService.getDevicesByNetwork(networkId);
         var resp = deviceApiMapper.toResponses(dtos);
         logger.trace("getDevicesByNetwork: returning {} devices", resp.size());
