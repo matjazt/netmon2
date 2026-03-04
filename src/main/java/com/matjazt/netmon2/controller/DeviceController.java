@@ -291,7 +291,7 @@ public class DeviceController {
             @PathVariable Long id, @RequestBody DeviceEntity device) {
 
         // Verify device exists
-        if (!deviceService.findDeviceById(id).isPresent()) {
+        if (deviceService.findDeviceById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
@@ -330,7 +330,7 @@ public class DeviceController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDevice(@PathVariable Long id) {
-        if (!deviceService.findDeviceById(id).isPresent()) {
+        if (deviceService.findDeviceById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
