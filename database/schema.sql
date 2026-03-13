@@ -185,6 +185,22 @@ CREATE INDEX idx_alert_network ON alert USING btree (network_id);
 CREATE INDEX idx_alert_timestamp ON alert USING btree ("timestamp");
 
 
+
+CREATE TABLE log_level (
+    level int4 NOT NULL,
+    name varchar(32) NOT NULL,
+    CONSTRAINT pk_log_level PRIMARY KEY (level),
+);
+
+INSERT INTO log_level (level, name) VALUES
+    (5000, 'TRACE'),
+    (10000, 'DEBUG'),
+    (20000, 'INFO'),
+    (30000, 'WARN'),
+    (40000, 'ERROR');
+
+
+
 CREATE TABLE log (
 	id bigserial NOT NULL,
     "timestamp" timestamp NOT NULL,

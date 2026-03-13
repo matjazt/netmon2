@@ -1,5 +1,6 @@
-DO NOT RUN THIS FILE DIRECTLY!!!!
-DO NOT COMMENT THE LINE ABOVE!!!!
+-- DO NOT RUN THIS FILE DIRECTLY!!!!
+select 1/0;
+-- DO NOT COMMENT THE LINE ABOVE!!!!
 
 drop table device_status_history ;
 drop table device ;
@@ -275,4 +276,3 @@ CREATE INDEX idx_log_timestamp ON log USING btree ("timestamp");
 ALTER TABLE network DROP COLUMN reporting_interval_ema;
 ALTER TABLE network DROP COLUMN alerting_delay;
 ALTER TABLE network DROP COLUMN email_address;
-
