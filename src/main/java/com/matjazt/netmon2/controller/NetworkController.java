@@ -97,13 +97,13 @@ public class NetworkController {
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
                     + " @networkAuthorizationService.canAccess(authentication, #id)")
-    public ResponseEntity<NetworkEntity> getNetworkById(@PathVariable Long id) {
+    public ResponseEntity<NetworkDto> getNetworkById(@PathVariable Long id) {
         logger.trace(
                 "getNetworkById: user={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
         return networkService
-                .findNetworkById(id)
+                .findNetworkDtoById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -117,13 +117,13 @@ public class NetworkController {
      */
     @GetMapping("/name/{name}")
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public ResponseEntity<NetworkEntity> getNetworkByName(@PathVariable String name) {
+    public ResponseEntity<NetworkDto> getNetworkByName(@PathVariable String name) {
         logger.trace(
                 "getNetworkByName: user={}, name={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 name);
         return networkService
-                .findNetworkByName(name)
+                .findNetworkDtoByName(name)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -150,11 +150,11 @@ public class NetworkController {
      */
     @GetMapping("/with-active-alerts")
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public List<NetworkEntity> getNetworksWithActiveAlerts() {
+    public List<NetworkDto> getNetworksWithActiveAlerts() {
         logger.trace(
                 "getNetworksWithActiveAlerts: user={}",
                 SecurityContextHolder.getContext().getAuthentication().getName());
-        var networks = networkService.findNetworksWithActiveAlerts();
+        var networks = networkService.findNetworkDtosWithActiveAlerts();
         logger.trace("getNetworksWithActiveAlerts: returning {} networks", networks.size());
         return networks;
     }
@@ -166,11 +166,11 @@ public class NetworkController {
      */
     @GetMapping("/without-active-alerts")
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public List<NetworkEntity> getNetworksWithoutActiveAlerts() {
+    public List<NetworkDto> getNetworksWithoutActiveAlerts() {
         logger.trace(
                 "getNetworksWithoutActiveAlerts: user={}",
                 SecurityContextHolder.getContext().getAuthentication().getName());
-        var networks = networkService.findNetworksWithoutActiveAlerts();
+        var networks = networkService.findNetworkDtosWithoutActiveAlerts();
         logger.trace("getNetworksWithoutActiveAlerts: returning {} networks", networks.size());
         return networks;
     }
@@ -182,12 +182,12 @@ public class NetworkController {
      */
     @GetMapping("/search")
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public List<NetworkEntity> searchNetworksByName(@RequestParam String name) {
+    public List<NetworkDto> searchNetworksByName(@RequestParam String name) {
         logger.trace(
                 "searchNetworksByName: user={}, name={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 name);
-        var networks = networkService.findNetworksByNameContaining(name);
+        var networks = networkService.findNetworkDtosByNameContaining(name);
         logger.trace("searchNetworksByName: returning {} networks", networks.size());
         return networks;
     }
@@ -205,13 +205,13 @@ public class NetworkController {
      */
     @PostMapping
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public ResponseEntity<NetworkEntity> createNetwork(@RequestBody SaveNetworkRequest request) {
+    public ResponseEntity<NetworkDto> createNetwork(@RequestBody SaveNetworkRequest request) {
         logger.trace(
                 "createNetwork: user={}, name={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 request.name());
-        NetworkEntity saved = networkService.saveNetwork(toEntity(request));
-        logger.trace("createNetwork: created network with id={}", saved.getId());
+        NetworkDto saved = networkService.saveNetworkAndReturnDto(toEntity(request));
+        logger.trace("createNetwork: created network with id={}", saved.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
@@ -226,7 +226,7 @@ public class NetworkController {
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public ResponseEntity<NetworkEntity> updateNetwork(
+    public ResponseEntity<NetworkDto> updateNetwork(
             @PathVariable Long id, @RequestBody SaveNetworkRequest request) {
         logger.trace(
                 "updateNetwork: user={}, networkId={}",
@@ -234,15 +234,15 @@ public class NetworkController {
                 id);
 
         // Verify network exists
-        if (!networkService.findNetworkById(id).isPresent()) {
+        if (!networkService.findNetworkDtoById(id).isPresent()) {
             logger.trace("updateNetwork: network not found, id={}", id);
             return ResponseEntity.notFound().build();
         }
 
         NetworkEntity network = toEntity(request);
         network.setId(id);
-        NetworkEntity updated = networkService.saveNetwork(network);
-        logger.trace("updateNetwork: updated network with id={}", updated.getId());
+        NetworkDto updated = networkService.saveNetworkAndReturnDto(network);
+        logger.trace("updateNetwork: updated network with id={}", updated.id());
         return ResponseEntity.ok(updated);
     }
 
@@ -274,7 +274,7 @@ public class NetworkController {
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
 
-        if (!networkService.findNetworkById(id).isPresent()) {
+        if (!networkService.findNetworkDtoById(id).isPresent()) {
             logger.trace("deleteNetwork: network not found, id={}", id);
             return ResponseEntity.notFound().build();
         }

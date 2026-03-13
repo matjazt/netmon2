@@ -159,4 +159,27 @@ public class AccountService {
         logger.trace("getAccountSummariesPaginated: returning {} accounts", dtoPage.getSize());
         return dtoPage;
     }
+
+    // ========== DTO SINGLE-RECORD METHODS ==========
+
+    @PreAuthorize("hasAnyRole('admin', 'system')")
+    public Optional<AccountDto> findAccountDtoById(Long id) {
+        return findAccountById(id).map(accountMapper::toDto);
+    }
+
+    @PreAuthorize("hasAnyRole('admin', 'system')")
+    public Optional<AccountDto> findAccountDtoByUsername(String username) {
+        return findAccountByUsername(username).map(accountMapper::toDto);
+    }
+
+    @PreAuthorize("hasAnyRole('admin', 'system')")
+    public List<AccountDto> findAccountDtosByType(String accountTypeName) {
+        return accountMapper.toDtos(findAccountsByType(accountTypeName));
+    }
+
+    @Transactional
+    @PreAuthorize("hasAnyRole('admin', 'system')")
+    public AccountDto saveAccountAndReturnDto(AccountEntity account) {
+        return accountMapper.toDto(saveAccount(account));
+    }
 }

@@ -1,11 +1,13 @@
 package com.matjazt.netmon2.service;
 
 import com.matjazt.netmon2.dto.DeviceDto;
+import com.matjazt.netmon2.dto.DeviceStatusHistoryDto;
 import com.matjazt.netmon2.entity.DeviceEntity;
 import com.matjazt.netmon2.entity.DeviceOperationMode;
 import com.matjazt.netmon2.entity.DeviceStatusHistoryEntity;
 import com.matjazt.netmon2.entity.NetworkEntity;
 import com.matjazt.netmon2.mapper.DeviceMapper;
+import com.matjazt.netmon2.mapper.DeviceStatusHistoryMapper;
 import com.matjazt.netmon2.repository.DeviceRepository;
 import com.matjazt.netmon2.repository.DeviceStatusHistoryRepository;
 import com.matjazt.netmon2.repository.NetworkRepository;
@@ -63,6 +65,7 @@ public class DeviceService {
     private final NetworkRepository networkRepository;
     private final DeviceStatusHistoryRepository deviceStatusHistoryRepository;
     private final DeviceMapper deviceMapper;
+    private final DeviceStatusHistoryMapper deviceStatusHistoryMapper;
 
     // ========== BASIC CRUD OPERATIONS ==========
 
@@ -281,6 +284,40 @@ public class DeviceService {
 
         device.setDeviceOperationMode(mode);
         return deviceRepository.save(device);
+    }
+
+    // ========== DTO SINGLE-RECORD METHODS ==========
+
+    public Optional<DeviceDto> findDeviceDtoById(Long id) {
+        return findDeviceById(id).map(deviceMapper::toDto);
+    }
+
+    public Optional<DeviceDto> findDeviceDtoByMac(String macAddress) {
+        return findDeviceByMac(macAddress).map(deviceMapper::toDto);
+    }
+
+    public List<DeviceDto> findDevicesNeedingAlertsDtos() {
+        return deviceMapper.toDtos(findDevicesNeedingAlerts());
+    }
+
+    public List<DeviceStatusHistoryDto> getDeviceHistoryDtos(Long deviceId, int limit) {
+        return deviceStatusHistoryMapper.toDtos(getDeviceHistory(deviceId, limit));
+    }
+
+    @Transactional
+    public DeviceDto saveDeviceAndReturnDto(DeviceEntity device) {
+        return deviceMapper.toDto(saveDevice(device));
+    }
+
+    @Transactional
+    public DeviceDto processDeviceUpdateAndReturnDto(
+            Long networkId, String macAddress, String ipAddress, Boolean online) {
+        return deviceMapper.toDto(processDeviceUpdate(networkId, macAddress, ipAddress, online));
+    }
+
+    @Transactional
+    public DeviceDto updateDeviceModeAndReturnDto(Long deviceId, DeviceOperationMode mode) {
+        return deviceMapper.toDto(updateDeviceMode(deviceId, mode));
     }
 
     // ========== INNER CLASS FOR EXAMPLE ==========

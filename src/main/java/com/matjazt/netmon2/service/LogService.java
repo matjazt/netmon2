@@ -190,4 +190,9 @@ public class LogService {
         logger.trace("getLogsByDeviceAndTimestampRange: returning {} logs", dtoPage.getSize());
         return dtoPage;
     }
+
+    @PreAuthorize("hasAnyRole('admin', 'system')")
+    public Optional<LogDto> findLogDtoById(Long id) {
+        return findLogById(id).map(logMapper::toDto);
+    }
 }

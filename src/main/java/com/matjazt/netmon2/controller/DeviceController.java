@@ -1,10 +1,10 @@
 package com.matjazt.netmon2.controller;
 
 import com.matjazt.netmon2.dto.DeviceDto;
+import com.matjazt.netmon2.dto.DeviceStatusHistoryDto;
 import com.matjazt.netmon2.dto.request.SaveDeviceRequest;
 import com.matjazt.netmon2.entity.DeviceEntity;
 import com.matjazt.netmon2.entity.DeviceOperationMode;
-import com.matjazt.netmon2.entity.DeviceStatusHistoryEntity;
 import com.matjazt.netmon2.entity.NetworkEntity;
 import com.matjazt.netmon2.service.DeviceService;
 
@@ -120,9 +120,9 @@ public class DeviceController {
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
-    public ResponseEntity<DeviceEntity> getDeviceById(@PathVariable Long id) {
+    public ResponseEntity<DeviceDto> getDeviceById(@PathVariable Long id) {
         return deviceService
-                .findDeviceById(id)
+                .findDeviceDtoById(id)
                 .map(ResponseEntity::ok) // If found, return 200 OK
                 .orElse(ResponseEntity.notFound().build()); // If not found, return 404
     }
@@ -136,9 +136,9 @@ public class DeviceController {
      */
     @GetMapping("/mac/{macAddress}")
     @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
-    public ResponseEntity<DeviceEntity> getDeviceByMac(@PathVariable String macAddress) {
+    public ResponseEntity<DeviceDto> getDeviceByMac(@PathVariable String macAddress) {
         return deviceService
-                .findDeviceByMac(macAddress)
+                .findDeviceDtoByMac(macAddress)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -195,9 +195,9 @@ public class DeviceController {
      * <p>Combines path variable and query parameter
      */
     @GetMapping("/{id}/history")
-    public List<DeviceStatusHistoryEntity> getDeviceHistory(
+    public List<DeviceStatusHistoryDto> getDeviceHistory(
             @PathVariable Long id, @RequestParam(defaultValue = "50") int limit) {
-        return deviceService.getDeviceHistory(id, limit);
+        return deviceService.getDeviceHistoryDtos(id, limit);
     }
 
     /**
@@ -206,8 +206,8 @@ public class DeviceController {
      * <p>Get devices that need alert generation
      */
     @GetMapping("/needing-alerts")
-    public List<DeviceEntity> getDevicesNeedingAlerts() {
-        return deviceService.findDevicesNeedingAlerts();
+    public List<DeviceDto> getDevicesNeedingAlerts() {
+        return deviceService.findDevicesNeedingAlertsDtos();
     }
 
     /**
@@ -245,8 +245,8 @@ public class DeviceController {
      * <p>Returns 201 Created with the saved device (including generated ID)
      */
     @PostMapping
-    public ResponseEntity<DeviceEntity> createDevice(@RequestBody SaveDeviceRequest request) {
-        DeviceEntity saved = deviceService.saveDevice(toEntity(request));
+    public ResponseEntity<DeviceDto> createDevice(@RequestBody SaveDeviceRequest request) {
+        DeviceDto saved = deviceService.saveDeviceAndReturnDto(toEntity(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
@@ -267,8 +267,8 @@ public class DeviceController {
      * }</pre>
      */
     @PostMapping("/mqtt-update")
-    public DeviceEntity processMqttUpdate(@RequestBody MqttDeviceUpdateRequest request) {
-        return deviceService.processDeviceUpdate(
+    public DeviceDto processMqttUpdate(@RequestBody MqttDeviceUpdateRequest request) {
+        return deviceService.processDeviceUpdateAndReturnDto(
                 request.networkId, request.macAddress, request.ipAddress, request.online);
     }
 
@@ -282,17 +282,17 @@ public class DeviceController {
      * <p>ID in path + full entity in body
      */
     @PutMapping("/{id}")
-    public ResponseEntity<DeviceEntity> updateDevice(
+    public ResponseEntity<DeviceDto> updateDevice(
             @PathVariable Long id, @RequestBody SaveDeviceRequest request) {
 
         // Verify device exists
-        if (deviceService.findDeviceById(id).isEmpty()) {
+        if (deviceService.findDeviceDtoById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         DeviceEntity device = toEntity(request);
         device.setId(id);
-        DeviceEntity updated = deviceService.saveDevice(device);
+        DeviceDto updated = deviceService.saveDeviceAndReturnDto(device);
         return ResponseEntity.ok(updated);
     }
 
@@ -321,10 +321,10 @@ public class DeviceController {
      * <p>Partial update - only changes one field
      */
     @PutMapping("/{id}/mode")
-    public ResponseEntity<DeviceEntity> updateDeviceMode(
+    public ResponseEntity<DeviceDto> updateDeviceMode(
             @PathVariable Long id, @RequestParam DeviceOperationMode mode) {
         try {
-            DeviceEntity updated = deviceService.updateDeviceMode(id, mode);
+            DeviceDto updated = deviceService.updateDeviceModeAndReturnDto(id, mode);
             return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
@@ -342,7 +342,7 @@ public class DeviceController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDevice(@PathVariable Long id) {
-        if (deviceService.findDeviceById(id).isEmpty()) {
+        if (deviceService.findDeviceDtoById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 

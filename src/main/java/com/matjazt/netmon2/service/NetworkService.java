@@ -171,4 +171,39 @@ public class NetworkService {
         logger.trace("getNetworkSummariesPaginated: returning {} networks", dtoPage.getSize());
         return dtoPage;
     }
+
+    // ========== DTO SINGLE-RECORD METHODS ==========
+
+    @PreAuthorize(
+            "hasAnyRole('admin', 'system') or"
+                    + " @networkAuthorizationService.canAccess(authentication, #id)")
+    public Optional<NetworkDto> findNetworkDtoById(Long id) {
+        return findNetworkById(id).map(networkMapper::toDto);
+    }
+
+    @PreAuthorize("hasAnyRole('admin', 'system')")
+    public Optional<NetworkDto> findNetworkDtoByName(String name) {
+        return findNetworkByName(name).map(networkMapper::toDto);
+    }
+
+    @PreAuthorize("hasAnyRole('admin', 'system')")
+    public List<NetworkDto> findNetworkDtosWithActiveAlerts() {
+        return networkMapper.toDtos(findNetworksWithActiveAlerts());
+    }
+
+    @PreAuthorize("hasAnyRole('admin', 'system')")
+    public List<NetworkDto> findNetworkDtosWithoutActiveAlerts() {
+        return networkMapper.toDtos(findNetworksWithoutActiveAlerts());
+    }
+
+    @PreAuthorize("hasAnyRole('admin', 'system')")
+    public List<NetworkDto> findNetworkDtosByNameContaining(String namePart) {
+        return networkMapper.toDtos(findNetworksByNameContaining(namePart));
+    }
+
+    @Transactional
+    @PreAuthorize("hasAnyRole('admin', 'system')")
+    public NetworkDto saveNetworkAndReturnDto(NetworkEntity network) {
+        return networkMapper.toDto(saveNetwork(network));
+    }
 }

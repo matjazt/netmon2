@@ -1,7 +1,6 @@
 package com.matjazt.netmon2.controller;
 
 import com.matjazt.netmon2.dto.LogDto;
-import com.matjazt.netmon2.entity.LogEntity;
 import com.matjazt.netmon2.service.LogService;
 
 import lombok.RequiredArgsConstructor;
@@ -74,13 +73,13 @@ public class LogController {
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public ResponseEntity<LogEntity> getLogById(@PathVariable Long id) {
+    public ResponseEntity<LogDto> getLogById(@PathVariable Long id) {
         logger.trace(
                 "getLogById: user={}, logId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
         return logService
-                .findLogById(id)
+                .findLogDtoById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

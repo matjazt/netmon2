@@ -1,7 +1,6 @@
 package com.matjazt.netmon2.controller;
 
 import com.matjazt.netmon2.dto.DeviceStatusHistoryDto;
-import com.matjazt.netmon2.entity.DeviceStatusHistoryEntity;
 import com.matjazt.netmon2.service.DeviceStatusHistoryService;
 
 import lombok.RequiredArgsConstructor;
@@ -75,13 +74,13 @@ public class DeviceStatusHistoryController {
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
-    public ResponseEntity<DeviceStatusHistoryEntity> getById(@PathVariable Long id) {
+    public ResponseEntity<DeviceStatusHistoryDto> getById(@PathVariable Long id) {
         logger.trace(
                 "getById: user={}, id={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
         return deviceStatusHistoryService
-                .findById(id)
+                .findDtoById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

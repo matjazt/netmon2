@@ -216,4 +216,9 @@ public class DeviceStatusHistoryService {
                 end);
         return deviceStatusHistoryRepository.countByTimestampBetween(start, end);
     }
+
+    @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
+    public Optional<DeviceStatusHistoryDto> findDtoById(Long id) {
+        return findById(id).map(deviceStatusHistoryMapper::toDto);
+    }
 }

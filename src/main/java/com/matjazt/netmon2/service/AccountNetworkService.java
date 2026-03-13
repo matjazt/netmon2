@@ -1,10 +1,14 @@
 package com.matjazt.netmon2.service;
 
+import com.matjazt.netmon2.dto.AccountDto;
 import com.matjazt.netmon2.dto.AccountNetworkDto;
+import com.matjazt.netmon2.dto.NetworkDto;
 import com.matjazt.netmon2.entity.AccountEntity;
 import com.matjazt.netmon2.entity.AccountNetworkEntity;
 import com.matjazt.netmon2.entity.NetworkEntity;
+import com.matjazt.netmon2.mapper.AccountMapper;
 import com.matjazt.netmon2.mapper.AccountNetworkMapper;
+import com.matjazt.netmon2.mapper.NetworkMapper;
 import com.matjazt.netmon2.repository.AccountNetworkRepository;
 import com.matjazt.netmon2.repository.AccountRepository;
 import com.matjazt.netmon2.repository.NetworkRepository;
@@ -38,6 +42,8 @@ public class AccountNetworkService {
     private final AccountRepository accountRepository;
     private final NetworkRepository networkRepository;
     private final AccountNetworkMapper accountNetworkMapper;
+    private final AccountMapper accountMapper;
+    private final NetworkMapper networkMapper;
 
     // ========== BASIC CRUD OPERATIONS ==========
 
@@ -254,5 +260,36 @@ public class AccountNetworkService {
         var dtoPage = accountNetworkMapper.toDtoPage(entityPage);
         logger.trace("getSummariesPaginated: returning {} relationships", dtoPage.getSize());
         return dtoPage;
+    }
+
+    // ========== DTO SINGLE-RECORD METHODS ==========
+
+    @PreAuthorize("hasAnyRole('admin', 'system')")
+    public Optional<AccountNetworkDto> findDtoById(Long id) {
+        return findById(id).map(accountNetworkMapper::toDto);
+    }
+
+    @Transactional
+    @PreAuthorize("hasAnyRole('admin', 'system')")
+    public AccountNetworkDto saveAndReturnDto(AccountNetworkEntity entity) {
+        return accountNetworkMapper.toDto(save(entity));
+    }
+
+    @Transactional
+    @PreAuthorize("hasAnyRole('admin', 'system')")
+    public AccountNetworkDto grantAccessAndReturnDto(Long accountId, Long networkId) {
+        return accountNetworkMapper.toDto(grantAccess(accountId, networkId));
+    }
+
+    @PreAuthorize("hasAnyRole('admin', 'system')")
+    public List<NetworkDto> getNetworkDtosByAccountId(Long accountId) {
+        return networkMapper.toDtos(getNetworksByAccountId(accountId));
+    }
+
+    @PreAuthorize(
+            "hasAnyRole('admin', 'system') or"
+                    + " @networkAuthorizationService.canAccess(authentication, #networkId)")
+    public List<AccountDto> getAccountDtosByNetworkId(Long networkId) {
+        return accountMapper.toDtos(getAccountsByNetworkId(networkId));
     }
 }
