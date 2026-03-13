@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 public record SaveAccountRequest(
         String username,
         Long accountTypeId,
-        String passwordHash,
+        String password,
         String fullName,
         String email,
         LocalDateTime createdAt,

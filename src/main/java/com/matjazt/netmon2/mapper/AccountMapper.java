@@ -30,6 +30,7 @@ public interface AccountMapper {
 
     @Mapping(source = "accountTypeId", target = "accountType.id")
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "passwordHash", ignore = true)
     AccountEntity toEntity(SaveAccountRequest request);
 
     /**

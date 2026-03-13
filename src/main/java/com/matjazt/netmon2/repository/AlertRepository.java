@@ -94,6 +94,9 @@ public interface AlertRepository extends JpaRepository<AlertEntity, Long> {
      */
     List<AlertEntity> findByDevice_Id(Long deviceId);
 
+    /** Finds open (unresolved) alerts for a specific device. */
+    List<AlertEntity> findByDevice_IdAndClosureTimestampIsNull(Long deviceId);
+
     /**
      * Finds alerts within a date range (inclusive).
      *
@@ -123,6 +126,9 @@ public interface AlertRepository extends JpaRepository<AlertEntity, Long> {
      * <p>Usage: alertRepo.findAll(PageRequest.of(0, 20, Sort.by("timestamp").descending()))
      */
     Page<AlertEntity> findByNetwork_Id(Long networkId, Pageable pageable);
+
+    /** Finds all alerts (open and closed) for a specific network, unpaginated. */
+    List<AlertEntity> findByNetwork_Id(Long networkId);
 
     /**
      * CUSTOM QUERY: Find open alerts for a network

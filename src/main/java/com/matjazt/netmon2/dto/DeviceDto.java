@@ -18,4 +18,5 @@ public record DeviceDto(
         Boolean online,
         LocalDateTime lastSeen,
         DeviceOperationMode deviceOperationMode,
-        Long activeAlertId) {}
+        Long activeAlertId,
+        String vendor) {}

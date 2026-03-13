@@ -129,6 +129,18 @@ public class AccountController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    /** GET /api/accounts/me — return the currently authenticated account. */
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<AccountDto> getCurrentAccount() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        logger.trace("getCurrentAccount: user={}", username);
+        return accountService
+                .findAccountDtoByUsername(username)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     /**
      * GET /api/accounts/exists?username=john
      *
