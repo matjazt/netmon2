@@ -1,6 +1,9 @@
 package com.matjazt.netmon2.config;
 
+import ch.qos.logback.classic.pattern.TargetLengthBasedClassNameAbbreviator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.IThrowableProxy;
+import ch.qos.logback.classic.spi.ThrowableProxyUtil;
 import ch.qos.logback.core.AppenderBase;
 
 import com.matjazt.netmon2.entity.DeviceEntity;
@@ -38,6 +41,13 @@ import java.time.LocalDateTime;
  * formatted message doesn't preserve object references.
  */
 public class NetworkLogAppender extends AppenderBase<ILoggingEvent> {
+
+    /**
+     * Abbreviates logger names to a target length of 36 characters, matching the pattern used in
+     * the file appender ({@code %logger{36}}).
+     */
+    private static final TargetLengthBasedClassNameAbbreviator ABBREVIATOR =
+            new TargetLengthBasedClassNameAbbreviator(50);
 
     private volatile LogDbWriterService logDbWriter;
     private volatile boolean writerResolved = false;
@@ -91,14 +101,24 @@ public class NetworkLogAppender extends AppenderBase<ILoggingEvent> {
                 return;
             }
 
+            String message = event.getFormattedMessage();
+
+            // Extract exception if present
+            IThrowableProxy tp = event.getThrowableProxy();
+            if (tp != null) {
+                message =
+                        (message == null ? "" : (message + "\n")) + ThrowableProxyUtil.asString(tp);
+            }
+
             // Build the log entity
             LogEntity logEntry =
                     new LogEntity(
                             null,
                             LocalDateTime.now(),
                             event.getLevel().toInt(),
-                            SimpleTools.safeTruncate(event.getLoggerName(), 500),
-                            SimpleTools.safeTruncate(event.getFormattedMessage(), 5000),
+                            SimpleTools.safeTruncate(
+                                    ABBREVIATOR.abbreviate(event.getLoggerName()), 500),
+                            SimpleTools.safeTruncate(message, 5000),
                             network,
                             device);
 
