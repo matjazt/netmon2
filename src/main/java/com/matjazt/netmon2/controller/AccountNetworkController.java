@@ -4,9 +4,6 @@ import com.matjazt.netmon2.dto.AccountDto;
 import com.matjazt.netmon2.dto.AccountNetworkDto;
 import com.matjazt.netmon2.dto.NetworkDto;
 import com.matjazt.netmon2.dto.request.SaveAccountNetworkRequest;
-import com.matjazt.netmon2.entity.AccountEntity;
-import com.matjazt.netmon2.entity.AccountNetworkEntity;
-import com.matjazt.netmon2.entity.NetworkEntity;
 import com.matjazt.netmon2.service.AccountNetworkService;
 
 import lombok.RequiredArgsConstructor;
@@ -216,7 +213,7 @@ public class AccountNetworkController {
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 request.accountId(),
                 request.networkId());
-        AccountNetworkDto saved = accountNetworkService.saveAndReturnDto(toEntity(request));
+        AccountNetworkDto saved = accountNetworkService.saveAndReturnDto(request, null);
         logger.trace("createAccountNetwork: created relationship with id={}", saved.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
@@ -272,19 +269,9 @@ public class AccountNetworkController {
             return ResponseEntity.notFound().build();
         }
 
-        AccountNetworkEntity entity = toEntity(request);
-        entity.setId(id);
-        AccountNetworkDto updated = accountNetworkService.saveAndReturnDto(entity);
+        AccountNetworkDto updated = accountNetworkService.saveAndReturnDto(request, id);
         logger.trace("updateAccountNetwork: updated relationship with id={}", updated.id());
         return ResponseEntity.ok(updated);
-    }
-
-    private AccountNetworkEntity toEntity(SaveAccountNetworkRequest request) {
-        AccountEntity account = new AccountEntity();
-        account.setId(request.accountId());
-        NetworkEntity network = new NetworkEntity();
-        network.setId(request.networkId());
-        return new AccountNetworkEntity(account, network);
     }
 
     // ========== DELETE ENDPOINTS (remove resources) ==========

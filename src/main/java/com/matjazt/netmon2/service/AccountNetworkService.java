@@ -3,6 +3,7 @@ package com.matjazt.netmon2.service;
 import com.matjazt.netmon2.dto.AccountDto;
 import com.matjazt.netmon2.dto.AccountNetworkDto;
 import com.matjazt.netmon2.dto.NetworkDto;
+import com.matjazt.netmon2.dto.request.SaveAccountNetworkRequest;
 import com.matjazt.netmon2.entity.AccountEntity;
 import com.matjazt.netmon2.entity.AccountNetworkEntity;
 import com.matjazt.netmon2.entity.NetworkEntity;
@@ -271,7 +272,9 @@ public class AccountNetworkService {
 
     @Transactional
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public AccountNetworkDto saveAndReturnDto(AccountNetworkEntity entity) {
+    public AccountNetworkDto saveAndReturnDto(SaveAccountNetworkRequest request, Long id) {
+        AccountNetworkEntity entity = accountNetworkMapper.toEntity(request);
+        if (id != null) entity.setId(id);
         return accountNetworkMapper.toDto(save(entity));
     }
 

@@ -1,6 +1,7 @@
 package com.matjazt.netmon2.service;
 
 import com.matjazt.netmon2.dto.NetworkDto;
+import com.matjazt.netmon2.dto.request.SaveNetworkRequest;
 import com.matjazt.netmon2.entity.NetworkEntity;
 import com.matjazt.netmon2.mapper.NetworkMapper;
 import com.matjazt.netmon2.repository.NetworkRepository;
@@ -203,7 +204,9 @@ public class NetworkService {
 
     @Transactional
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public NetworkDto saveNetworkAndReturnDto(NetworkEntity network) {
+    public NetworkDto saveNetworkAndReturnDto(SaveNetworkRequest request, Long id) {
+        NetworkEntity network = networkMapper.toEntity(request);
+        if (id != null) network.setId(id);
         return networkMapper.toDto(saveNetwork(network));
     }
 }

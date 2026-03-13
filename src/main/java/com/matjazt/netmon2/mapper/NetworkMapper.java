@@ -1,9 +1,11 @@
 package com.matjazt.netmon2.mapper;
 
 import com.matjazt.netmon2.dto.NetworkDto;
+import com.matjazt.netmon2.dto.request.SaveNetworkRequest;
 import com.matjazt.netmon2.entity.NetworkEntity;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -24,6 +26,9 @@ public interface NetworkMapper {
      * <p>Fields match 1:1, so no explicit @Mapping needed.
      */
     NetworkDto toDto(NetworkEntity entity);
+
+    @Mapping(target = "id", ignore = true)
+    NetworkEntity toEntity(SaveNetworkRequest request);
 
     /**
      * Convert list of NetworkEntity to list of NetworkDto.

@@ -1,6 +1,7 @@
 package com.matjazt.netmon2.service;
 
 import com.matjazt.netmon2.dto.AccountDto;
+import com.matjazt.netmon2.dto.request.SaveAccountRequest;
 import com.matjazt.netmon2.entity.AccountEntity;
 import com.matjazt.netmon2.mapper.AccountMapper;
 import com.matjazt.netmon2.repository.AccountRepository;
@@ -179,7 +180,9 @@ public class AccountService {
 
     @Transactional
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public AccountDto saveAccountAndReturnDto(AccountEntity account) {
+    public AccountDto saveAccountAndReturnDto(SaveAccountRequest request, Long id) {
+        AccountEntity account = accountMapper.toEntity(request);
+        if (id != null) account.setId(id);
         return accountMapper.toDto(saveAccount(account));
     }
 }

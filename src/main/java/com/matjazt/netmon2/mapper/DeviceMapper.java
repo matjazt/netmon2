@@ -1,6 +1,7 @@
 package com.matjazt.netmon2.mapper;
 
 import com.matjazt.netmon2.dto.DeviceDto;
+import com.matjazt.netmon2.dto.request.SaveDeviceRequest;
 import com.matjazt.netmon2.entity.DeviceEntity;
 
 import org.mapstruct.Mapper;
@@ -26,6 +27,11 @@ public interface DeviceMapper {
      */
     @Mapping(source = "network.id", target = "networkId")
     DeviceDto toDto(DeviceEntity entity);
+
+    @Mapping(source = "networkId", target = "network.id")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "deviceOperationModeRef", ignore = true)
+    DeviceEntity toEntity(SaveDeviceRequest request);
 
     /**
      * Convert list of DeviceEntity to list of DeviceDto.

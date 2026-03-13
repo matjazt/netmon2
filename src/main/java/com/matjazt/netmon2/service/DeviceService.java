@@ -2,6 +2,7 @@ package com.matjazt.netmon2.service;
 
 import com.matjazt.netmon2.dto.DeviceDto;
 import com.matjazt.netmon2.dto.DeviceStatusHistoryDto;
+import com.matjazt.netmon2.dto.request.SaveDeviceRequest;
 import com.matjazt.netmon2.entity.DeviceEntity;
 import com.matjazt.netmon2.entity.DeviceOperationMode;
 import com.matjazt.netmon2.entity.DeviceStatusHistoryEntity;
@@ -305,7 +306,9 @@ public class DeviceService {
     }
 
     @Transactional
-    public DeviceDto saveDeviceAndReturnDto(DeviceEntity device) {
+    public DeviceDto saveDeviceAndReturnDto(SaveDeviceRequest request, Long id) {
+        DeviceEntity device = deviceMapper.toEntity(request);
+        if (id != null) device.setId(id);
         return deviceMapper.toDto(saveDevice(device));
     }
 

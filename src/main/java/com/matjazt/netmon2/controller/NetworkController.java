@@ -2,7 +2,6 @@ package com.matjazt.netmon2.controller;
 
 import com.matjazt.netmon2.dto.NetworkDto;
 import com.matjazt.netmon2.dto.request.SaveNetworkRequest;
-import com.matjazt.netmon2.entity.NetworkEntity;
 import com.matjazt.netmon2.service.NetworkService;
 
 import lombok.RequiredArgsConstructor;
@@ -210,7 +209,7 @@ public class NetworkController {
                 "createNetwork: user={}, name={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 request.name());
-        NetworkDto saved = networkService.saveNetworkAndReturnDto(toEntity(request));
+        NetworkDto saved = networkService.saveNetworkAndReturnDto(request, null);
         logger.trace("createNetwork: created network with id={}", saved.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
@@ -239,22 +238,9 @@ public class NetworkController {
             return ResponseEntity.notFound().build();
         }
 
-        NetworkEntity network = toEntity(request);
-        network.setId(id);
-        NetworkDto updated = networkService.saveNetworkAndReturnDto(network);
+        NetworkDto updated = networkService.saveNetworkAndReturnDto(request, id);
         logger.trace("updateNetwork: updated network with id={}", updated.id());
         return ResponseEntity.ok(updated);
-    }
-
-    private NetworkEntity toEntity(SaveNetworkRequest request) {
-        NetworkEntity network = new NetworkEntity();
-        network.setName(request.name());
-        network.setFirstSeen(request.firstSeen());
-        network.setLastSeen(request.lastSeen());
-        network.setActiveAlertId(request.activeAlertId());
-        network.setConfiguration(request.configuration());
-        network.setBackOnlineTime(request.backOnlineTime());
-        return network;
     }
 
     // ========== DELETE ENDPOINTS (remove resources) ==========

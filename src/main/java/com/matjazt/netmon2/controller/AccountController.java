@@ -2,8 +2,6 @@ package com.matjazt.netmon2.controller;
 
 import com.matjazt.netmon2.dto.AccountDto;
 import com.matjazt.netmon2.dto.request.SaveAccountRequest;
-import com.matjazt.netmon2.entity.AccountEntity;
-import com.matjazt.netmon2.entity.AccountTypeEntity;
 import com.matjazt.netmon2.service.AccountService;
 
 import lombok.RequiredArgsConstructor;
@@ -179,7 +177,7 @@ public class AccountController {
                 "createAccount: user={}, username={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 request.username());
-        AccountDto saved = accountService.saveAccountAndReturnDto(toEntity(request));
+        AccountDto saved = accountService.saveAccountAndReturnDto(request, null);
         logger.trace("createAccount: created account with id={}", saved.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
@@ -208,25 +206,9 @@ public class AccountController {
             return ResponseEntity.notFound().build();
         }
 
-        AccountEntity account = toEntity(request);
-        account.setId(id);
-        AccountDto updated = accountService.saveAccountAndReturnDto(account);
+        AccountDto updated = accountService.saveAccountAndReturnDto(request, id);
         logger.trace("updateAccount: updated account with id={}", updated.id());
         return ResponseEntity.ok(updated);
-    }
-
-    private AccountEntity toEntity(SaveAccountRequest request) {
-        AccountTypeEntity accountType = new AccountTypeEntity();
-        accountType.setId(request.accountTypeId());
-        AccountEntity account = new AccountEntity();
-        account.setUsername(request.username());
-        account.setAccountType(accountType);
-        account.setPasswordHash(request.passwordHash());
-        account.setFullName(request.fullName());
-        account.setEmail(request.email());
-        account.setCreatedAt(request.createdAt());
-        account.setLastSeen(request.lastSeen());
-        return account;
     }
 
     // ========== DELETE ENDPOINTS (remove resources) ==========

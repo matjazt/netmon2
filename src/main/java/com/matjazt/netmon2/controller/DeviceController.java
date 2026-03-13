@@ -3,9 +3,7 @@ package com.matjazt.netmon2.controller;
 import com.matjazt.netmon2.dto.DeviceDto;
 import com.matjazt.netmon2.dto.DeviceStatusHistoryDto;
 import com.matjazt.netmon2.dto.request.SaveDeviceRequest;
-import com.matjazt.netmon2.entity.DeviceEntity;
 import com.matjazt.netmon2.entity.DeviceOperationMode;
-import com.matjazt.netmon2.entity.NetworkEntity;
 import com.matjazt.netmon2.service.DeviceService;
 
 import lombok.RequiredArgsConstructor;
@@ -246,7 +244,7 @@ public class DeviceController {
      */
     @PostMapping
     public ResponseEntity<DeviceDto> createDevice(@RequestBody SaveDeviceRequest request) {
-        DeviceDto saved = deviceService.saveDeviceAndReturnDto(toEntity(request));
+        DeviceDto saved = deviceService.saveDeviceAndReturnDto(request, null);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
@@ -290,27 +288,8 @@ public class DeviceController {
             return ResponseEntity.notFound().build();
         }
 
-        DeviceEntity device = toEntity(request);
-        device.setId(id);
-        DeviceDto updated = deviceService.saveDeviceAndReturnDto(device);
+        DeviceDto updated = deviceService.saveDeviceAndReturnDto(request, id);
         return ResponseEntity.ok(updated);
-    }
-
-    private DeviceEntity toEntity(SaveDeviceRequest request) {
-        NetworkEntity network = new NetworkEntity();
-        network.setId(request.networkId());
-        DeviceEntity device = new DeviceEntity();
-        device.setNetwork(network);
-        device.setName(request.name());
-        device.setMacAddress(request.macAddress());
-        device.setIpAddress(request.ipAddress());
-        device.setOnline(request.online());
-        device.setFirstSeen(request.firstSeen());
-        device.setLastSeen(request.lastSeen());
-        device.setActiveAlertId(request.activeAlertId());
-        device.setVendor(request.vendor());
-        device.setDeviceOperationMode(request.deviceOperationMode());
-        return device;
     }
 
     /**
