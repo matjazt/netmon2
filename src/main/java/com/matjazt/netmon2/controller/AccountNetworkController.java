@@ -1,11 +1,10 @@
 package com.matjazt.netmon2.controller;
 
 import com.matjazt.netmon2.dto.AccountNetworkDto;
-import com.matjazt.netmon2.dto.response.AccountNetworkResponseDto;
+import com.matjazt.netmon2.dto.request.SaveAccountNetworkRequest;
 import com.matjazt.netmon2.entity.AccountEntity;
 import com.matjazt.netmon2.entity.AccountNetworkEntity;
 import com.matjazt.netmon2.entity.NetworkEntity;
-import com.matjazt.netmon2.mapper.AccountNetworkApiMapper;
 import com.matjazt.netmon2.service.AccountNetworkService;
 
 import lombok.RequiredArgsConstructor;
@@ -43,7 +42,6 @@ import java.util.List;
 public class AccountNetworkController {
 
     private final AccountNetworkService accountNetworkService;
-    private final AccountNetworkApiMapper accountNetworkApiMapper;
 
     // ========== GET ENDPOINTS (retrieve data) ==========
 
@@ -54,14 +52,13 @@ public class AccountNetworkController {
      */
     @GetMapping
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public List<AccountNetworkResponseDto> getAllAccountNetworks() {
+    public List<AccountNetworkDto> getAllAccountNetworks() {
         logger.trace(
                 "getAllAccountNetworks: user={}",
                 SecurityContextHolder.getContext().getAuthentication().getName());
         List<AccountNetworkDto> dtos = accountNetworkService.findAllSummaries();
-        var resp = accountNetworkApiMapper.toResponses(dtos);
-        logger.trace("getAllAccountNetworks: returning {} relationships", resp.size());
-        return resp;
+        logger.trace("getAllAccountNetworks: returning {} relationships", dtos.size());
+        return dtos;
     }
 
     /**
@@ -71,7 +68,7 @@ public class AccountNetworkController {
      */
     @GetMapping("/paginated")
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public Page<AccountNetworkResponseDto> getAccountNetworksPaginated(
+    public Page<AccountNetworkDto> getAccountNetworksPaginated(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         logger.trace(
@@ -80,9 +77,8 @@ public class AccountNetworkController {
                 page,
                 size);
         Page<AccountNetworkDto> dtoPage = accountNetworkService.getSummariesPaginated(page, size);
-        var respPage = accountNetworkApiMapper.toResponsePage(dtoPage);
-        logger.trace("getAccountNetworksPaginated: returning {} relationships", respPage.getSize());
-        return respPage;
+        logger.trace("getAccountNetworksPaginated: returning {} relationships", dtoPage.getSize());
+        return dtoPage;
     }
 
     /**
@@ -117,15 +113,14 @@ public class AccountNetworkController {
      */
     @GetMapping("/account/{accountId}")
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public List<AccountNetworkResponseDto> getNetworksByAccount(@PathVariable Long accountId) {
+    public List<AccountNetworkDto> getNetworksByAccount(@PathVariable Long accountId) {
         logger.trace(
                 "getNetworksByAccount: user={}, accountId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 accountId);
         List<AccountNetworkDto> dtos = accountNetworkService.getByAccountId(accountId);
-        var resp = accountNetworkApiMapper.toResponses(dtos);
-        logger.trace("getNetworksByAccount: returning {} relationships", resp.size());
-        return resp;
+        logger.trace("getNetworksByAccount: returning {} relationships", dtos.size());
+        return dtos;
     }
 
     /**
@@ -137,15 +132,14 @@ public class AccountNetworkController {
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
                     + " @networkAuthorizationService.canAccess(authentication, #networkId)")
-    public List<AccountNetworkResponseDto> getAccountsByNetwork(@PathVariable Long networkId) {
+    public List<AccountNetworkDto> getAccountsByNetwork(@PathVariable Long networkId) {
         logger.trace(
                 "getAccountsByNetwork: user={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId);
         List<AccountNetworkDto> dtos = accountNetworkService.getByNetworkId(networkId);
-        var resp = accountNetworkApiMapper.toResponses(dtos);
-        logger.trace("getAccountsByNetwork: returning {} relationships", resp.size());
-        return resp;
+        logger.trace("getAccountsByNetwork: returning {} relationships", dtos.size());
+        return dtos;
     }
 
     /**
@@ -214,13 +208,13 @@ public class AccountNetworkController {
     @PostMapping
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public ResponseEntity<AccountNetworkEntity> createAccountNetwork(
-            @RequestBody AccountNetworkEntity accountNetwork) {
+            @RequestBody SaveAccountNetworkRequest request) {
         logger.trace(
                 "createAccountNetwork: user={}, accountId={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
-                accountNetwork.getAccount() != null ? accountNetwork.getAccount().getId() : null,
-                accountNetwork.getNetwork() != null ? accountNetwork.getNetwork().getId() : null);
-        AccountNetworkEntity saved = accountNetworkService.save(accountNetwork);
+                request.accountId(),
+                request.networkId());
+        AccountNetworkEntity saved = accountNetworkService.save(toEntity(request));
         logger.trace("createAccountNetwork: created relationship with id={}", saved.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
@@ -263,7 +257,7 @@ public class AccountNetworkController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public ResponseEntity<AccountNetworkEntity> updateAccountNetwork(
-            @PathVariable Long id, @RequestBody AccountNetworkEntity accountNetwork) {
+            @PathVariable Long id, @RequestBody SaveAccountNetworkRequest request) {
         logger.trace(
                 "updateAccountNetwork: user={}, id={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
@@ -275,11 +269,19 @@ public class AccountNetworkController {
             return ResponseEntity.notFound().build();
         }
 
-        // Ensure ID matches
-        accountNetwork.setId(id);
-        AccountNetworkEntity updated = accountNetworkService.save(accountNetwork);
+        AccountNetworkEntity entity = toEntity(request);
+        entity.setId(id);
+        AccountNetworkEntity updated = accountNetworkService.save(entity);
         logger.trace("updateAccountNetwork: updated relationship with id={}", updated.getId());
         return ResponseEntity.ok(updated);
+    }
+
+    private AccountNetworkEntity toEntity(SaveAccountNetworkRequest request) {
+        AccountEntity account = new AccountEntity();
+        account.setId(request.accountId());
+        NetworkEntity network = new NetworkEntity();
+        network.setId(request.networkId());
+        return new AccountNetworkEntity(account, network);
     }
 
     // ========== DELETE ENDPOINTS (remove resources) ==========

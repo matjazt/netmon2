@@ -1,16 +1,18 @@
-package com.matjazt.netmon2.dto.response;
+package com.matjazt.netmon2.dto.request;
 
 import com.matjazt.netmon2.entity.DeviceOperationMode;
 
 import java.time.LocalDateTime;
 
-/** Lightweight DTO for exposing device data via API without touching lazy proxies. */
-public record DeviceResponseDto(
-        Long id,
+/** Request DTO for creating or updating a Device. */
+public record SaveDeviceRequest(
         Long networkId,
         String name,
         String macAddress,
         String ipAddress,
         Boolean online,
+        LocalDateTime firstSeen,
         LocalDateTime lastSeen,
+        Long activeAlertId,
+        String vendor,
         DeviceOperationMode deviceOperationMode) {}

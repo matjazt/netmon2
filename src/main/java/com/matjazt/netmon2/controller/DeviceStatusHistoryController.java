@@ -1,9 +1,7 @@
 package com.matjazt.netmon2.controller;
 
 import com.matjazt.netmon2.dto.DeviceStatusHistoryDto;
-import com.matjazt.netmon2.dto.response.DeviceStatusHistoryResponseDto;
 import com.matjazt.netmon2.entity.DeviceStatusHistoryEntity;
-import com.matjazt.netmon2.mapper.DeviceStatusHistoryApiMapper;
 import com.matjazt.netmon2.service.DeviceStatusHistoryService;
 
 import lombok.RequiredArgsConstructor;
@@ -37,7 +35,6 @@ import java.time.LocalDateTime;
 public class DeviceStatusHistoryController {
 
     private final DeviceStatusHistoryService deviceStatusHistoryService;
-    private final DeviceStatusHistoryApiMapper deviceStatusHistoryApiMapper;
 
     // ========== GET ENDPOINTS (retrieve data) ==========
 
@@ -50,7 +47,7 @@ public class DeviceStatusHistoryController {
      */
     @GetMapping("/paginated")
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public Page<DeviceStatusHistoryResponseDto> getAllPaginated(
+    public Page<DeviceStatusHistoryDto> getAllPaginated(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
         logger.trace(
@@ -60,9 +57,8 @@ public class DeviceStatusHistoryController {
                 size);
         Page<DeviceStatusHistoryDto> dtoPage =
                 deviceStatusHistoryService.getAllPaginated(page, size);
-        var respPage = deviceStatusHistoryApiMapper.toResponsePage(dtoPage);
-        logger.trace("getAllPaginated: returning {} history records", respPage.getSize());
-        return respPage;
+        logger.trace("getAllPaginated: returning {} history records", dtoPage.getSize());
+        return dtoPage;
     }
 
     /**
@@ -97,7 +93,7 @@ public class DeviceStatusHistoryController {
      */
     @GetMapping("/device/{deviceId}")
     @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
-    public Page<DeviceStatusHistoryResponseDto> getByDevice(
+    public Page<DeviceStatusHistoryDto> getByDevice(
             @PathVariable Long deviceId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
@@ -109,9 +105,8 @@ public class DeviceStatusHistoryController {
                 size);
         Page<DeviceStatusHistoryDto> dtoPage =
                 deviceStatusHistoryService.getByDevice(deviceId, page, size);
-        var respPage = deviceStatusHistoryApiMapper.toResponsePage(dtoPage);
-        logger.trace("getByDevice: returning {} history records", respPage.getSize());
-        return respPage;
+        logger.trace("getByDevice: returning {} history records", dtoPage.getSize());
+        return dtoPage;
     }
 
     /**
@@ -123,7 +118,7 @@ public class DeviceStatusHistoryController {
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
                     + " @networkAuthorizationService.canAccess(authentication, #networkId)")
-    public Page<DeviceStatusHistoryResponseDto> getByNetwork(
+    public Page<DeviceStatusHistoryDto> getByNetwork(
             @PathVariable Long networkId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
@@ -135,9 +130,8 @@ public class DeviceStatusHistoryController {
                 size);
         Page<DeviceStatusHistoryDto> dtoPage =
                 deviceStatusHistoryService.getByNetwork(networkId, page, size);
-        var respPage = deviceStatusHistoryApiMapper.toResponsePage(dtoPage);
-        logger.trace("getByNetwork: returning {} history records", respPage.getSize());
-        return respPage;
+        logger.trace("getByNetwork: returning {} history records", dtoPage.getSize());
+        return dtoPage;
     }
 
     /**
@@ -150,7 +144,7 @@ public class DeviceStatusHistoryController {
      */
     @GetMapping("/by-timestamp")
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public Page<DeviceStatusHistoryResponseDto> getByTimestampRange(
+    public Page<DeviceStatusHistoryDto> getByTimestampRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                     LocalDateTime minTimestamp,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -167,9 +161,8 @@ public class DeviceStatusHistoryController {
         Page<DeviceStatusHistoryDto> dtoPage =
                 deviceStatusHistoryService.getByTimestampRange(
                         minTimestamp, maxTimestamp, page, size);
-        var respPage = deviceStatusHistoryApiMapper.toResponsePage(dtoPage);
-        logger.trace("getByTimestampRange: returning {} history records", respPage.getSize());
-        return respPage;
+        logger.trace("getByTimestampRange: returning {} history records", dtoPage.getSize());
+        return dtoPage;
     }
 
     /**
@@ -182,7 +175,7 @@ public class DeviceStatusHistoryController {
      */
     @GetMapping("/device/{deviceId}/by-timestamp")
     @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
-    public Page<DeviceStatusHistoryResponseDto> getByDeviceAndTimestampRange(
+    public Page<DeviceStatusHistoryDto> getByDeviceAndTimestampRange(
             @PathVariable Long deviceId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                     LocalDateTime minTimestamp,
@@ -202,10 +195,9 @@ public class DeviceStatusHistoryController {
         Page<DeviceStatusHistoryDto> dtoPage =
                 deviceStatusHistoryService.getByDeviceAndTimestampRange(
                         deviceId, minTimestamp, maxTimestamp, page, size);
-        var respPage = deviceStatusHistoryApiMapper.toResponsePage(dtoPage);
         logger.trace(
-                "getByDeviceAndTimestampRange: returning {} history records", respPage.getSize());
-        return respPage;
+                "getByDeviceAndTimestampRange: returning {} history records", dtoPage.getSize());
+        return dtoPage;
     }
 
     /**
@@ -220,7 +212,7 @@ public class DeviceStatusHistoryController {
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
                     + " @networkAuthorizationService.canAccess(authentication, #networkId)")
-    public Page<DeviceStatusHistoryResponseDto> getByNetworkAndTimestampRange(
+    public Page<DeviceStatusHistoryDto> getByNetworkAndTimestampRange(
             @PathVariable Long networkId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                     LocalDateTime minTimestamp,
@@ -240,10 +232,9 @@ public class DeviceStatusHistoryController {
         Page<DeviceStatusHistoryDto> dtoPage =
                 deviceStatusHistoryService.getByNetworkAndTimestampRange(
                         networkId, minTimestamp, maxTimestamp, page, size);
-        var respPage = deviceStatusHistoryApiMapper.toResponsePage(dtoPage);
         logger.trace(
-                "getByNetworkAndTimestampRange: returning {} history records", respPage.getSize());
-        return respPage;
+                "getByNetworkAndTimestampRange: returning {} history records", dtoPage.getSize());
+        return dtoPage;
     }
 
     /**

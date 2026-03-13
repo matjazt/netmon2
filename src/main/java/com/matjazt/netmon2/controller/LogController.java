@@ -1,9 +1,7 @@
 package com.matjazt.netmon2.controller;
 
 import com.matjazt.netmon2.dto.LogDto;
-import com.matjazt.netmon2.dto.response.LogResponseDto;
 import com.matjazt.netmon2.entity.LogEntity;
-import com.matjazt.netmon2.mapper.LogApiMapper;
 import com.matjazt.netmon2.service.LogService;
 
 import lombok.RequiredArgsConstructor;
@@ -37,7 +35,6 @@ import java.time.LocalDateTime;
 public class LogController {
 
     private final LogService logService;
-    private final LogApiMapper logApiMapper;
 
     // ========== GET ENDPOINTS (retrieve data) ==========
 
@@ -50,7 +47,7 @@ public class LogController {
      */
     @GetMapping("/paginated")
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public Page<LogResponseDto> getAllLogsPaginated(
+    public Page<LogDto> getAllLogsPaginated(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
         logger.trace(
@@ -59,9 +56,8 @@ public class LogController {
                 page,
                 size);
         Page<LogDto> dtoPage = logService.getAllLogsPaginated(page, size);
-        var respPage = logApiMapper.toResponsePage(dtoPage);
-        logger.trace("getAllLogsPaginated: returning {} logs", respPage.getSize());
-        return respPage;
+        logger.trace("getAllLogsPaginated: returning {} logs", dtoPage.getSize());
+        return dtoPage;
     }
 
     /**
@@ -98,7 +94,7 @@ public class LogController {
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
                     + " @networkAuthorizationService.canAccess(authentication, #networkId)")
-    public Page<LogResponseDto> getLogsByNetwork(
+    public Page<LogDto> getLogsByNetwork(
             @PathVariable Long networkId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
@@ -109,9 +105,8 @@ public class LogController {
                 page,
                 size);
         Page<LogDto> dtoPage = logService.getLogsByNetwork(networkId, page, size);
-        var respPage = logApiMapper.toResponsePage(dtoPage);
-        logger.trace("getLogsByNetwork: returning {} logs", respPage.getSize());
-        return respPage;
+        logger.trace("getLogsByNetwork: returning {} logs", dtoPage.getSize());
+        return dtoPage;
     }
 
     /**
@@ -121,7 +116,7 @@ public class LogController {
      */
     @GetMapping("/device/{deviceId}")
     @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
-    public Page<LogResponseDto> getLogsByDevice(
+    public Page<LogDto> getLogsByDevice(
             @PathVariable Long deviceId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
@@ -132,9 +127,8 @@ public class LogController {
                 page,
                 size);
         Page<LogDto> dtoPage = logService.getLogsByDevice(deviceId, page, size);
-        var respPage = logApiMapper.toResponsePage(dtoPage);
-        logger.trace("getLogsByDevice: returning {} logs", respPage.getSize());
-        return respPage;
+        logger.trace("getLogsByDevice: returning {} logs", dtoPage.getSize());
+        return dtoPage;
     }
 
     /**
@@ -147,7 +141,7 @@ public class LogController {
      */
     @GetMapping("/by-timestamp")
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public Page<LogResponseDto> getLogsByTimestampRange(
+    public Page<LogDto> getLogsByTimestampRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                     LocalDateTime minTimestamp,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -164,9 +158,8 @@ public class LogController {
                 size);
         Page<LogDto> dtoPage =
                 logService.getLogsByTimestampRange(minTimestamp, maxTimestamp, page, size);
-        var respPage = logApiMapper.toResponsePage(dtoPage);
-        logger.trace("getLogsByTimestampRange: returning {} logs", respPage.getSize());
-        return respPage;
+        logger.trace("getLogsByTimestampRange: returning {} logs", dtoPage.getSize());
+        return dtoPage;
     }
 
     /**
@@ -181,7 +174,7 @@ public class LogController {
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
                     + " @networkAuthorizationService.canAccess(authentication, #networkId)")
-    public Page<LogResponseDto> getLogsByNetworkAndTimestampRange(
+    public Page<LogDto> getLogsByNetworkAndTimestampRange(
             @PathVariable Long networkId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                     LocalDateTime minTimestamp,
@@ -201,9 +194,8 @@ public class LogController {
         Page<LogDto> dtoPage =
                 logService.getLogsByNetworkAndTimestampRange(
                         networkId, minTimestamp, maxTimestamp, page, size);
-        var respPage = logApiMapper.toResponsePage(dtoPage);
-        logger.trace("getLogsByNetworkAndTimestampRange: returning {} logs", respPage.getSize());
-        return respPage;
+        logger.trace("getLogsByNetworkAndTimestampRange: returning {} logs", dtoPage.getSize());
+        return dtoPage;
     }
 
     /**
@@ -216,7 +208,7 @@ public class LogController {
      */
     @GetMapping("/device/{deviceId}/by-timestamp")
     @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
-    public Page<LogResponseDto> getLogsByDeviceAndTimestampRange(
+    public Page<LogDto> getLogsByDeviceAndTimestampRange(
             @PathVariable Long deviceId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                     LocalDateTime minTimestamp,
@@ -236,8 +228,7 @@ public class LogController {
         Page<LogDto> dtoPage =
                 logService.getLogsByDeviceAndTimestampRange(
                         deviceId, minTimestamp, maxTimestamp, page, size);
-        var respPage = logApiMapper.toResponsePage(dtoPage);
-        logger.trace("getLogsByDeviceAndTimestampRange: returning {} logs", respPage.getSize());
-        return respPage;
+        logger.trace("getLogsByDeviceAndTimestampRange: returning {} logs", dtoPage.getSize());
+        return dtoPage;
     }
 }

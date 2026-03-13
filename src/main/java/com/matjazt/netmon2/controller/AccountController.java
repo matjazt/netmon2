@@ -1,9 +1,9 @@
 package com.matjazt.netmon2.controller;
 
 import com.matjazt.netmon2.dto.AccountDto;
-import com.matjazt.netmon2.dto.response.AccountResponseDto;
+import com.matjazt.netmon2.dto.request.SaveAccountRequest;
 import com.matjazt.netmon2.entity.AccountEntity;
-import com.matjazt.netmon2.mapper.AccountApiMapper;
+import com.matjazt.netmon2.entity.AccountTypeEntity;
 import com.matjazt.netmon2.service.AccountService;
 
 import lombok.RequiredArgsConstructor;
@@ -41,7 +41,6 @@ import java.util.List;
 public class AccountController {
 
     private final AccountService accountService;
-    private final AccountApiMapper accountApiMapper;
 
     // ========== GET ENDPOINTS (retrieve data) ==========
 
@@ -52,14 +51,13 @@ public class AccountController {
      */
     @GetMapping
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public List<AccountResponseDto> getAllAccounts() {
+    public List<AccountDto> getAllAccounts() {
         logger.trace(
                 "getAllAccounts: user={}",
                 SecurityContextHolder.getContext().getAuthentication().getName());
         List<AccountDto> dtos = accountService.findAllAccountSummaries();
-        var resp = accountApiMapper.toResponses(dtos);
-        logger.trace("getAllAccounts: returning {} accounts", resp.size());
-        return resp;
+        logger.trace("getAllAccounts: returning {} accounts", dtos.size());
+        return dtos;
     }
 
     /**
@@ -73,7 +71,7 @@ public class AccountController {
      */
     @GetMapping("/paginated")
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public Page<AccountResponseDto> getAccountsPaginated(
+    public Page<AccountDto> getAccountsPaginated(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         logger.trace(
@@ -82,9 +80,8 @@ public class AccountController {
                 page,
                 size);
         Page<AccountDto> dtoPage = accountService.getAccountSummariesPaginated(page, size);
-        var respPage = accountApiMapper.toResponsePage(dtoPage);
-        logger.trace("getAccountsPaginated: returning {} accounts", respPage.getSize());
-        return respPage;
+        logger.trace("getAccountsPaginated: returning {} accounts", dtoPage.getSize());
+        return dtoPage;
     }
 
     /**
@@ -177,12 +174,12 @@ public class AccountController {
      */
     @PostMapping
     @PreAuthorize("hasAnyRole('admin')")
-    public ResponseEntity<AccountEntity> createAccount(@RequestBody AccountEntity account) {
+    public ResponseEntity<AccountEntity> createAccount(@RequestBody SaveAccountRequest request) {
         logger.trace(
                 "createAccount: user={}, username={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
-                account.getUsername());
-        AccountEntity saved = accountService.saveAccount(account);
+                request.username());
+        AccountEntity saved = accountService.saveAccount(toEntity(request));
         logger.trace("createAccount: created account with id={}", saved.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
@@ -199,7 +196,7 @@ public class AccountController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('admin')")
     public ResponseEntity<AccountEntity> updateAccount(
-            @PathVariable Long id, @RequestBody AccountEntity account) {
+            @PathVariable Long id, @RequestBody SaveAccountRequest request) {
         logger.trace(
                 "updateAccount: user={}, accountId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
@@ -211,11 +208,25 @@ public class AccountController {
             return ResponseEntity.notFound().build();
         }
 
-        // Ensure ID matches
+        AccountEntity account = toEntity(request);
         account.setId(id);
         AccountEntity updated = accountService.saveAccount(account);
         logger.trace("updateAccount: updated account with id={}", updated.getId());
         return ResponseEntity.ok(updated);
+    }
+
+    private AccountEntity toEntity(SaveAccountRequest request) {
+        AccountTypeEntity accountType = new AccountTypeEntity();
+        accountType.setId(request.accountTypeId());
+        AccountEntity account = new AccountEntity();
+        account.setUsername(request.username());
+        account.setAccountType(accountType);
+        account.setPasswordHash(request.passwordHash());
+        account.setFullName(request.fullName());
+        account.setEmail(request.email());
+        account.setCreatedAt(request.createdAt());
+        account.setLastSeen(request.lastSeen());
+        return account;
     }
 
     // ========== DELETE ENDPOINTS (remove resources) ==========

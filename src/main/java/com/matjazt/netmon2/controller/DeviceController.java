@@ -1,11 +1,11 @@
 package com.matjazt.netmon2.controller;
 
 import com.matjazt.netmon2.dto.DeviceDto;
-import com.matjazt.netmon2.dto.response.DeviceResponseDto;
+import com.matjazt.netmon2.dto.request.SaveDeviceRequest;
 import com.matjazt.netmon2.entity.DeviceEntity;
 import com.matjazt.netmon2.entity.DeviceOperationMode;
 import com.matjazt.netmon2.entity.DeviceStatusHistoryEntity;
-import com.matjazt.netmon2.mapper.DeviceApiMapper;
+import com.matjazt.netmon2.entity.NetworkEntity;
 import com.matjazt.netmon2.service.DeviceService;
 
 import lombok.RequiredArgsConstructor;
@@ -73,7 +73,6 @@ import java.util.List;
 public class DeviceController {
 
     private final DeviceService deviceService;
-    private final DeviceApiMapper deviceApiMapper;
 
     // ========== GET ENDPOINTS (retrieve data) ==========
 
@@ -84,9 +83,8 @@ public class DeviceController {
      */
     @GetMapping
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public List<DeviceResponseDto> getAllDevices() {
-        List<DeviceDto> dtos = deviceService.findAllDeviceSummaries();
-        return deviceApiMapper.toResponses(dtos);
+    public List<DeviceDto> getAllDevices() {
+        return deviceService.findAllDeviceSummaries();
     }
 
     /**
@@ -100,11 +98,10 @@ public class DeviceController {
      */
     @GetMapping("/paginated")
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public Page<DeviceResponseDto> getDevicesPaginated(
+    public Page<DeviceDto> getDevicesPaginated(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        Page<DeviceDto> dtoPage = deviceService.getDeviceSummariesPaginated(null, page, size);
-        return deviceApiMapper.toResponsePage(dtoPage);
+        return deviceService.getDeviceSummariesPaginated(null, page, size);
     }
 
     /**
@@ -155,15 +152,14 @@ public class DeviceController {
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
                     + " @networkAuthorizationService.canAccess(authentication, #networkId)")
-    public List<DeviceResponseDto> getDevicesByNetwork(@PathVariable Long networkId) {
+    public List<DeviceDto> getDevicesByNetwork(@PathVariable Long networkId) {
         logger.trace(
                 "getDevicesByNetwork: user={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId);
         List<DeviceDto> dtos = deviceService.getDevicesByNetwork(networkId);
-        var resp = deviceApiMapper.toResponses(dtos);
-        logger.trace("getDevicesByNetwork: returning {} devices", resp.size());
-        return resp;
+        logger.trace("getDevicesByNetwork: returning {} devices", dtos.size());
+        return dtos;
     }
 
     /**
@@ -175,9 +171,8 @@ public class DeviceController {
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
                     + " @networkAuthorizationService.canAccess(authentication, #networkId)")
-    public List<DeviceResponseDto> getOnlineDevices(@PathVariable Long networkId) {
-        List<DeviceDto> dtos = deviceService.findOnlineDeviceSummaries(networkId);
-        return deviceApiMapper.toResponses(dtos);
+    public List<DeviceDto> getOnlineDevices(@PathVariable Long networkId) {
+        return deviceService.findOnlineDeviceSummaries(networkId);
     }
 
     /**
@@ -250,8 +245,8 @@ public class DeviceController {
      * <p>Returns 201 Created with the saved device (including generated ID)
      */
     @PostMapping
-    public ResponseEntity<DeviceEntity> createDevice(@RequestBody DeviceEntity device) {
-        DeviceEntity saved = deviceService.saveDevice(device);
+    public ResponseEntity<DeviceEntity> createDevice(@RequestBody SaveDeviceRequest request) {
+        DeviceEntity saved = deviceService.saveDevice(toEntity(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
@@ -288,17 +283,34 @@ public class DeviceController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<DeviceEntity> updateDevice(
-            @PathVariable Long id, @RequestBody DeviceEntity device) {
+            @PathVariable Long id, @RequestBody SaveDeviceRequest request) {
 
         // Verify device exists
         if (deviceService.findDeviceById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        // Ensure ID matches
+        DeviceEntity device = toEntity(request);
         device.setId(id);
         DeviceEntity updated = deviceService.saveDevice(device);
         return ResponseEntity.ok(updated);
+    }
+
+    private DeviceEntity toEntity(SaveDeviceRequest request) {
+        NetworkEntity network = new NetworkEntity();
+        network.setId(request.networkId());
+        DeviceEntity device = new DeviceEntity();
+        device.setNetwork(network);
+        device.setName(request.name());
+        device.setMacAddress(request.macAddress());
+        device.setIpAddress(request.ipAddress());
+        device.setOnline(request.online());
+        device.setFirstSeen(request.firstSeen());
+        device.setLastSeen(request.lastSeen());
+        device.setActiveAlertId(request.activeAlertId());
+        device.setVendor(request.vendor());
+        device.setDeviceOperationMode(request.deviceOperationMode());
+        return device;
     }
 
     /**

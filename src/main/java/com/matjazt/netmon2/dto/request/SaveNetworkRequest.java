@@ -1,10 +1,9 @@
-package com.matjazt.netmon2.dto.response;
+package com.matjazt.netmon2.dto.request;
 
 import java.time.LocalDateTime;
 
-/** Lightweight DTO for exposing network data via API without touching lazy proxies. */
-public record NetworkResponseDto(
-        Long id,
+/** Request DTO for creating or updating a Network. */
+public record SaveNetworkRequest(
         String name,
         LocalDateTime firstSeen,
         LocalDateTime lastSeen,

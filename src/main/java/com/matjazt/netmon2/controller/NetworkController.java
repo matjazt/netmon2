@@ -1,9 +1,8 @@
 package com.matjazt.netmon2.controller;
 
 import com.matjazt.netmon2.dto.NetworkDto;
-import com.matjazt.netmon2.dto.response.NetworkResponseDto;
+import com.matjazt.netmon2.dto.request.SaveNetworkRequest;
 import com.matjazt.netmon2.entity.NetworkEntity;
-import com.matjazt.netmon2.mapper.NetworkApiMapper;
 import com.matjazt.netmon2.service.NetworkService;
 
 import lombok.RequiredArgsConstructor;
@@ -41,7 +40,6 @@ import java.util.List;
 public class NetworkController {
 
     private final NetworkService networkService;
-    private final NetworkApiMapper networkApiMapper;
 
     // ========== GET ENDPOINTS (retrieve data) ==========
 
@@ -52,14 +50,13 @@ public class NetworkController {
      */
     @GetMapping
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public List<NetworkResponseDto> getAllNetworks() {
+    public List<NetworkDto> getAllNetworks() {
         logger.trace(
                 "getAllNetworks: user={}",
                 SecurityContextHolder.getContext().getAuthentication().getName());
         List<NetworkDto> dtos = networkService.findAllNetworkSummaries();
-        var resp = networkApiMapper.toResponses(dtos);
-        logger.trace("getAllNetworks: returning {} networks", resp.size());
-        return resp;
+        logger.trace("getAllNetworks: returning {} networks", dtos.size());
+        return dtos;
     }
 
     /**
@@ -69,7 +66,7 @@ public class NetworkController {
      */
     @GetMapping("/paginated")
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public Page<NetworkResponseDto> getNetworksPaginated(
+    public Page<NetworkDto> getNetworksPaginated(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         logger.trace(
@@ -78,9 +75,8 @@ public class NetworkController {
                 page,
                 size);
         Page<NetworkDto> dtoPage = networkService.getNetworkSummariesPaginated(page, size);
-        var respPage = networkApiMapper.toResponsePage(dtoPage);
-        logger.trace("getNetworksPaginated: returning {} networks", respPage.getSize());
-        return respPage;
+        logger.trace("getNetworksPaginated: returning {} networks", dtoPage.getSize());
+        return dtoPage;
     }
 
     /**
@@ -209,12 +205,12 @@ public class NetworkController {
      */
     @PostMapping
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public ResponseEntity<NetworkEntity> createNetwork(@RequestBody NetworkEntity network) {
+    public ResponseEntity<NetworkEntity> createNetwork(@RequestBody SaveNetworkRequest request) {
         logger.trace(
                 "createNetwork: user={}, name={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
-                network.getName());
-        NetworkEntity saved = networkService.saveNetwork(network);
+                request.name());
+        NetworkEntity saved = networkService.saveNetwork(toEntity(request));
         logger.trace("createNetwork: created network with id={}", saved.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
@@ -231,7 +227,7 @@ public class NetworkController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public ResponseEntity<NetworkEntity> updateNetwork(
-            @PathVariable Long id, @RequestBody NetworkEntity network) {
+            @PathVariable Long id, @RequestBody SaveNetworkRequest request) {
         logger.trace(
                 "updateNetwork: user={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
@@ -243,11 +239,22 @@ public class NetworkController {
             return ResponseEntity.notFound().build();
         }
 
-        // Ensure ID matches
+        NetworkEntity network = toEntity(request);
         network.setId(id);
         NetworkEntity updated = networkService.saveNetwork(network);
         logger.trace("updateNetwork: updated network with id={}", updated.getId());
         return ResponseEntity.ok(updated);
+    }
+
+    private NetworkEntity toEntity(SaveNetworkRequest request) {
+        NetworkEntity network = new NetworkEntity();
+        network.setName(request.name());
+        network.setFirstSeen(request.firstSeen());
+        network.setLastSeen(request.lastSeen());
+        network.setActiveAlertId(request.activeAlertId());
+        network.setConfiguration(request.configuration());
+        network.setBackOnlineTime(request.backOnlineTime());
+        return network;
     }
 
     // ========== DELETE ENDPOINTS (remove resources) ==========
