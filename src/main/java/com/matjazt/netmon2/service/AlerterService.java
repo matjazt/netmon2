@@ -126,7 +126,7 @@ public class AlerterService {
         }
 
         var fullMessage = String.join(System.lineSeparator(), fullMessageEntries);
-        logger.warn("alert message for network {}:\n{}", network, fullMessage, device);
+        logger.info("alert message for network {}:\n{}", network, fullMessage, device);
 
         // Send email if network has an email address configured
         var notificationEmailAddress = networkConfig.getNotificationEmailAddress();
@@ -283,7 +283,7 @@ public class AlerterService {
         if (network.getLastSeen().isBefore(onlineThreshold)) {
             // network failed to report regularly, so we should reset the backOnlineTime to reflect
             // that
-            logger.warn(
+            logger.info(
                     "Network {} failed to report regularly (lastSeen: {}, onlineThreshold: {},"
                             + " backOnlineTime: {}), resetting backOnlineTime",
                     network,

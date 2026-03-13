@@ -25,12 +25,14 @@
     </appender>
 
     <!-- Custom appender for database logging of network/device events -->
-    <appender name="NETWORK_DB" class="com.matjazt.netmon2.config.NetworkLogAppender">
+    <appender
+        name="NETWORK_DB" class="com.matjazt.netmon2.config.NetworkLogAppender">
         <!-- No configuration needed - uses Spring beans -->
     </appender>
 
     <!-- Async wrapper to prevent database logging from blocking log threads -->
-    <appender name="ASYNC_NETWORK_DB" class="ch.qos.logback.classic.AsyncAppender">
+    <appender
+        name="ASYNC_NETWORK_DB" class="ch.qos.logback.classic.AsyncAppender">
         <appender-ref ref="NETWORK_DB" />
         <!-- Queue size for async processing -->
         <queueSize>512</queueSize>
@@ -41,9 +43,26 @@
         <neverBlock>true</neverBlock>
     </appender>
 
+
+    <!-- Buffered email appender - sends batched log emails -->
+    <appender name="EMAIL"
+        class="com.matjazt.netmon2.config.BufferedEmailAppender">
+        <!-- No configuration needed - uses Spring beans -->
+    </appender>
+
+    <!-- Async wrapper for email appender to prevent blocking -->
+    <appender
+        name="ASYNC_EMAIL" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="EMAIL" />
+        <queueSize>256</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <neverBlock>true</neverBlock>
+    </appender>
+
     <root level="INFO">
         <appender-ref ref="ROLLING" />
         <appender-ref ref="ASYNC_NETWORK_DB" />
+        <appender-ref ref="ASYNC_EMAIL" />
     </root>
 
 </configuration>

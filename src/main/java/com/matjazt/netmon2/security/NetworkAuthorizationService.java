@@ -95,7 +95,7 @@ public class NetworkAuthorizationService {
                         })
                 .orElseGet(
                         () -> {
-                            logger.warn(
+                            logger.debug(
                                     "Access denied: authenticated user '{}' not found in"
                                             + " database",
                                     username);

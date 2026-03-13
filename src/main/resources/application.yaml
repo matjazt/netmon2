@@ -32,6 +32,12 @@ spring:
         flush_mode: COMMIT
     open-in-view: false
 
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
 netmon:
   cache:
     network-config:
@@ -82,13 +88,30 @@ mqtt:
   completion-timeout: 5000 # Completion timeout in milliseconds
   ssl-verify-hostname: true # Verify SSL hostname (disable only for testing)
 
+email-delivery:
+  smtp-host: change-me
+  smtp-port: 587
+  smtp-username: change-me
+  smtp-password: change-me
+  smtp-starttls: true
+  smtp-auth: true
+
+# Buffered Email Logging Configuration
+# These properties are used by BufferedEmailAppender in logback-spring.xml
+# Configure via environment variables using relaxed binding (e.g., EMAIL_LOGGING_SMTP_HOST)
+# or override in application-{profile}.yml
+email-logging:
+  # Email addresses
+  email-from: change-me
+  email-to: change-me
+  email-subject-prefix: "[netmon2]"
+
+  # Buffering behavior
+  max-count: 100 # Send email when buffer reaches this many logs
+  max-delay-seconds: 300 # Send email after this many seconds (300 seconds)
+  min-level: WARN # Minimum log level to buffer (ERROR, WARN, INFO, DEBUG, TRACE)
+
 alerter:
-  smtp-host: changeit # SMTP server hostname
-  smtp-port: changeit # SMTP port (587 for TLS, 465 for SSL, 25 for plain)
-  smtp-username: changeit # SMTP username for authentication
-  smtp-password: changeit # SMTP password for authentication
-  smtp-start-tls: true # Enable STARTTLS (recommended for port 587)
-  smtp-auth: true # Enable SMTP authentication
   from-email: changeit # Sender email address
   from-name: netmon2 # Sender display name
   interval-seconds: 20 # Alert processing interval in seconds

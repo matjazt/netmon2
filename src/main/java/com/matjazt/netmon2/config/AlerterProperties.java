@@ -34,12 +34,6 @@ import org.springframework.stereotype.Component;
 @Setter
 public class AlerterProperties {
 
-    private String smtpHost;
-    private int smtpPort = 587;
-    private String smtpUsername;
-    private String smtpPassword;
-    private boolean smtpStartTls = true;
-    private boolean smtpAuth = true;
     private String fromEmail;
     private String fromName;
 

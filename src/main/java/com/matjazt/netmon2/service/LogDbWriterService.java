@@ -46,7 +46,7 @@ public class LogDbWriterService {
             logRepository.save(logEntry);
         } catch (Exception e) {
             // Never throw - database logging is supplementary and must not break the app
-            logger.warn("Failed to write log entry to database: {}", e.getMessage());
+            // Also do not log the error to avoid potential recursion.
         }
     }
 }

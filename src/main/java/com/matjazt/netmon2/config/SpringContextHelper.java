@@ -54,15 +54,9 @@ public class SpringContextHelper implements ApplicationContextAware {
                 return null;
             }
             var bean = context.getBean(beanClass);
-            if (bean == null) {
-                logger.warn(
-                        "Spring context does not contain bean of type {} at this time",
-                        beanClass.getSimpleName());
-            } else {
-                logger.info(
-                        "Successfully retrieved bean {} from Spring context",
-                        beanClass.getSimpleName());
-            }
+            logger.debug(
+                    "Successfully retrieved bean {} from Spring context",
+                    beanClass.getSimpleName());
             return bean;
         } catch (Exception e) {
             logger.warn(

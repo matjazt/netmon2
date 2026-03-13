@@ -68,7 +68,7 @@ public class WatchDogConfig {
         // First check if watchdog has detected a shutdown request.
         // This is a slow polling operation, so we use a timeout of 5 seconds
         if (wd.waitForShutdownEvent(5000)) {
-            logger.error(
+            logger.info(
                     "SvcWatchDogClient has detected an external shutdown request - exiting"
                             + " application");
             running = false;

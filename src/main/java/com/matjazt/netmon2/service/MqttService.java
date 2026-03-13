@@ -136,7 +136,7 @@ public class MqttService {
             var messageTimestamp = LocalDateTime.ofInstant(message.getTimestamp(), ZoneOffset.UTC);
 
             if (messageTimestamp.isAfter(now.plusSeconds(networkConfig.getReportingInterval()))) {
-                logger.warn(
+                logger.info(
                         "Message timestamp is too far in the future: {}, ignoring entire message"
                                 + " for network {}",
                         messageTimestamp,
@@ -284,7 +284,7 @@ public class MqttService {
                         // The device was offline, now online
                         shouldRecord = true;
                         if (device.getDeviceOperationMode() == DeviceOperationMode.UNAUTHORIZED) {
-                            logger.warn(
+                            logger.info(
                                     "Device {} is not allowed on network {} but is online!",
                                     device,
                                     network);

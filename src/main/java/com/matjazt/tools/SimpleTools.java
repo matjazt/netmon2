@@ -5,6 +5,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 
 public class SimpleTools {
 
@@ -191,5 +192,29 @@ public class SimpleTools {
             return txt.substring(0, maxLength - 3) + "...";
         }
         return txt;
+    }
+
+    public static boolean isNumericString(String str, int minLength, int maxLength) {
+        if (str == null || str.length() < minLength || str.length() > maxLength) {
+            return false;
+        }
+        for (char c : str.toCharArray()) {
+            if (!Character.isDigit(c)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static String toHexString(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
+
+    public static boolean arrayContainsString(String[] array, String element) {
+        return array != null && element != null && Arrays.stream(array).anyMatch(element::equals);
     }
 }
