@@ -14,7 +14,7 @@ import java.util.Optional;
  * change often.
  */
 @Repository
-public interface AccountTypeRepository extends JpaRepository<AccountTypeEntity, Long> {
+public interface AccountTypeRepository extends JpaRepository<AccountTypeEntity, Integer> {
 
     /**
      * Find account type by name (e.g., "Admin", "Viewer", "MonitoringDevice")

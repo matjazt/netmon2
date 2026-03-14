@@ -34,6 +34,7 @@ dependencies {
     implementation("net.java.dev.jna:jna:5.14.0")
     implementation("net.java.dev.jna:jna-platform:5.14.0")
     implementation("me.paulschwarz:springboot4-dotenv:5.1.0")
+    implementation("org.zalando:logbook-spring-boot-starter:4.0.2")
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

@@ -68,6 +68,23 @@ netmon:
       maximum-size: 1000
       expire-after-write: 1m
 
+logbook:
+  # Master switch. Set to false (or NETMON_LOGBOOK_FILTER_ENABLED=false) to disable entirely.
+  filter:
+    enabled: true
+  format:
+    style: http # human-readable HTTP wire format
+  write:
+    level: TRACE # log level used by Logbook writers
+  predicate:
+    include: # log every path; add exclusions below if needed
+      # - path: /**
+      - path: /netmon2/api/**
+    exclude:
+      - path: /netmon2/actuator/**
+      - path: /netmon2/v3/**
+      - path: /netmon2/swagger-ui/**
+
 logging:
   level:
     org.hibernate.SQL: OFF
@@ -76,6 +93,8 @@ logging:
     # org.hibernate.orm.jdbc.bind: TRACE
     com.matjazt.tools.SvcWatchDogClient: INFO
     com.matjazt: TRACE
+    # Set to TRACE to see Logbook output; set to OFF to silence it without disabling the filter
+    org.zalando.logbook: TRACE
 
 server:
   port: 8080
