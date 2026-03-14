@@ -25,6 +25,7 @@ public interface AccountMapper {
      *
      * <p>@Mapping maps nested accountType.name to flat accountTypeName field.
      */
+    @Mapping(source = "accountType.id", target = "accountTypeId")
     @Mapping(source = "accountType.name", target = "accountTypeName")
     AccountDto toDto(AccountEntity entity);
 

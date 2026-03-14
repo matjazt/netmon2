@@ -189,7 +189,7 @@ CREATE INDEX idx_alert_timestamp ON alert USING btree ("timestamp");
 CREATE TABLE log_level (
     level int4 NOT NULL,
     name varchar(32) NOT NULL,
-    CONSTRAINT pk_log_level PRIMARY KEY (level),
+    CONSTRAINT pk_log_level PRIMARY KEY (level)
 );
 
 INSERT INTO log_level (level, name) VALUES

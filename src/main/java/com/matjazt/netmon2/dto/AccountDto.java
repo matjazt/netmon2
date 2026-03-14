@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 public record AccountDto(
         Long id,
         String username,
+        int accountTypeId,
         String accountTypeName,
         String fullName,
         String email,

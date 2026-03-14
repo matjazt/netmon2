@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 /** Request DTO for creating or updating an Account. */
 public record SaveAccountRequest(
         String username,
-        Long accountTypeId,
+        Integer accountTypeId,
         String password,
         String fullName,
         String email,
