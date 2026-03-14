@@ -6,7 +6,6 @@ import com.matjazt.netmon2.entity.DeviceEntity;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -39,13 +38,4 @@ public interface DeviceMapper {
      * <p>MapStruct automatically generates this using toDto() for each element.
      */
     List<DeviceDto> toDtos(List<DeviceEntity> entities);
-
-    /**
-     * Convert Page of DeviceEntity to Page of DeviceDto.
-     *
-     * <p>Default method allows custom logic for Page mapping.
-     */
-    default Page<DeviceDto> toDtoPage(Page<DeviceEntity> page) {
-        return page.map(this::toDto);
-    }
 }

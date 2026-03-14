@@ -77,7 +77,7 @@ logbook:
   write:
     level: TRACE # log level used by Logbook writers
   predicate:
-    include: # log every path; add exclusions below if needed
+    include:
       # - path: /**
       - path: /netmon2/api/**
     exclude:

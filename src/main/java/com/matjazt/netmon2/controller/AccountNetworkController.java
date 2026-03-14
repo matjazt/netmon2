@@ -9,7 +9,6 @@ import com.matjazt.netmon2.service.AccountNetworkService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -58,26 +57,6 @@ public class AccountNetworkController {
         List<AccountNetworkDto> dtos = accountNetworkService.findAllSummaries();
         logger.trace("getAllAccountNetworks: returning {} relationships", dtos.size());
         return dtos;
-    }
-
-    /**
-     * GET /api/account-networks/paginated?page=0&size=20
-     *
-     * <p>Get account-network relationships with pagination
-     */
-    @GetMapping("/paginated")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public Page<AccountNetworkDto> getAccountNetworksPaginated(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        logger.trace(
-                "getAccountNetworksPaginated: user={}, page={}, size={}",
-                SecurityContextHolder.getContext().getAuthentication().getName(),
-                page,
-                size);
-        Page<AccountNetworkDto> dtoPage = accountNetworkService.getSummariesPaginated(page, size);
-        logger.trace("getAccountNetworksPaginated: returning {} relationships", dtoPage.getSize());
-        return dtoPage;
     }
 
     /**

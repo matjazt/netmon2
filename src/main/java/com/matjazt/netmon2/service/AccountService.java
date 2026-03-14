@@ -9,10 +9,6 @@ import com.matjazt.netmon2.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -141,26 +137,6 @@ public class AccountService {
         var dtos = accountMapper.toDtos(entities);
         logger.trace("findAllAccountSummaries: returning {} accounts", dtos.size());
         return dtos;
-    }
-
-    /**
-     * Pagination - get accounts page by page
-     *
-     * <p>Pageable defines page number, size, and sorting. Page contains results + metadata (total
-     * pages, total elements, etc.)
-     */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public Page<AccountDto> getAccountSummariesPaginated(int page, int size) {
-        logger.trace(
-                "getAccountSummariesPaginated: user={}, page={}, size={}",
-                SecurityContextHolder.getContext().getAuthentication().getName(),
-                page,
-                size);
-        Pageable pageable = PageRequest.of(page, size, Sort.by("username").ascending());
-        Page<AccountEntity> entityPage = accountRepository.findAll(pageable);
-        var dtoPage = accountMapper.toDtoPage(entityPage);
-        logger.trace("getAccountSummariesPaginated: returning {} accounts", dtoPage.getSize());
-        return dtoPage;
     }
 
     // ========== DTO SINGLE-RECORD METHODS ==========

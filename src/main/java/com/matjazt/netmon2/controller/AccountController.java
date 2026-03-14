@@ -7,7 +7,6 @@ import com.matjazt.netmon2.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -56,30 +55,6 @@ public class AccountController {
         List<AccountDto> dtos = accountService.findAllAccountSummaries();
         logger.trace("getAllAccounts: returning {} accounts", dtos.size());
         return dtos;
-    }
-
-    /**
-     * GET /api/accounts/paginated?page=0&size=20
-     *
-     * <p>Get accounts with pagination
-     *
-     * <p>@RequestParam extracts query parameters from URL
-     *
-     * <p>defaultValue provides fallback if parameter is missing
-     */
-    @GetMapping("/paginated")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public Page<AccountDto> getAccountsPaginated(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        logger.trace(
-                "getAccountsPaginated: user={}, page={}, size={}",
-                SecurityContextHolder.getContext().getAuthentication().getName(),
-                page,
-                size);
-        Page<AccountDto> dtoPage = accountService.getAccountSummariesPaginated(page, size);
-        logger.trace("getAccountsPaginated: returning {} accounts", dtoPage.getSize());
-        return dtoPage;
     }
 
     /**

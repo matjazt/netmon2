@@ -9,10 +9,6 @@ import com.matjazt.netmon2.repository.NetworkRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -151,26 +147,6 @@ public class NetworkService {
         var dtos = networkMapper.toDtos(entities);
         logger.trace("findAllNetworkSummaries: returning {} networks", dtos.size());
         return dtos;
-    }
-
-    /**
-     * Pagination - get networks page by page
-     *
-     * <p>Pageable defines page number, size, and sorting. Page contains results + metadata (total
-     * pages, total elements, etc.)
-     */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public Page<NetworkDto> getNetworkSummariesPaginated(int page, int size) {
-        logger.trace(
-                "getNetworkSummariesPaginated: user={}, page={}, size={}",
-                SecurityContextHolder.getContext().getAuthentication().getName(),
-                page,
-                size);
-        Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
-        Page<NetworkEntity> entityPage = networkRepository.findAll(pageable);
-        var dtoPage = networkMapper.toDtoPage(entityPage);
-        logger.trace("getNetworkSummariesPaginated: returning {} networks", dtoPage.getSize());
-        return dtoPage;
     }
 
     // ========== DTO SINGLE-RECORD METHODS ==========

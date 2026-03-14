@@ -7,7 +7,6 @@ import com.matjazt.netmon2.service.NetworkService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -56,26 +55,6 @@ public class NetworkController {
         List<NetworkDto> dtos = networkService.findAllNetworkSummaries();
         logger.trace("getAllNetworks: returning {} networks", dtos.size());
         return dtos;
-    }
-
-    /**
-     * GET /api/networks/paginated?page=0&size=20
-     *
-     * <p>Get networks with pagination
-     */
-    @GetMapping("/paginated")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public Page<NetworkDto> getNetworksPaginated(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        logger.trace(
-                "getNetworksPaginated: user={}, page={}, size={}",
-                SecurityContextHolder.getContext().getAuthentication().getName(),
-                page,
-                size);
-        Page<NetworkDto> dtoPage = networkService.getNetworkSummariesPaginated(page, size);
-        logger.trace("getNetworksPaginated: returning {} networks", dtoPage.getSize());
-        return dtoPage;
     }
 
     /**

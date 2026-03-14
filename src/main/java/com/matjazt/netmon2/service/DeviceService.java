@@ -242,26 +242,6 @@ public class DeviceService {
         return new DeviceStats(totalDevices, onlineDevices, offlineDevices);
     }
 
-    /**
-     * EXAMPLE: Pagination - get devices page by page
-     *
-     * <p>Pageable defines page number, size, and sorting. Page contains results + metadata (total
-     * pages, total elements, etc.)
-     */
-    public Page<DeviceDto> getDeviceSummariesPaginated(Long networkId, int page, int size) {
-        // Create Pageable: page 0 is first page, sort by name ascending
-        Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
-        Page<DeviceEntity> entityPage;
-
-        if (networkId != null) {
-            entityPage = deviceRepository.findByNetworkIdWithNetwork(networkId, pageable);
-        } else {
-            entityPage = deviceRepository.findAllWithNetwork(pageable);
-        }
-
-        return deviceMapper.toDtoPage(entityPage);
-    }
-
     /** EXAMPLE: Get device history */
     public List<DeviceStatusHistoryEntity> getDeviceHistory(Long deviceId, int limit) {
         Pageable pageable = PageRequest.of(0, limit, Sort.by("timestamp").descending());

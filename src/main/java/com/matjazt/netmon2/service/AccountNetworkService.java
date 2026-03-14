@@ -17,10 +17,6 @@ import com.matjazt.netmon2.repository.NetworkRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -246,21 +242,6 @@ public class AccountNetworkService {
         var dtos = accountNetworkMapper.toDtos(entities);
         logger.trace("getByNetworkId: returning {} relationships", dtos.size());
         return dtos;
-    }
-
-    /** Pagination - get relationships page by page */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public Page<AccountNetworkDto> getSummariesPaginated(int page, int size) {
-        logger.trace(
-                "getSummariesPaginated: user={}, page={}, size={}",
-                SecurityContextHolder.getContext().getAuthentication().getName(),
-                page,
-                size);
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
-        Page<AccountNetworkEntity> entityPage = accountNetworkRepository.findAll(pageable);
-        var dtoPage = accountNetworkMapper.toDtoPage(entityPage);
-        logger.trace("getSummariesPaginated: returning {} relationships", dtoPage.getSize());
-        return dtoPage;
     }
 
     // ========== DTO SINGLE-RECORD METHODS ==========

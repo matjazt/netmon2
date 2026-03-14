@@ -6,7 +6,6 @@ import com.matjazt.netmon2.entity.AccountNetworkEntity;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -40,13 +39,4 @@ public interface AccountNetworkMapper {
      * <p>MapStruct automatically generates this using toDto() for each element.
      */
     List<AccountNetworkDto> toDtos(List<AccountNetworkEntity> entities);
-
-    /**
-     * Convert Page of AccountNetworkEntity to Page of AccountNetworkDto.
-     *
-     * <p>Default method allows custom logic for Page mapping.
-     */
-    default Page<AccountNetworkDto> toDtoPage(Page<AccountNetworkEntity> page) {
-        return page.map(this::toDto);
-    }
 }

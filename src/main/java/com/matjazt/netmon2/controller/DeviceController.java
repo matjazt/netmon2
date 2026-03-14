@@ -9,7 +9,6 @@ import com.matjazt.netmon2.service.DeviceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -83,23 +82,6 @@ public class DeviceController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<DeviceDto> getAllDevices() {
         return deviceService.findAllDeviceSummaries();
-    }
-
-    /**
-     * EXAMPLE: GET /api/devices/paginated?page=0&size=20
-     *
-     * <p>Get devices with pagination
-     *
-     * <p>@RequestParam extracts query parameters from URL
-     *
-     * <p>defaultValue provides fallback if parameter is missing
-     */
-    @GetMapping("/paginated")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public Page<DeviceDto> getDevicesPaginated(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        return deviceService.getDeviceSummariesPaginated(null, page, size);
     }
 
     /**
