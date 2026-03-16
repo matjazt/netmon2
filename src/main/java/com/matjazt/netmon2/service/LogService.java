@@ -37,7 +37,7 @@ public class LogService {
     /** Find log by ID */
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public Optional<LogEntity> findLogById(Long id) {
-        logger.trace(
+        log.trace(
                 "findLogById: user={}, logId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
@@ -51,7 +51,7 @@ public class LogService {
      */
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public Page<LogDto> getAllLogsPaginated(int page, int size) {
-        logger.trace(
+        log.trace(
                 "getAllLogsPaginated: user={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 page,
@@ -59,7 +59,7 @@ public class LogService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         Page<LogEntity> entityPage = logRepository.findAll(pageable);
         var dtoPage = logMapper.toDtoPage(entityPage);
-        logger.trace("getAllLogsPaginated: returning {} logs", dtoPage.getSize());
+        log.trace("getAllLogsPaginated: returning {} logs", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -72,7 +72,7 @@ public class LogService {
             "hasAnyRole('admin', 'system') or"
                     + " @networkAuthorizationService.canAccess(authentication, #networkId)")
     public Page<LogDto> getLogsByNetwork(Long networkId, int page, int size) {
-        logger.trace(
+        log.trace(
                 "getLogsByNetwork: user={}, networkId={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId,
@@ -81,7 +81,7 @@ public class LogService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         Page<LogEntity> entityPage = logRepository.findByNetwork_Id(networkId, pageable);
         var dtoPage = logMapper.toDtoPage(entityPage);
-        logger.trace("getLogsByNetwork: returning {} logs", dtoPage.getSize());
+        log.trace("getLogsByNetwork: returning {} logs", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -92,7 +92,7 @@ public class LogService {
      */
     @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
     public Page<LogDto> getLogsByDevice(Long deviceId, int page, int size) {
-        logger.trace(
+        log.trace(
                 "getLogsByDevice: user={}, deviceId={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 deviceId,
@@ -101,7 +101,7 @@ public class LogService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         Page<LogEntity> entityPage = logRepository.findByDevice_Id(deviceId, pageable);
         var dtoPage = logMapper.toDtoPage(entityPage);
-        logger.trace("getLogsByDevice: returning {} logs", dtoPage.getSize());
+        log.trace("getLogsByDevice: returning {} logs", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -113,7 +113,7 @@ public class LogService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public Page<LogDto> getLogsByTimestampRange(
             LocalDateTime minTimestamp, LocalDateTime maxTimestamp, int page, int size) {
-        logger.trace(
+        log.trace(
                 "getLogsByTimestampRange: user={}, minTimestamp={}, maxTimestamp={}, page={},"
                         + " size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
@@ -125,7 +125,7 @@ public class LogService {
         Page<LogEntity> entityPage =
                 logRepository.findByTimestampBetween(minTimestamp, maxTimestamp, pageable);
         var dtoPage = logMapper.toDtoPage(entityPage);
-        logger.trace("getLogsByTimestampRange: returning {} logs", dtoPage.getSize());
+        log.trace("getLogsByTimestampRange: returning {} logs", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -143,7 +143,7 @@ public class LogService {
             LocalDateTime maxTimestamp,
             int page,
             int size) {
-        logger.trace(
+        log.trace(
                 "getLogsByNetworkAndTimestampRange: user={}, networkId={}, minTimestamp={},"
                         + " maxTimestamp={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
@@ -157,7 +157,7 @@ public class LogService {
                 logRepository.findByNetwork_IdAndTimestampBetween(
                         networkId, minTimestamp, maxTimestamp, pageable);
         var dtoPage = logMapper.toDtoPage(entityPage);
-        logger.trace("getLogsByNetworkAndTimestampRange: returning {} logs", dtoPage.getSize());
+        log.trace("getLogsByNetworkAndTimestampRange: returning {} logs", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -173,7 +173,7 @@ public class LogService {
             LocalDateTime maxTimestamp,
             int page,
             int size) {
-        logger.trace(
+        log.trace(
                 "getLogsByDeviceAndTimestampRange: user={}, deviceId={}, minTimestamp={},"
                         + " maxTimestamp={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
@@ -187,7 +187,7 @@ public class LogService {
                 logRepository.findByDevice_IdAndTimestampBetween(
                         deviceId, minTimestamp, maxTimestamp, pageable);
         var dtoPage = logMapper.toDtoPage(entityPage);
-        logger.trace("getLogsByDeviceAndTimestampRange: returning {} logs", dtoPage.getSize());
+        log.trace("getLogsByDeviceAndTimestampRange: returning {} logs", dtoPage.getSize());
         return dtoPage;
     }
 

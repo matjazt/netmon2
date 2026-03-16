@@ -38,7 +38,7 @@ public class WatchDogConfig {
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationReady() {
         if (healthEndpoint == null) {
-            logger.warn(
+            log.warn(
                     "HealthEndpoint bean not found — WatchDog will assume the application is"
                             + " healthy unless a timeout or freeze is detected.");
         }
@@ -52,11 +52,11 @@ public class WatchDogConfig {
         monitoringThread =
                 new Thread(
                         () -> {
-                            logger.info("Monitoring thread started");
+                            log.info("Monitoring thread started");
                             while (running) {
                                 checkHealthAndPing();
                             }
-                            logger.info("Monitoring thread stopped");
+                            log.info("Monitoring thread stopped");
                         },
                         "HealthMonitorThread");
         monitoringThread.start();
@@ -68,7 +68,7 @@ public class WatchDogConfig {
         // First check if watchdog has detected a shutdown request.
         // This is a slow polling operation, so we use a timeout of 5 seconds
         if (wd.waitForShutdownEvent(5000)) {
-            logger.info(
+            log.info(
                     "SvcWatchDogClient has detected an external shutdown request - exiting"
                             + " application");
             running = false;
@@ -84,7 +84,7 @@ public class WatchDogConfig {
         // check watchdog status, and exit if watchdog has marked the application as unhealthy
         // AND external watchdog is detected
         if (wd.isTimedOut() && wd.isExternalWatchdogDetected()) {
-            logger.error(
+            log.error(
                     "SvcWatchDogClient has marked the application as unhealthy - exiting"
                             + " application, since it will be restarted by the external watchdog");
             running = false;
@@ -121,7 +121,7 @@ public class WatchDogConfig {
                 monitoringThread.join(2000); // Wait up to 2 seconds for thread to finish
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                logger.warn("Interrupted while waiting for monitoring thread to stop");
+                log.warn("Interrupted while waiting for monitoring thread to stop");
             }
         }
         SvcWatchDogClient.getInstance().stop();

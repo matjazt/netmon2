@@ -49,11 +49,11 @@ public class AccountController {
     @GetMapping
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountDto> getAllAccounts() {
-        logger.trace(
+        log.trace(
                 "getAllAccounts: user={}",
                 SecurityContextHolder.getContext().getAuthentication().getName());
         List<AccountDto> dtos = accountService.findAllAccountSummaries();
-        logger.trace("getAllAccounts: returning {} accounts", dtos.size());
+        log.trace("getAllAccounts: returning {} accounts", dtos.size());
         return dtos;
     }
 
@@ -74,7 +74,7 @@ public class AccountController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public ResponseEntity<AccountDto> getAccountById(@PathVariable Long id) {
-        logger.trace(
+        log.trace(
                 "getAccountById: user={}, accountId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
@@ -94,7 +94,7 @@ public class AccountController {
     @GetMapping("/username/{username}")
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public ResponseEntity<AccountDto> getAccountByUsername(@PathVariable String username) {
-        logger.trace(
+        log.trace(
                 "getAccountByUsername: user={}, targetUsername={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 username);
@@ -109,7 +109,7 @@ public class AccountController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<AccountDto> getCurrentAccount() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        logger.trace("getCurrentAccount: user={}", username);
+        log.trace("getCurrentAccount: user={}", username);
         return accountService
                 .findAccountDtoByUsername(username)
                 .map(ResponseEntity::ok)
@@ -124,7 +124,7 @@ public class AccountController {
     @GetMapping("/exists")
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public boolean checkAccountExists(@RequestParam String username) {
-        logger.trace(
+        log.trace(
                 "checkAccountExists: user={}, username={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 username);
@@ -139,7 +139,7 @@ public class AccountController {
     @GetMapping("/type/{accountTypeName}")
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountDto> getAccountsByType(@PathVariable String accountTypeName) {
-        logger.trace(
+        log.trace(
                 "getAccountsByType: user={}, accountTypeName={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 accountTypeName);
@@ -160,12 +160,12 @@ public class AccountController {
     @PostMapping
     @PreAuthorize("hasAnyRole('admin')")
     public ResponseEntity<AccountDto> createAccount(@RequestBody SaveAccountRequest request) {
-        logger.trace(
+        log.trace(
                 "createAccount: user={}, username={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 request.username());
         AccountDto saved = accountService.saveAccountAndReturnDto(request, null);
-        logger.trace("createAccount: created account with id={}", saved.id());
+        log.trace("createAccount: created account with id={}", saved.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
@@ -182,19 +182,19 @@ public class AccountController {
     @PreAuthorize("hasAnyRole('admin')")
     public ResponseEntity<AccountDto> updateAccount(
             @PathVariable Long id, @RequestBody SaveAccountRequest request) {
-        logger.trace(
+        log.trace(
                 "updateAccount: user={}, accountId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
 
         // Verify account exists
         if (!accountService.findAccountDtoById(id).isPresent()) {
-            logger.trace("updateAccount: account not found, id={}", id);
+            log.trace("updateAccount: account not found, id={}", id);
             return ResponseEntity.notFound().build();
         }
 
         AccountDto updated = accountService.saveAccountAndReturnDto(request, id);
-        logger.trace("updateAccount: updated account with id={}", updated.id());
+        log.trace("updateAccount: updated account with id={}", updated.id());
         return ResponseEntity.ok(updated);
     }
 
@@ -210,18 +210,18 @@ public class AccountController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('admin')")
     public ResponseEntity<Void> deleteAccount(@PathVariable Long id) {
-        logger.trace(
+        log.trace(
                 "deleteAccount: user={}, accountId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
 
         if (!accountService.findAccountDtoById(id).isPresent()) {
-            logger.trace("deleteAccount: account not found, id={}", id);
+            log.trace("deleteAccount: account not found, id={}", id);
             return ResponseEntity.notFound().build();
         }
 
         accountService.deleteAccount(id);
-        logger.trace("deleteAccount: deleted account with id={}", id);
+        log.trace("deleteAccount: deleted account with id={}", id);
         return ResponseEntity.noContent().build();
     }
 }

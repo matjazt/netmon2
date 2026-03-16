@@ -67,7 +67,7 @@ public class TimingProxy {
         long startTime = System.currentTimeMillis();
         mqttService.processMqttMessage(mqttMessage);
         long endTime = System.currentTimeMillis();
-        logger.info("Processed MQTT message in {} ms", (endTime - startTime));
+        log.info("Processed MQTT message in {} ms", (endTime - startTime));
     }
 
     /**
@@ -111,7 +111,7 @@ public class TimingProxy {
             // (future) transaction
             alerterService.processNetworkAlerts(network.getId());
             long endTime = System.currentTimeMillis();
-            logger.info(
+            log.info(
                     "Processed alerts for network '{}' in {} ms",
                     network.getName(),
                     (endTime - startTime));

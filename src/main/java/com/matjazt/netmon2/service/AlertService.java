@@ -25,7 +25,7 @@ public class AlertService {
 
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public Optional<AlertDto> findById(Long id) {
-        logger.trace(
+        log.trace(
                 "findById: user={}, alertId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
@@ -34,7 +34,7 @@ public class AlertService {
 
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AlertDto> findByNetworkId(Long networkId) {
-        logger.trace(
+        log.trace(
                 "findByNetworkId: user={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId);
@@ -43,7 +43,7 @@ public class AlertService {
 
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AlertDto> findActiveByNetworkId(Long networkId) {
-        logger.trace(
+        log.trace(
                 "findActiveByNetworkId: user={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId);
@@ -53,7 +53,7 @@ public class AlertService {
 
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AlertDto> findByDeviceId(Long deviceId) {
-        logger.trace(
+        log.trace(
                 "findByDeviceId: user={}, deviceId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 deviceId);
@@ -62,7 +62,7 @@ public class AlertService {
 
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AlertDto> findActiveByDeviceId(Long deviceId) {
-        logger.trace(
+        log.trace(
                 "findActiveByDeviceId: user={}, deviceId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 deviceId);

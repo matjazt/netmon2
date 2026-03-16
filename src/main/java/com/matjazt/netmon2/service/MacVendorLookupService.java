@@ -58,7 +58,7 @@ public class MacVendorLookupService {
     /** Downloads and parses the OUI CSV file. */
     public void loadVendorData() {
         try {
-            logger.info("Downloading IEEE OUI list from {}", OUI_CSV_URL);
+            log.info("Downloading IEEE OUI list from {}", OUI_CSV_URL);
             long startMs = System.currentTimeMillis();
 
             var tmpMap = new HashMap<String, String>(50_000);
@@ -78,7 +78,7 @@ public class MacVendorLookupService {
 
                     // Skip header row
                     if (linesRead == 1) {
-                        logger.debug("CSV header: {}", line);
+                        log.debug("CSV header: {}", line);
                         continue;
                     }
 
@@ -93,7 +93,7 @@ public class MacVendorLookupService {
                         // Expected columns: Registry(0), Assignment/OUI(1), Org Name(2), Address(3)
                         if (fields.size() < 3) {
                             parseErrors++;
-                            logger.trace("Skipping short CSV line {}: {}", linesRead, line);
+                            log.trace("Skipping short CSV line {}: {}", linesRead, line);
                             continue;
                         }
 
@@ -110,18 +110,18 @@ public class MacVendorLookupService {
 
                     } catch (Exception e) {
                         parseErrors++;
-                        logger.trace("Failed to parse CSV line {}: {}", linesRead, e.getMessage());
+                        log.trace("Failed to parse CSV line {}: {}", linesRead, e.getMessage());
                     }
                 }
 
                 long elapsed = System.currentTimeMillis() - startMs;
 
                 if (tmpMap.isEmpty()) {
-                    logger.error(
+                    log.error(
                             "No valid OUI entries loaded from IEEE CSV - check logs for parsing"
                                     + " errors.");
                 } else {
-                    logger.info(
+                    log.info(
                             "IEEE OUI list loaded: {} entries in {} ms (lines read: {}, parse"
                                     + " errors: {})",
                             entriesLoaded,
@@ -131,13 +131,13 @@ public class MacVendorLookupService {
 
                     // Log one sample entry to confirm parsing is working correctly
                     var sample = tmpMap.entrySet().iterator().next();
-                    logger.debug("Sample OUI entry: {} → {}", sample.getKey(), sample.getValue());
+                    log.debug("Sample OUI entry: {} → {}", sample.getKey(), sample.getValue());
                     // publish the fully loaded map
                     ouiMap = tmpMap;
                 }
             }
         } catch (Exception e) {
-            logger.warn(
+            log.warn(
                     "Could not load IEEE OUI list from {}. Cause: {}", OUI_CSV_URL, e.getMessage());
         } finally {
             synchronized (this) {
@@ -188,7 +188,7 @@ public class MacVendorLookupService {
             return vendor != null ? vendor : UNKNOWN_VENDOR;
 
         } catch (Exception e) {
-            logger.warn("Error during vendor lookup for MAC {}: {}", macAddress, e.getMessage());
+            log.warn("Error during vendor lookup for MAC {}: {}", macAddress, e.getMessage());
             return null;
         }
     }
@@ -213,7 +213,7 @@ public class MacVendorLookupService {
                 thread.setDaemon(true);
                 thread.start();
             } catch (RejectedExecutionException ex) {
-                logger.error("Failed to start async OUI loader thread - will retry later", ex);
+                log.error("Failed to start async OUI loader thread - will retry later", ex);
                 loadInProgress = false;
             }
         }

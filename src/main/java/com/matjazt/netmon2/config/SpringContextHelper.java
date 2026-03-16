@@ -34,7 +34,7 @@ public class SpringContextHelper implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         context = applicationContext;
-        logger.info("SpringContextHelper initialized with application context");
+        log.info("SpringContextHelper initialized with application context");
     }
 
     /**
@@ -54,13 +54,12 @@ public class SpringContextHelper implements ApplicationContextAware {
                 return null;
             }
             var bean = context.getBean(beanClass);
-            logger.debug(
+            log.debug(
                     "Successfully retrieved bean {} from Spring context",
                     beanClass.getSimpleName());
             return bean;
         } catch (Exception e) {
-            logger.warn(
-                    "Failed to retrieve bean {}: {}", beanClass.getSimpleName(), e.getMessage());
+            log.warn("Failed to retrieve bean {}: {}", beanClass.getSimpleName(), e.getMessage());
             return null;
         }
     }

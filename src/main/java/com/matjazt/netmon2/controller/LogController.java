@@ -49,13 +49,13 @@ public class LogController {
     public Page<LogDto> getAllLogsPaginated(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
-        logger.trace(
+        log.trace(
                 "getAllLogsPaginated: user={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 page,
                 size);
         Page<LogDto> dtoPage = logService.getAllLogsPaginated(page, size);
-        logger.trace("getAllLogsPaginated: returning {} logs", dtoPage.getSize());
+        log.trace("getAllLogsPaginated: returning {} logs", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -74,7 +74,7 @@ public class LogController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public ResponseEntity<LogDto> getLogById(@PathVariable Long id) {
-        logger.trace(
+        log.trace(
                 "getLogById: user={}, logId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
@@ -97,14 +97,14 @@ public class LogController {
             @PathVariable Long networkId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
-        logger.trace(
+        log.trace(
                 "getLogsByNetwork: user={}, networkId={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId,
                 page,
                 size);
         Page<LogDto> dtoPage = logService.getLogsByNetwork(networkId, page, size);
-        logger.trace("getLogsByNetwork: returning {} logs", dtoPage.getSize());
+        log.trace("getLogsByNetwork: returning {} logs", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -119,14 +119,14 @@ public class LogController {
             @PathVariable Long deviceId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
-        logger.trace(
+        log.trace(
                 "getLogsByDevice: user={}, deviceId={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 deviceId,
                 page,
                 size);
         Page<LogDto> dtoPage = logService.getLogsByDevice(deviceId, page, size);
-        logger.trace("getLogsByDevice: returning {} logs", dtoPage.getSize());
+        log.trace("getLogsByDevice: returning {} logs", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -147,7 +147,7 @@ public class LogController {
                     LocalDateTime maxTimestamp,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
-        logger.trace(
+        log.trace(
                 "getLogsByTimestampRange: user={}, minTimestamp={}, maxTimestamp={}, page={},"
                         + " size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
@@ -157,7 +157,7 @@ public class LogController {
                 size);
         Page<LogDto> dtoPage =
                 logService.getLogsByTimestampRange(minTimestamp, maxTimestamp, page, size);
-        logger.trace("getLogsByTimestampRange: returning {} logs", dtoPage.getSize());
+        log.trace("getLogsByTimestampRange: returning {} logs", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -181,7 +181,7 @@ public class LogController {
                     LocalDateTime maxTimestamp,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
-        logger.trace(
+        log.trace(
                 "getLogsByNetworkAndTimestampRange: user={}, networkId={}, minTimestamp={},"
                         + " maxTimestamp={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
@@ -193,7 +193,7 @@ public class LogController {
         Page<LogDto> dtoPage =
                 logService.getLogsByNetworkAndTimestampRange(
                         networkId, minTimestamp, maxTimestamp, page, size);
-        logger.trace("getLogsByNetworkAndTimestampRange: returning {} logs", dtoPage.getSize());
+        log.trace("getLogsByNetworkAndTimestampRange: returning {} logs", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -215,7 +215,7 @@ public class LogController {
                     LocalDateTime maxTimestamp,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
-        logger.trace(
+        log.trace(
                 "getLogsByDeviceAndTimestampRange: user={}, deviceId={}, minTimestamp={},"
                         + " maxTimestamp={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
@@ -227,7 +227,7 @@ public class LogController {
         Page<LogDto> dtoPage =
                 logService.getLogsByDeviceAndTimestampRange(
                         deviceId, minTimestamp, maxTimestamp, page, size);
-        logger.trace("getLogsByDeviceAndTimestampRange: returning {} logs", dtoPage.getSize());
+        log.trace("getLogsByDeviceAndTimestampRange: returning {} logs", dtoPage.getSize());
         return dtoPage;
     }
 }

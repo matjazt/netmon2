@@ -73,7 +73,7 @@ public class MqttInboundConfig {
         for (var network : networks) {
             String topic = topicTemplate.replace("{networkName}", network.getName());
             topicList[index++] = topic;
-            logger.info("Subscribing to topic: {}", topic);
+            log.info("Subscribing to topic: {}", topic);
         }
 
         MqttPahoMessageDrivenChannelAdapter adapter =

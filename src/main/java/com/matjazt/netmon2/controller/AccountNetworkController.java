@@ -51,11 +51,11 @@ public class AccountNetworkController {
     @GetMapping
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountNetworkDto> getAllAccountNetworks() {
-        logger.trace(
+        log.trace(
                 "getAllAccountNetworks: user={}",
                 SecurityContextHolder.getContext().getAuthentication().getName());
         List<AccountNetworkDto> dtos = accountNetworkService.findAllSummaries();
-        logger.trace("getAllAccountNetworks: returning {} relationships", dtos.size());
+        log.trace("getAllAccountNetworks: returning {} relationships", dtos.size());
         return dtos;
     }
 
@@ -74,7 +74,7 @@ public class AccountNetworkController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public ResponseEntity<AccountNetworkDto> getAccountNetworkById(@PathVariable Long id) {
-        logger.trace(
+        log.trace(
                 "getAccountNetworkById: user={}, id={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
@@ -92,12 +92,12 @@ public class AccountNetworkController {
     @GetMapping("/account/{accountId}")
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountNetworkDto> getNetworksByAccount(@PathVariable Long accountId) {
-        logger.trace(
+        log.trace(
                 "getNetworksByAccount: user={}, accountId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 accountId);
         List<AccountNetworkDto> dtos = accountNetworkService.getByAccountId(accountId);
-        logger.trace("getNetworksByAccount: returning {} relationships", dtos.size());
+        log.trace("getNetworksByAccount: returning {} relationships", dtos.size());
         return dtos;
     }
 
@@ -111,12 +111,12 @@ public class AccountNetworkController {
             "hasAnyRole('admin', 'system') or"
                     + " @networkAuthorizationService.canAccess(authentication, #networkId)")
     public List<AccountNetworkDto> getAccountsByNetwork(@PathVariable Long networkId) {
-        logger.trace(
+        log.trace(
                 "getAccountsByNetwork: user={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId);
         List<AccountNetworkDto> dtos = accountNetworkService.getByNetworkId(networkId);
-        logger.trace("getAccountsByNetwork: returning {} relationships", dtos.size());
+        log.trace("getAccountsByNetwork: returning {} relationships", dtos.size());
         return dtos;
     }
 
@@ -128,12 +128,12 @@ public class AccountNetworkController {
     @GetMapping("/networks-by-account/{accountId}")
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<NetworkDto> getNetworkEntitiesByAccount(@PathVariable Long accountId) {
-        logger.trace(
+        log.trace(
                 "getNetworkEntitiesByAccount: user={}, accountId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 accountId);
         var networks = accountNetworkService.getNetworkDtosByAccountId(accountId);
-        logger.trace("getNetworkEntitiesByAccount: returning {} networks", networks.size());
+        log.trace("getNetworkEntitiesByAccount: returning {} networks", networks.size());
         return networks;
     }
 
@@ -147,12 +147,12 @@ public class AccountNetworkController {
             "hasAnyRole('admin', 'system') or"
                     + " @networkAuthorizationService.canAccess(authentication, #networkId)")
     public List<AccountDto> getAccountEntitiesByNetwork(@PathVariable Long networkId) {
-        logger.trace(
+        log.trace(
                 "getAccountEntitiesByNetwork: user={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId);
         var accounts = accountNetworkService.getAccountDtosByNetworkId(networkId);
-        logger.trace("getAccountEntitiesByNetwork: returning {} accounts", accounts.size());
+        log.trace("getAccountEntitiesByNetwork: returning {} accounts", accounts.size());
         return accounts;
     }
 
@@ -164,7 +164,7 @@ public class AccountNetworkController {
     @GetMapping("/has-access")
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public boolean checkAccess(@RequestParam Long accountId, @RequestParam Long networkId) {
-        logger.trace(
+        log.trace(
                 "checkAccess: user={}, accountId={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 accountId,
@@ -187,13 +187,13 @@ public class AccountNetworkController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public ResponseEntity<AccountNetworkDto> createAccountNetwork(
             @RequestBody SaveAccountNetworkRequest request) {
-        logger.trace(
+        log.trace(
                 "createAccountNetwork: user={}, accountId={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 request.accountId(),
                 request.networkId());
         AccountNetworkDto saved = accountNetworkService.saveAndReturnDto(request, null);
-        logger.trace("createAccountNetwork: created relationship with id={}", saved.id());
+        log.trace("createAccountNetwork: created relationship with id={}", saved.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
@@ -208,7 +208,7 @@ public class AccountNetworkController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public ResponseEntity<AccountNetworkDto> grantAccess(
             @RequestParam Long accountId, @RequestParam Long networkId) {
-        logger.trace(
+        log.trace(
                 "grantAccess: user={}, accountId={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 accountId,
@@ -216,10 +216,10 @@ public class AccountNetworkController {
         try {
             AccountNetworkDto saved =
                     accountNetworkService.grantAccessAndReturnDto(accountId, networkId);
-            logger.trace("grantAccess: created relationship with id={}", saved.id());
+            log.trace("grantAccess: created relationship with id={}", saved.id());
             return ResponseEntity.status(HttpStatus.CREATED).body(saved);
         } catch (RuntimeException e) {
-            logger.trace("grantAccess: failed - {}", e.getMessage());
+            log.trace("grantAccess: failed - {}", e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
@@ -237,19 +237,19 @@ public class AccountNetworkController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public ResponseEntity<AccountNetworkDto> updateAccountNetwork(
             @PathVariable Long id, @RequestBody SaveAccountNetworkRequest request) {
-        logger.trace(
+        log.trace(
                 "updateAccountNetwork: user={}, id={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
 
         // Verify relationship exists
         if (!accountNetworkService.findDtoById(id).isPresent()) {
-            logger.trace("updateAccountNetwork: relationship not found, id={}", id);
+            log.trace("updateAccountNetwork: relationship not found, id={}", id);
             return ResponseEntity.notFound().build();
         }
 
         AccountNetworkDto updated = accountNetworkService.saveAndReturnDto(request, id);
-        logger.trace("updateAccountNetwork: updated relationship with id={}", updated.id());
+        log.trace("updateAccountNetwork: updated relationship with id={}", updated.id());
         return ResponseEntity.ok(updated);
     }
 
@@ -265,18 +265,18 @@ public class AccountNetworkController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public ResponseEntity<Void> deleteAccountNetwork(@PathVariable Long id) {
-        logger.trace(
+        log.trace(
                 "deleteAccountNetwork: user={}, id={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
 
         if (!accountNetworkService.findDtoById(id).isPresent()) {
-            logger.trace("deleteAccountNetwork: relationship not found, id={}", id);
+            log.trace("deleteAccountNetwork: relationship not found, id={}", id);
             return ResponseEntity.notFound().build();
         }
 
         accountNetworkService.delete(id);
-        logger.trace("deleteAccountNetwork: deleted relationship with id={}", id);
+        log.trace("deleteAccountNetwork: deleted relationship with id={}", id);
         return ResponseEntity.noContent().build();
     }
 
@@ -291,13 +291,13 @@ public class AccountNetworkController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public ResponseEntity<Void> revokeAccess(
             @RequestParam Long accountId, @RequestParam Long networkId) {
-        logger.trace(
+        log.trace(
                 "revokeAccess: user={}, accountId={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 accountId,
                 networkId);
         accountNetworkService.revokeAccess(accountId, networkId);
-        logger.trace(
+        log.trace(
                 "revokeAccess: revoked access for accountId={}, networkId={}",
                 accountId,
                 networkId);

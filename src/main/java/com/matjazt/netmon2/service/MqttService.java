@@ -104,7 +104,7 @@ public class MqttService {
                         org.springframework.integration.mqtt.support.MqttHeaders.DUPLICATE,
                         Boolean.class);
 
-        logger.info(
+        log.info(
                 "Received MQTT message: payload='{}', topic='{}', qos={}, retained={},"
                         + " duplicate={}, headers={}",
                 mqttMessage.getPayload(),
@@ -136,7 +136,7 @@ public class MqttService {
             var messageTimestamp = LocalDateTime.ofInstant(message.getTimestamp(), ZoneOffset.UTC);
 
             if (messageTimestamp.isAfter(now.plusSeconds(networkConfig.getReportingInterval()))) {
-                logger.info(
+                log.info(
                         "Message timestamp is too far in the future: {}, ignoring entire message"
                                 + " for network {}",
                         messageTimestamp,
@@ -156,8 +156,7 @@ public class MqttService {
             // alert - we want to wait until the network has been back up for a certain threshold to
             // avoid closing the alert too quickly if the network is flapping.
             if (network.getBackOnlineTime() == null) {
-                logger.info(
-                        "Network {} is back online, setting backOnlineTime to {}", network, now);
+                log.info("Network {} is back online, setting backOnlineTime to {}", network, now);
                 network.setBackOnlineTime(now);
             }
 
@@ -195,7 +194,7 @@ public class MqttService {
 
                 var mac = deviceStatus.getMac();
                 if (mac == null || mac.isBlank()) {
-                    logger.warn(
+                    log.warn(
                             "Device with missing or empty MAC address reported on network {}",
                             network);
                     continue; // skip devices with missing MAC
@@ -275,7 +274,7 @@ public class MqttService {
                         // device was already online, no change, don't record
                         // NOTE: we don't want these logs in the database, so we use
                         // toString() explicitly and this way prevent detection as a "network log".
-                        logger.debug(
+                        log.debug(
                                 "Device {} is still online on network {}",
                                 device.toString(),
                                 network.toString());
@@ -284,13 +283,13 @@ public class MqttService {
                         // The device was offline, now online
                         shouldRecord = true;
                         if (device.getDeviceOperationMode() == DeviceOperationMode.UNAUTHORIZED) {
-                            logger.info(
+                            log.info(
                                     "Device {} is not allowed on network {} but is online!",
                                     device,
                                     network);
 
                         } else {
-                            logger.info("Device {} came online on network {}", device, network);
+                            log.info("Device {} came online on network {}", device, network);
                         }
                     }
                 }
@@ -325,7 +324,7 @@ public class MqttService {
 
                 // if (lastOnlineStatus.isPresent()) {
                 // device went offline
-                logger.info("Device {} went offline on network {}", knownDevice, network);
+                log.info("Device {} went offline on network {}", knownDevice, network);
 
                 // Record offline status with last known IP
                 var offlineStatus =
@@ -340,7 +339,7 @@ public class MqttService {
             }
 
         } catch (Exception e) {
-            logger.error("Error processing MQTT message from topic: {}", topic, e);
+            log.error("Error processing MQTT message from topic: {}", topic, e);
         }
     }
 
@@ -358,7 +357,7 @@ public class MqttService {
             }
         }
 
-        logger.warn(
+        log.warn(
                 "Topic does not follow expected format, using entire topic as network name: {}",
                 topic);
         return topic;

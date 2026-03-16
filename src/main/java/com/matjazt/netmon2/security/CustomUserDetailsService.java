@@ -37,11 +37,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // Validate credentials using your custom logic
-        logger.debug("Authenticating user: {}", username);
+        log.debug("Authenticating user: {}", username);
         // var now = System.currentTimeMillis();
         var account = accountRepository.cachedFindByUsername(username);
         // var duration = System.currentTimeMillis() - now;
-        // logger.info("Authentication lookup for user '{}' took {} ms", username, duration);
+        // log.info("Authentication lookup for user '{}' took {} ms", username, duration);
         if (!account.isPresent()) {
             throw new UsernameNotFoundException("User not found: " + username);
         }

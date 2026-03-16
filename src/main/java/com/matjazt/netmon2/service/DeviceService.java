@@ -131,13 +131,13 @@ public class DeviceService {
             "hasAnyRole('admin', 'system') or"
                     + " @networkAuthorizationService.canAccess(authentication, #networkId)")
     public List<DeviceDto> getDevicesByNetwork(Long networkId) {
-        logger.trace(
+        log.trace(
                 "getDevicesByNetwork: user={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId);
         var entities = deviceRepository.findByNetwork_Id(networkId);
         var dtos = deviceMapper.toDtos(entities);
-        logger.trace("getDevicesByNetwork: returning {} devices", dtos.size());
+        log.trace("getDevicesByNetwork: returning {} devices", dtos.size());
         return dtos;
     }
 

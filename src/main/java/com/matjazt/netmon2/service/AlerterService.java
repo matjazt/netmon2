@@ -126,7 +126,7 @@ public class AlerterService {
         }
 
         var fullMessage = String.join(System.lineSeparator(), fullMessageEntries);
-        logger.info("alert message for network {}:\n{}", network, fullMessage, device);
+        log.info("alert message for network {}:\n{}", network, fullMessage, device);
 
         // Send email if network has an email address configured
         var notificationEmailAddress = networkConfig.getNotificationEmailAddress();
@@ -134,14 +134,14 @@ public class AlerterService {
         if (notificationEmailAddress != null && !notificationEmailAddress.isEmpty()) {
             try {
                 sendEmail(notificationEmailAddress, subject, fullMessage);
-                logger.info(
+                log.info(
                         "Alert email for network {} sent to {}",
                         network,
                         notificationEmailAddress,
                         device);
                 alert.setLastNotificationTimestamp(now);
             } catch (Exception e) {
-                logger.error("Failed to send alert email", network, device, e);
+                log.error("Failed to send alert email", network, device, e);
                 throw new RuntimeException(
                         "Failed to send alert email to " + notificationEmailAddress, e);
             }
@@ -151,7 +151,7 @@ public class AlerterService {
     public AlertEntity openAlert(
             AlertType alertType, NetworkEntity network, DeviceEntity device, String message) {
 
-        logger.info(
+        log.info(
                 "opening alert: alertType={}, network={}, device={}, message={}",
                 alertType,
                 network.getName(),
@@ -198,7 +198,7 @@ public class AlerterService {
 
     public AlertEntity closeAlert(NetworkEntity network, DeviceEntity device, String message) {
 
-        logger.info(
+        log.info(
                 "closing alert: network={}, device={}, message={}",
                 network.getName(),
                 device != null ? device.getBasicInfo() : "N/A",
@@ -283,7 +283,7 @@ public class AlerterService {
         if (network.getLastSeen().isBefore(onlineThreshold)) {
             // network failed to report regularly, so we should reset the backOnlineTime to reflect
             // that
-            logger.info(
+            log.info(
                     "Network {} failed to report regularly (lastSeen: {}, onlineThreshold: {},"
                             + " backOnlineTime: {}), resetting backOnlineTime",
                     network,

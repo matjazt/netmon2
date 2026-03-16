@@ -52,11 +52,11 @@ public final class SystemSecurityContext {
         SecurityContext previousContext = SecurityContextHolder.getContext();
         try {
             setSystemAuthentication();
-            logger.debug("Executing task as SYSTEM");
+            log.debug("Executing task as SYSTEM");
             task.run();
         } finally {
             SecurityContextHolder.setContext(previousContext);
-            logger.debug("Restored previous SecurityContext");
+            log.debug("Restored previous SecurityContext");
         }
     }
 
@@ -73,11 +73,11 @@ public final class SystemSecurityContext {
         SecurityContext previousContext = SecurityContextHolder.getContext();
         try {
             setSystemAuthentication();
-            logger.debug("Calling task as SYSTEM");
+            log.debug("Calling task as SYSTEM");
             return task.call();
         } finally {
             SecurityContextHolder.setContext(previousContext);
-            logger.debug("Restored previous SecurityContext");
+            log.debug("Restored previous SecurityContext");
         }
     }
 

@@ -34,7 +34,7 @@ public class AlertController {
     /** GET /api/alerts/{id} — get a single alert by ID. */
     @GetMapping("/{id}")
     public ResponseEntity<AlertDto> getAlertById(@PathVariable Long id) {
-        logger.trace(
+        log.trace(
                 "getAlertById: user={}, alertId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
@@ -52,7 +52,7 @@ public class AlertController {
     @GetMapping("/network/{networkId}")
     public List<AlertDto> getAlertsByNetwork(
             @PathVariable Long networkId, @RequestParam(defaultValue = "false") boolean active) {
-        logger.trace(
+        log.trace(
                 "getAlertsByNetwork: user={}, networkId={}, active={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId,
@@ -70,7 +70,7 @@ public class AlertController {
     @GetMapping("/device/{deviceId}")
     public List<AlertDto> getAlertsByDevice(
             @PathVariable Long deviceId, @RequestParam(defaultValue = "false") boolean active) {
-        logger.trace(
+        log.trace(
                 "getAlertsByDevice: user={}, deviceId={}, active={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 deviceId,

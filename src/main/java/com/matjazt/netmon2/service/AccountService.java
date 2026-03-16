@@ -41,7 +41,7 @@ public class AccountService {
      */
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public Optional<AccountEntity> findAccountById(Long id) {
-        logger.trace(
+        log.trace(
                 "findAccountById: user={}, accountId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
@@ -51,7 +51,7 @@ public class AccountService {
     /** Get all accounts (admin only) */
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountEntity> findAllAccounts() {
-        logger.trace(
+        log.trace(
                 "findAllAccounts: user={}",
                 SecurityContextHolder.getContext().getAuthentication().getName());
         return accountRepository.findAll();
@@ -65,7 +65,7 @@ public class AccountService {
     @Transactional
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public AccountEntity saveAccount(AccountEntity account) {
-        logger.trace(
+        log.trace(
                 "saveAccount: user={}, username={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 account.getUsername());
@@ -76,7 +76,7 @@ public class AccountService {
     @Transactional
     @PreAuthorize("hasAnyRole('admin')")
     public void deleteAccount(Long id) {
-        logger.trace(
+        log.trace(
                 "deleteAccount: user={}, accountId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
@@ -88,7 +88,7 @@ public class AccountService {
     /** Find account by username */
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public Optional<AccountEntity> findAccountByUsername(String username) {
-        logger.trace(
+        log.trace(
                 "findAccountByUsername: user={}, targetUsername={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 username);
@@ -98,7 +98,7 @@ public class AccountService {
     /** Check if account exists by username */
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public boolean accountExistsByUsername(String username) {
-        logger.trace(
+        log.trace(
                 "accountExistsByUsername: user={}, username={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 username);
@@ -108,7 +108,7 @@ public class AccountService {
     /** Check if email exists */
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public boolean emailExists(String email) {
-        logger.trace(
+        log.trace(
                 "emailExists: user={}, email={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 email);
@@ -118,7 +118,7 @@ public class AccountService {
     /** Find accounts by account type */
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountEntity> findAccountsByType(String accountTypeName) {
-        logger.trace(
+        log.trace(
                 "findAccountsByType: user={}, accountTypeName={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 accountTypeName);
@@ -130,12 +130,12 @@ public class AccountService {
     /** Get all accounts as DTOs */
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountDto> findAllAccountSummaries() {
-        logger.trace(
+        log.trace(
                 "findAllAccountSummaries: user={}",
                 SecurityContextHolder.getContext().getAuthentication().getName());
         List<AccountEntity> entities = accountRepository.findAll();
         var dtos = accountMapper.toDtos(entities);
-        logger.trace("findAllAccountSummaries: returning {} accounts", dtos.size());
+        log.trace("findAllAccountSummaries: returning {} accounts", dtos.size());
         return dtos;
     }
 

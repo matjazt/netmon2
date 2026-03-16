@@ -49,14 +49,14 @@ public class DeviceStatusHistoryController {
     public Page<DeviceStatusHistoryDto> getAllPaginated(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
-        logger.trace(
+        log.trace(
                 "getAllPaginated: user={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 page,
                 size);
         Page<DeviceStatusHistoryDto> dtoPage =
                 deviceStatusHistoryService.getAllPaginated(page, size);
-        logger.trace("getAllPaginated: returning {} history records", dtoPage.getSize());
+        log.trace("getAllPaginated: returning {} history records", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -75,7 +75,7 @@ public class DeviceStatusHistoryController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
     public ResponseEntity<DeviceStatusHistoryDto> getById(@PathVariable Long id) {
-        logger.trace(
+        log.trace(
                 "getById: user={}, id={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
@@ -96,7 +96,7 @@ public class DeviceStatusHistoryController {
             @PathVariable Long deviceId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
-        logger.trace(
+        log.trace(
                 "getByDevice: user={}, deviceId={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 deviceId,
@@ -104,7 +104,7 @@ public class DeviceStatusHistoryController {
                 size);
         Page<DeviceStatusHistoryDto> dtoPage =
                 deviceStatusHistoryService.getByDevice(deviceId, page, size);
-        logger.trace("getByDevice: returning {} history records", dtoPage.getSize());
+        log.trace("getByDevice: returning {} history records", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -121,7 +121,7 @@ public class DeviceStatusHistoryController {
             @PathVariable Long networkId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
-        logger.trace(
+        log.trace(
                 "getByNetwork: user={}, networkId={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId,
@@ -129,7 +129,7 @@ public class DeviceStatusHistoryController {
                 size);
         Page<DeviceStatusHistoryDto> dtoPage =
                 deviceStatusHistoryService.getByNetwork(networkId, page, size);
-        logger.trace("getByNetwork: returning {} history records", dtoPage.getSize());
+        log.trace("getByNetwork: returning {} history records", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -150,7 +150,7 @@ public class DeviceStatusHistoryController {
                     LocalDateTime maxTimestamp,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
-        logger.trace(
+        log.trace(
                 "getByTimestampRange: user={}, minTimestamp={}, maxTimestamp={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 minTimestamp,
@@ -160,7 +160,7 @@ public class DeviceStatusHistoryController {
         Page<DeviceStatusHistoryDto> dtoPage =
                 deviceStatusHistoryService.getByTimestampRange(
                         minTimestamp, maxTimestamp, page, size);
-        logger.trace("getByTimestampRange: returning {} history records", dtoPage.getSize());
+        log.trace("getByTimestampRange: returning {} history records", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -182,7 +182,7 @@ public class DeviceStatusHistoryController {
                     LocalDateTime maxTimestamp,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
-        logger.trace(
+        log.trace(
                 "getByDeviceAndTimestampRange: user={}, deviceId={}, minTimestamp={},"
                         + " maxTimestamp={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
@@ -194,8 +194,7 @@ public class DeviceStatusHistoryController {
         Page<DeviceStatusHistoryDto> dtoPage =
                 deviceStatusHistoryService.getByDeviceAndTimestampRange(
                         deviceId, minTimestamp, maxTimestamp, page, size);
-        logger.trace(
-                "getByDeviceAndTimestampRange: returning {} history records", dtoPage.getSize());
+        log.trace("getByDeviceAndTimestampRange: returning {} history records", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -219,7 +218,7 @@ public class DeviceStatusHistoryController {
                     LocalDateTime maxTimestamp,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
-        logger.trace(
+        log.trace(
                 "getByNetworkAndTimestampRange: user={}, networkId={}, minTimestamp={},"
                         + " maxTimestamp={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
@@ -231,8 +230,7 @@ public class DeviceStatusHistoryController {
         Page<DeviceStatusHistoryDto> dtoPage =
                 deviceStatusHistoryService.getByNetworkAndTimestampRange(
                         networkId, minTimestamp, maxTimestamp, page, size);
-        logger.trace(
-                "getByNetworkAndTimestampRange: returning {} history records", dtoPage.getSize());
+        log.trace("getByNetworkAndTimestampRange: returning {} history records", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -244,7 +242,7 @@ public class DeviceStatusHistoryController {
     @GetMapping("/device/{deviceId}/count")
     @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
     public long countByDevice(@PathVariable Long deviceId) {
-        logger.trace(
+        log.trace(
                 "countByDevice: user={}, deviceId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 deviceId);
@@ -264,7 +262,7 @@ public class DeviceStatusHistoryController {
     public long countByTimestampRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
-        logger.trace(
+        log.trace(
                 "countByTimestampRange: user={}, start={}, end={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 start,

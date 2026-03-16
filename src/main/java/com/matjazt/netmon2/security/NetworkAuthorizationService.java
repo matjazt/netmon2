@@ -49,12 +49,12 @@ public class NetworkAuthorizationService {
             sync = true)
     public boolean canAccess(Authentication authentication, Long networkId) {
         if (authentication == null || !authentication.isAuthenticated()) {
-            logger.debug("Access denied: no authenticated user");
+            log.debug("Access denied: no authenticated user");
             return false;
         }
 
         String username = authentication.getName();
-        logger.debug("Checking network access for user '{}' to network ID {}", username, networkId);
+        log.debug("Checking network access for user '{}' to network ID {}", username, networkId);
 
         // Check if user has admin or system role
         boolean hasAdminOrSystemRole =
@@ -66,7 +66,7 @@ public class NetworkAuthorizationService {
                                                 || role.equals(SystemSecurityContext.SYSTEM_ROLE));
 
         if (hasAdminOrSystemRole) {
-            logger.debug("Access granted: user '{}' has admin or system role", username);
+            log.debug("Access granted: user '{}' has admin or system role", username);
             return true;
         }
 
@@ -79,13 +79,13 @@ public class NetworkAuthorizationService {
                                     accountNetworkRepository.existsByAccount_IdAndNetwork_Id(
                                             account.getId(), networkId);
                             if (hasAccess) {
-                                logger.debug(
+                                log.debug(
                                         "Access granted: user '{}' has explicit access to"
                                                 + " network {}",
                                         username,
                                         networkId);
                             } else {
-                                logger.debug(
+                                log.debug(
                                         "Access denied: user '{}' does not have access to"
                                                 + " network {}",
                                         username,
@@ -95,7 +95,7 @@ public class NetworkAuthorizationService {
                         })
                 .orElseGet(
                         () -> {
-                            logger.debug(
+                            log.debug(
                                     "Access denied: authenticated user '{}' not found in"
                                             + " database",
                                     username);

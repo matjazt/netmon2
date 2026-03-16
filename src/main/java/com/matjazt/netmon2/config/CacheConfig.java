@@ -51,7 +51,7 @@ public class CacheConfig {
     }
 
     private CaffeineCache buildCache(String name, long maxSize, Duration ttl) {
-        logger.debug("Creating cache '{}' with maxSize={} and TTL={}", name, maxSize, ttl);
+        log.debug("Creating cache '{}' with maxSize={} and TTL={}", name, maxSize, ttl);
         return new CaffeineCache(
                 name,
                 Caffeine.newBuilder()

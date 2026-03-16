@@ -37,7 +37,7 @@ public class DeviceStatusHistoryService {
     /** Find device status history by ID */
     @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
     public Optional<DeviceStatusHistoryEntity> findById(Long id) {
-        logger.trace(
+        log.trace(
                 "findById: user={}, id={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
@@ -51,7 +51,7 @@ public class DeviceStatusHistoryService {
      */
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public Page<DeviceStatusHistoryDto> getAllPaginated(int page, int size) {
-        logger.trace(
+        log.trace(
                 "getAllPaginated: user={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 page,
@@ -60,7 +60,7 @@ public class DeviceStatusHistoryService {
         Page<DeviceStatusHistoryEntity> entityPage =
                 deviceStatusHistoryRepository.findAll(pageable);
         var dtoPage = deviceStatusHistoryMapper.toDtoPage(entityPage);
-        logger.trace("getAllPaginated: returning {} history records", dtoPage.getSize());
+        log.trace("getAllPaginated: returning {} history records", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -71,7 +71,7 @@ public class DeviceStatusHistoryService {
      */
     @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
     public Page<DeviceStatusHistoryDto> getByDevice(Long deviceId, int page, int size) {
-        logger.trace(
+        log.trace(
                 "getByDevice: user={}, deviceId={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 deviceId,
@@ -81,7 +81,7 @@ public class DeviceStatusHistoryService {
         Page<DeviceStatusHistoryEntity> entityPage =
                 deviceStatusHistoryRepository.findByDevice_Id(deviceId, pageable);
         var dtoPage = deviceStatusHistoryMapper.toDtoPage(entityPage);
-        logger.trace("getByDevice: returning {} history records", dtoPage.getSize());
+        log.trace("getByDevice: returning {} history records", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -94,7 +94,7 @@ public class DeviceStatusHistoryService {
             "hasAnyRole('admin', 'system') or"
                     + " @networkAuthorizationService.canAccess(authentication, #networkId)")
     public Page<DeviceStatusHistoryDto> getByNetwork(Long networkId, int page, int size) {
-        logger.trace(
+        log.trace(
                 "getByNetwork: user={}, networkId={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId,
@@ -104,7 +104,7 @@ public class DeviceStatusHistoryService {
         Page<DeviceStatusHistoryEntity> entityPage =
                 deviceStatusHistoryRepository.findByNetwork_Id(networkId, pageable);
         var dtoPage = deviceStatusHistoryMapper.toDtoPage(entityPage);
-        logger.trace("getByNetwork: returning {} history records", dtoPage.getSize());
+        log.trace("getByNetwork: returning {} history records", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -116,7 +116,7 @@ public class DeviceStatusHistoryService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public Page<DeviceStatusHistoryDto> getByTimestampRange(
             LocalDateTime minTimestamp, LocalDateTime maxTimestamp, int page, int size) {
-        logger.trace(
+        log.trace(
                 "getByTimestampRange: user={}, minTimestamp={}, maxTimestamp={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 minTimestamp,
@@ -128,7 +128,7 @@ public class DeviceStatusHistoryService {
                 deviceStatusHistoryRepository.findByTimestampBetween(
                         minTimestamp, maxTimestamp, pageable);
         var dtoPage = deviceStatusHistoryMapper.toDtoPage(entityPage);
-        logger.trace("getByTimestampRange: returning {} history records", dtoPage.getSize());
+        log.trace("getByTimestampRange: returning {} history records", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -144,7 +144,7 @@ public class DeviceStatusHistoryService {
             LocalDateTime maxTimestamp,
             int page,
             int size) {
-        logger.trace(
+        log.trace(
                 "getByDeviceAndTimestampRange: user={}, deviceId={}, minTimestamp={},"
                         + " maxTimestamp={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
@@ -158,8 +158,7 @@ public class DeviceStatusHistoryService {
                 deviceStatusHistoryRepository.findByDevice_IdAndTimestampBetween(
                         deviceId, minTimestamp, maxTimestamp, pageable);
         var dtoPage = deviceStatusHistoryMapper.toDtoPage(entityPage);
-        logger.trace(
-                "getByDeviceAndTimestampRange: returning {} history records", dtoPage.getSize());
+        log.trace("getByDeviceAndTimestampRange: returning {} history records", dtoPage.getSize());
         return dtoPage;
     }
 
@@ -177,7 +176,7 @@ public class DeviceStatusHistoryService {
             LocalDateTime maxTimestamp,
             int page,
             int size) {
-        logger.trace(
+        log.trace(
                 "getByNetworkAndTimestampRange: user={}, networkId={}, minTimestamp={},"
                         + " maxTimestamp={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
@@ -191,15 +190,14 @@ public class DeviceStatusHistoryService {
                 deviceStatusHistoryRepository.findByNetwork_IdAndTimestampBetween(
                         networkId, minTimestamp, maxTimestamp, pageable);
         var dtoPage = deviceStatusHistoryMapper.toDtoPage(entityPage);
-        logger.trace(
-                "getByNetworkAndTimestampRange: returning {} history records", dtoPage.getSize());
+        log.trace("getByNetworkAndTimestampRange: returning {} history records", dtoPage.getSize());
         return dtoPage;
     }
 
     /** Count status changes for a device */
     @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
     public long countByDevice(Long deviceId) {
-        logger.trace(
+        log.trace(
                 "countByDevice: user={}, deviceId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 deviceId);
@@ -209,7 +207,7 @@ public class DeviceStatusHistoryService {
     /** Count status changes in date range */
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public long countByTimestampRange(LocalDateTime start, LocalDateTime end) {
-        logger.trace(
+        log.trace(
                 "countByTimestampRange: user={}, start={}, end={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 start,
