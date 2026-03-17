@@ -17,6 +17,11 @@ spring:
       minimum-idle: 2
       auto-commit: false
 
+  # Logbook master switch: exclude it from autoconfiguration
+  # autoconfigure:
+  # exclude:
+  # - org.zalando.logbook.autoconfigure.LogbookAutoConfiguration
+
   jpa:
     hibernate:
       ddl-auto: none # important for DB-first
@@ -69,8 +74,11 @@ netmon:
       expire-after-write: 1m
 
 logbook:
-  # Master switch. Set to false (or NETMON_LOGBOOK_FILTER_ENABLED=false) to disable entirely.
   filter:
+    # Soft switch #1. Set to false (or LOGBOOK_FILTER_ENABLED=false) to disable for successful requests.
+    enabled: true
+  secure-filter:
+    # Soft switch #2. Set to false (or LOGBOOK_SECURE_FILTER_ENABLED=false) to disable for failed requests.
     enabled: true
   format:
     style: http # human-readable HTTP wire format
