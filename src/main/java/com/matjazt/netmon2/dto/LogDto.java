@@ -14,4 +14,6 @@ public record LogDto(
         String origin,
         String message,
         Long networkId,
-        Long deviceId) {}
+        Long deviceId,
+        String networkName,
+        String deviceNameOrVendor) {}

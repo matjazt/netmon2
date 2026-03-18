@@ -5,6 +5,7 @@ import com.matjazt.netmon2.dto.DeviceStatusHistoryDto;
 import com.matjazt.netmon2.dto.request.SaveDeviceRequest;
 import com.matjazt.netmon2.entity.DeviceOperationMode;
 import com.matjazt.netmon2.service.DeviceService;
+import com.matjazt.netmon2.service.DeviceStatusHistoryService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,6 +71,7 @@ import java.util.List;
 public class DeviceController {
 
     private final DeviceService deviceService;
+    private final DeviceStatusHistoryService deviceStatusHistoryService;
 
     // ========== GET ENDPOINTS (retrieve data) ==========
 
@@ -177,7 +179,7 @@ public class DeviceController {
     @GetMapping("/{id}/history")
     public List<DeviceStatusHistoryDto> getDeviceHistory(
             @PathVariable Long id, @RequestParam(defaultValue = "50") int limit) {
-        return deviceService.getDeviceHistoryDtos(id, limit);
+        return deviceStatusHistoryService.getByDevice(id, 0, limit).getContent();
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.matjazt.netmon2.service;
 
+import com.matjazt.netmon2.dto.DeviceDto;
 import com.matjazt.netmon2.dto.LogDto;
 import com.matjazt.netmon2.entity.LogEntity;
 import com.matjazt.netmon2.mapper.LogMapper;
@@ -17,6 +18,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -31,6 +37,8 @@ public class LogService {
 
     private final LogRepository logRepository;
     private final LogMapper logMapper;
+    private final NetworkService networkService;
+    private final DeviceService deviceService;
 
     // ========== READ-ONLY OPERATIONS ==========
 
@@ -58,7 +66,7 @@ public class LogService {
                 size);
         Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         Page<LogEntity> entityPage = logRepository.findAll(pageable);
-        var dtoPage = logMapper.toDtoPage(entityPage);
+        var dtoPage = enrichPage(entityPage);
         log.trace("getAllLogsPaginated: returning {} logs", dtoPage.getSize());
         return dtoPage;
     }
@@ -80,7 +88,7 @@ public class LogService {
                 size);
         Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         Page<LogEntity> entityPage = logRepository.findByNetwork_Id(networkId, pageable);
-        var dtoPage = logMapper.toDtoPage(entityPage);
+        var dtoPage = enrichPage(entityPage);
         log.trace("getLogsByNetwork: returning {} logs", dtoPage.getSize());
         return dtoPage;
     }
@@ -100,7 +108,7 @@ public class LogService {
                 size);
         Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         Page<LogEntity> entityPage = logRepository.findByDevice_Id(deviceId, pageable);
-        var dtoPage = logMapper.toDtoPage(entityPage);
+        var dtoPage = enrichPage(entityPage);
         log.trace("getLogsByDevice: returning {} logs", dtoPage.getSize());
         return dtoPage;
     }
@@ -124,7 +132,7 @@ public class LogService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         Page<LogEntity> entityPage =
                 logRepository.findByTimestampBetween(minTimestamp, maxTimestamp, pageable);
-        var dtoPage = logMapper.toDtoPage(entityPage);
+        var dtoPage = enrichPage(entityPage);
         log.trace("getLogsByTimestampRange: returning {} logs", dtoPage.getSize());
         return dtoPage;
     }
@@ -156,7 +164,7 @@ public class LogService {
         Page<LogEntity> entityPage =
                 logRepository.findByNetwork_IdAndTimestampBetween(
                         networkId, minTimestamp, maxTimestamp, pageable);
-        var dtoPage = logMapper.toDtoPage(entityPage);
+        var dtoPage = enrichPage(entityPage);
         log.trace("getLogsByNetworkAndTimestampRange: returning {} logs", dtoPage.getSize());
         return dtoPage;
     }
@@ -186,13 +194,37 @@ public class LogService {
         Page<LogEntity> entityPage =
                 logRepository.findByDevice_IdAndTimestampBetween(
                         deviceId, minTimestamp, maxTimestamp, pageable);
-        var dtoPage = logMapper.toDtoPage(entityPage);
+        var dtoPage = enrichPage(entityPage);
         log.trace("getLogsByDeviceAndTimestampRange: returning {} logs", dtoPage.getSize());
         return dtoPage;
     }
 
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public Optional<LogDto> findLogDtoById(Long id) {
-        return findLogById(id).map(logMapper::toDto);
+        return findLogById(id)
+                .map(
+                        entity ->
+                                logMapper.toDto(
+                                        entity,
+                                        networkService.getAllNetworksAsMap(),
+                                        buildDeviceMap(List.of(entity))));
+    }
+
+    // ========== PRIVATE HELPERS ==========
+
+    private Page<LogDto> enrichPage(Page<LogEntity> entityPage) {
+        var networkMap = networkService.getAllNetworksAsMap();
+        var deviceMap = buildDeviceMap(entityPage.getContent());
+        return logMapper.toDtoPage(entityPage, networkMap, deviceMap);
+    }
+
+    private Map<Long, DeviceDto> buildDeviceMap(Collection<LogEntity> entities) {
+        Map<Long, DeviceDto> result = new HashMap<>();
+        entities.stream()
+                .map(e -> e.getNetwork() != null ? e.getNetwork().getId() : null)
+                .filter(Objects::nonNull)
+                .distinct()
+                .forEach(nid -> result.putAll(deviceService.getNetworkDevicesAsMap(nid)));
+        return result;
     }
 }

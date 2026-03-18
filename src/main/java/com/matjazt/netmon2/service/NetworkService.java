@@ -9,13 +9,17 @@ import com.matjazt.netmon2.repository.NetworkRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Service for managing Network entities.
@@ -147,6 +151,21 @@ public class NetworkService {
         var dtos = networkMapper.toDtos(entities);
         log.trace("findAllNetworkSummaries: returning {} networks", dtos.size());
         return dtos;
+    }
+
+    // ========== DISPLAY CACHE METHODS ==========
+
+    /**
+     * Returns all networks indexed by their ID for fast display-name lookups.
+     *
+     * <p>Result is cached in networkDetailsCache. Called by log and history services to resolve
+     * network names without additional SQL queries.
+     */
+    @Cacheable("networkDetailsCache")
+    public Map<Long, NetworkDto> getAllNetworksAsMap() {
+        log.trace("getAllNetworksAsMap: loading all networks into cache");
+        return networkMapper.toDtos(networkRepository.findAll()).stream()
+                .collect(Collectors.toMap(NetworkDto::id, Function.identity()));
     }
 
     // ========== DTO SINGLE-RECORD METHODS ==========

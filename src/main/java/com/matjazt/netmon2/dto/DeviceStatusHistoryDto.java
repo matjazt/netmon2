@@ -13,4 +13,6 @@ public record DeviceStatusHistoryDto(
         Long deviceId,
         String ipAddress,
         Boolean online,
-        LocalDateTime timestamp) {}
+        LocalDateTime timestamp,
+        String networkName,
+        String deviceNameOrVendor) {}

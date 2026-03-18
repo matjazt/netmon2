@@ -72,6 +72,13 @@ netmon:
     security:
       maximum-size: 1000
       expire-after-write: 1m
+    display:
+      network:
+        maximum-size: 100
+        expire-after-write: 2m
+      device:
+        maximum-size: 2000
+        expire-after-write: 2m
 
 logbook:
   filter:

@@ -38,6 +38,18 @@ public class CacheConfig {
     @Value("${netmon.cache.security.expire-after-write:30s}")
     private Duration securityExpireAfterWrite;
 
+    @Value("${netmon.cache.display.network.maximum-size:100}")
+    private long displayNetworkMaxSize;
+
+    @Value("${netmon.cache.display.network.expire-after-write:1m}")
+    private Duration displayNetworkExpireAfterWrite;
+
+    @Value("${netmon.cache.display.device.maximum-size:1000}")
+    private long displayDeviceMaxSize;
+
+    @Value("${netmon.cache.display.device.expire-after-write:30s}")
+    private Duration displayDeviceExpireAfterWrite;
+
     @Bean
     public CacheManager cacheManager() {
         SimpleCacheManager manager = new SimpleCacheManager();
@@ -45,8 +57,15 @@ public class CacheConfig {
                 Arrays.asList(
                         buildCache("networkConfigCache", networkMaxSize, networkExpireAfterWrite),
                         buildCache("userDetailsCache", securityMaxSize, securityExpireAfterWrite),
+                        buildCache("networkAccessCache", securityMaxSize, securityExpireAfterWrite),
                         buildCache(
-                                "networkAccessCache", securityMaxSize, securityExpireAfterWrite)));
+                                "networkDetailsCache",
+                                displayNetworkMaxSize,
+                                displayNetworkExpireAfterWrite),
+                        buildCache(
+                                "deviceDetailsCache",
+                                displayDeviceMaxSize,
+                                displayDeviceExpireAfterWrite)));
         return manager;
     }
 

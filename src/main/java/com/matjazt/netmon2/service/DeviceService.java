@@ -1,14 +1,12 @@
 package com.matjazt.netmon2.service;
 
 import com.matjazt.netmon2.dto.DeviceDto;
-import com.matjazt.netmon2.dto.DeviceStatusHistoryDto;
 import com.matjazt.netmon2.dto.request.SaveDeviceRequest;
 import com.matjazt.netmon2.entity.DeviceEntity;
 import com.matjazt.netmon2.entity.DeviceOperationMode;
 import com.matjazt.netmon2.entity.DeviceStatusHistoryEntity;
 import com.matjazt.netmon2.entity.NetworkEntity;
 import com.matjazt.netmon2.mapper.DeviceMapper;
-import com.matjazt.netmon2.mapper.DeviceStatusHistoryMapper;
 import com.matjazt.netmon2.repository.DeviceRepository;
 import com.matjazt.netmon2.repository.DeviceStatusHistoryRepository;
 import com.matjazt.netmon2.repository.NetworkRepository;
@@ -16,6 +14,7 @@ import com.matjazt.netmon2.repository.NetworkRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Example Service demonstrating how to use Spring Data JPA repositories.
@@ -66,7 +68,6 @@ public class DeviceService {
     private final NetworkRepository networkRepository;
     private final DeviceStatusHistoryRepository deviceStatusHistoryRepository;
     private final DeviceMapper deviceMapper;
-    private final DeviceStatusHistoryMapper deviceStatusHistoryMapper;
 
     // ========== BASIC CRUD OPERATIONS ==========
 
@@ -116,6 +117,21 @@ public class DeviceService {
     /** EXAMPLE: Find device by MAC address */
     public Optional<DeviceEntity> findDeviceByMac(String macAddress) {
         return deviceRepository.findByMacAddress(macAddress);
+    }
+
+    // ========== DISPLAY CACHE METHODS ==========
+
+    /**
+     * Returns all devices for the given network, indexed by device ID, for display-name lookups.
+     *
+     * <p>Result is cached in deviceDetailsCache keyed by networkId. Called by log and history
+     * services to resolve device names without additional SQL queries.
+     */
+    @Cacheable(value = "deviceDetailsCache", key = "#networkId")
+    public Map<Long, DeviceDto> getNetworkDevicesAsMap(Long networkId) {
+        log.trace("getNetworkDevicesAsMap: loading devices for networkId={}", networkId);
+        return deviceMapper.toDtos(deviceRepository.findByNetwork_Id(networkId)).stream()
+                .collect(Collectors.toMap(DeviceDto::id, Function.identity()));
     }
 
     // ========== DTO SUMMARY METHODS ==========
@@ -279,10 +295,6 @@ public class DeviceService {
 
     public List<DeviceDto> findDevicesNeedingAlertsDtos() {
         return deviceMapper.toDtos(findDevicesNeedingAlerts());
-    }
-
-    public List<DeviceStatusHistoryDto> getDeviceHistoryDtos(Long deviceId, int limit) {
-        return deviceStatusHistoryMapper.toDtos(getDeviceHistory(deviceId, limit));
     }
 
     @Transactional

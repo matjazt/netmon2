@@ -1,6 +1,8 @@
 package com.matjazt.netmon2.service;
 
+import com.matjazt.netmon2.dto.DeviceDto;
 import com.matjazt.netmon2.dto.DeviceStatusHistoryDto;
+import com.matjazt.netmon2.dto.NetworkDto;
 import com.matjazt.netmon2.entity.DeviceStatusHistoryEntity;
 import com.matjazt.netmon2.mapper.DeviceStatusHistoryMapper;
 import com.matjazt.netmon2.repository.DeviceStatusHistoryRepository;
@@ -17,6 +19,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -31,6 +38,8 @@ public class DeviceStatusHistoryService {
 
     private final DeviceStatusHistoryRepository deviceStatusHistoryRepository;
     private final DeviceStatusHistoryMapper deviceStatusHistoryMapper;
+    private final NetworkService networkService;
+    private final DeviceService deviceService;
 
     // ========== READ-ONLY OPERATIONS ==========
 
@@ -59,7 +68,7 @@ public class DeviceStatusHistoryService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         Page<DeviceStatusHistoryEntity> entityPage =
                 deviceStatusHistoryRepository.findAll(pageable);
-        var dtoPage = deviceStatusHistoryMapper.toDtoPage(entityPage);
+        var dtoPage = enrichPage(entityPage);
         log.trace("getAllPaginated: returning {} history records", dtoPage.getSize());
         return dtoPage;
     }
@@ -80,7 +89,7 @@ public class DeviceStatusHistoryService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         Page<DeviceStatusHistoryEntity> entityPage =
                 deviceStatusHistoryRepository.findByDevice_Id(deviceId, pageable);
-        var dtoPage = deviceStatusHistoryMapper.toDtoPage(entityPage);
+        var dtoPage = enrichPage(entityPage);
         log.trace("getByDevice: returning {} history records", dtoPage.getSize());
         return dtoPage;
     }
@@ -103,7 +112,7 @@ public class DeviceStatusHistoryService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         Page<DeviceStatusHistoryEntity> entityPage =
                 deviceStatusHistoryRepository.findByNetwork_Id(networkId, pageable);
-        var dtoPage = deviceStatusHistoryMapper.toDtoPage(entityPage);
+        var dtoPage = enrichPage(entityPage);
         log.trace("getByNetwork: returning {} history records", dtoPage.getSize());
         return dtoPage;
     }
@@ -127,7 +136,7 @@ public class DeviceStatusHistoryService {
         Page<DeviceStatusHistoryEntity> entityPage =
                 deviceStatusHistoryRepository.findByTimestampBetween(
                         minTimestamp, maxTimestamp, pageable);
-        var dtoPage = deviceStatusHistoryMapper.toDtoPage(entityPage);
+        var dtoPage = enrichPage(entityPage);
         log.trace("getByTimestampRange: returning {} history records", dtoPage.getSize());
         return dtoPage;
     }
@@ -157,7 +166,7 @@ public class DeviceStatusHistoryService {
         Page<DeviceStatusHistoryEntity> entityPage =
                 deviceStatusHistoryRepository.findByDevice_IdAndTimestampBetween(
                         deviceId, minTimestamp, maxTimestamp, pageable);
-        var dtoPage = deviceStatusHistoryMapper.toDtoPage(entityPage);
+        var dtoPage = enrichPage(entityPage);
         log.trace("getByDeviceAndTimestampRange: returning {} history records", dtoPage.getSize());
         return dtoPage;
     }
@@ -189,7 +198,7 @@ public class DeviceStatusHistoryService {
         Page<DeviceStatusHistoryEntity> entityPage =
                 deviceStatusHistoryRepository.findByNetwork_IdAndTimestampBetween(
                         networkId, minTimestamp, maxTimestamp, pageable);
-        var dtoPage = deviceStatusHistoryMapper.toDtoPage(entityPage);
+        var dtoPage = enrichPage(entityPage);
         log.trace("getByNetworkAndTimestampRange: returning {} history records", dtoPage.getSize());
         return dtoPage;
     }
@@ -217,6 +226,30 @@ public class DeviceStatusHistoryService {
 
     @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
     public Optional<DeviceStatusHistoryDto> findDtoById(Long id) {
-        return findById(id).map(deviceStatusHistoryMapper::toDto);
+        return findById(id)
+                .map(
+                        entity ->
+                                deviceStatusHistoryMapper.toDto(
+                                        entity,
+                                        networkService.getAllNetworksAsMap(),
+                                        buildDeviceMap(List.of(entity))));
+    }
+
+    // ========== PRIVATE HELPERS ==========
+
+    private Page<DeviceStatusHistoryDto> enrichPage(Page<DeviceStatusHistoryEntity> entityPage) {
+        var networkMap = networkService.getAllNetworksAsMap();
+        var deviceMap = buildDeviceMap(entityPage.getContent());
+        return deviceStatusHistoryMapper.toDtoPage(entityPage, networkMap, deviceMap);
+    }
+
+    private Map<Long, DeviceDto> buildDeviceMap(Collection<DeviceStatusHistoryEntity> entities) {
+        Map<Long, DeviceDto> result = new HashMap<>();
+        entities.stream()
+                .map(e -> e.getNetwork() != null ? e.getNetwork().getId() : null)
+                .filter(Objects::nonNull)
+                .distinct()
+                .forEach(nid -> result.putAll(deviceService.getNetworkDevicesAsMap(nid)));
+        return result;
     }
 }
