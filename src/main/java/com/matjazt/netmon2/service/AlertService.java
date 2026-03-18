@@ -1,6 +1,7 @@
 package com.matjazt.netmon2.service;
 
 import com.matjazt.netmon2.dto.AlertDto;
+import com.matjazt.netmon2.entity.AlertEntity;
 import com.matjazt.netmon2.mapper.AlertMapper;
 import com.matjazt.netmon2.repository.AlertRepository;
 
@@ -32,13 +33,20 @@ public class AlertService {
         return alertRepository.findById(id).map(alertMapper::toDto);
     }
 
+    private List<AlertDto> convertAndSortByTimeDesc(List<AlertEntity> entities) {
+
+        return alertMapper.toDtos(entities).stream()
+                .sorted((o1, o2) -> o2.timestamp().compareTo(o1.timestamp()))
+                .toList();
+    }
+
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AlertDto> findByNetworkId(Long networkId) {
         log.trace(
                 "findByNetworkId: user={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId);
-        return alertMapper.toDtos(alertRepository.findByNetwork_Id(networkId));
+        return convertAndSortByTimeDesc(alertRepository.findByNetwork_Id(networkId));
     }
 
     @PreAuthorize("hasAnyRole('admin', 'system')")
@@ -47,7 +55,7 @@ public class AlertService {
                 "findActiveByNetworkId: user={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId);
-        return alertMapper.toDtos(
+        return convertAndSortByTimeDesc(
                 alertRepository.findByNetwork_IdAndClosureTimestampIsNull(networkId));
     }
 
@@ -57,7 +65,7 @@ public class AlertService {
                 "findByDeviceId: user={}, deviceId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 deviceId);
-        return alertMapper.toDtos(alertRepository.findByDevice_Id(deviceId));
+        return convertAndSortByTimeDesc(alertRepository.findByDevice_Id(deviceId));
     }
 
     @PreAuthorize("hasAnyRole('admin', 'system')")
@@ -66,7 +74,7 @@ public class AlertService {
                 "findActiveByDeviceId: user={}, deviceId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 deviceId);
-        return alertMapper.toDtos(
+        return convertAndSortByTimeDesc(
                 alertRepository.findByDevice_IdAndClosureTimestampIsNull(deviceId));
     }
 }
