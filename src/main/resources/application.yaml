@@ -82,6 +82,7 @@ logbook:
     enabled: true
   format:
     style: http # human-readable HTTP wire format
+  # strategy: without-body
   write:
     level: TRACE # log level used by Logbook writers
   predicate:
