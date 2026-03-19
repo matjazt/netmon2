@@ -276,3 +276,7 @@ CREATE INDEX idx_log_timestamp ON log USING btree ("timestamp");
 ALTER TABLE network DROP COLUMN reporting_interval_ema;
 ALTER TABLE network DROP COLUMN alerting_delay;
 ALTER TABLE network DROP COLUMN email_address;
+
+select * from log
+
+select * from device_status_history dsh 

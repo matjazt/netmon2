@@ -2,7 +2,6 @@ package com.matjazt.netmon2.service;
 
 import com.matjazt.netmon2.dto.DeviceDto;
 import com.matjazt.netmon2.dto.DeviceStatusHistoryDto;
-import com.matjazt.netmon2.dto.NetworkDto;
 import com.matjazt.netmon2.entity.DeviceStatusHistoryEntity;
 import com.matjazt.netmon2.mapper.DeviceStatusHistoryMapper;
 import com.matjazt.netmon2.repository.DeviceStatusHistoryRepository;
@@ -101,7 +100,7 @@ public class DeviceStatusHistoryService {
      */
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #networkId)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public Page<DeviceStatusHistoryDto> getByNetwork(Long networkId, int page, int size) {
         log.trace(
                 "getByNetwork: user={}, networkId={}, page={}, size={}",
@@ -178,7 +177,7 @@ public class DeviceStatusHistoryService {
      */
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #networkId)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public Page<DeviceStatusHistoryDto> getByNetworkAndTimestampRange(
             Long networkId,
             LocalDateTime minTimestamp,

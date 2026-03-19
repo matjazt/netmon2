@@ -116,7 +116,7 @@ public class DeviceStatusHistoryController {
     @GetMapping("/network/{networkId}")
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #networkId)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public Page<DeviceStatusHistoryDto> getByNetwork(
             @PathVariable Long networkId,
             @RequestParam(defaultValue = "0") int page,
@@ -209,7 +209,7 @@ public class DeviceStatusHistoryController {
     @GetMapping("/network/{networkId}/by-timestamp")
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #networkId)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public Page<DeviceStatusHistoryDto> getByNetworkAndTimestampRange(
             @PathVariable Long networkId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)

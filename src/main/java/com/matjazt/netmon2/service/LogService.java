@@ -78,7 +78,7 @@ public class LogService {
      */
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #networkId)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public Page<LogDto> getLogsByNetwork(Long networkId, int page, int size) {
         log.trace(
                 "getLogsByNetwork: user={}, networkId={}, page={}, size={}",
@@ -144,7 +144,7 @@ public class LogService {
      */
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #networkId)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public Page<LogDto> getLogsByNetworkAndTimestampRange(
             Long networkId,
             LocalDateTime minTimestamp,

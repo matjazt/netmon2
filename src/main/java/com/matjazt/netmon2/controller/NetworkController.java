@@ -74,7 +74,7 @@ public class NetworkController {
     @GetMapping("/{id}")
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #id)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #id)")
     public ResponseEntity<NetworkDto> getNetworkById(@PathVariable Long id) {
         log.trace(
                 "getNetworkById: user={}, networkId={}",

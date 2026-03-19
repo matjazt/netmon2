@@ -92,7 +92,7 @@ public class LogController {
     @GetMapping("/network/{networkId}")
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #networkId)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public Page<LogDto> getLogsByNetwork(
             @PathVariable Long networkId,
             @RequestParam(defaultValue = "0") int page,
@@ -172,7 +172,7 @@ public class LogController {
     @GetMapping("/network/{networkId}/by-timestamp")
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #networkId)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public Page<LogDto> getLogsByNetworkAndTimestampRange(
             @PathVariable Long networkId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)

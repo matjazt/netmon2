@@ -5,6 +5,7 @@ import com.matjazt.netmon2.entity.DeviceOperationMode;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -53,6 +54,7 @@ public interface DeviceRepository extends JpaRepository<DeviceEntity, Long> {
      * @return list of devices on the network
      */
     List<DeviceEntity> findByNetwork_Id(Long networkId);
+    List<DeviceEntity> findByNetwork_Id(Long networkId, Sort sort);
 
     /**
      * Finds devices by online status.

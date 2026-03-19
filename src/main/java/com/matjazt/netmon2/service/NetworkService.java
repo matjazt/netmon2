@@ -39,7 +39,7 @@ public class NetworkService {
     /** Find network by ID */
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #id)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #id)")
     public Optional<NetworkEntity> findNetworkById(Long id) {
         log.trace(
                 "findNetworkById: user={}, networkId={}",
@@ -172,7 +172,7 @@ public class NetworkService {
 
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #id)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #id)")
     public Optional<NetworkDto> findNetworkDtoById(Long id) {
         return findNetworkById(id).map(networkMapper::toDto);
     }

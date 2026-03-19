@@ -91,7 +91,7 @@ public class AccountNetworkService {
     /** Find all networks accessible by an account */
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #accountId)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #accountId)")
     public List<AccountNetworkEntity> findByAccountId(Long accountId) {
         log.trace(
                 "findByAccountId: user={}, accountId={}",
@@ -105,7 +105,7 @@ public class AccountNetworkService {
     /** Find all accounts with access to a network */
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #networkId)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<AccountNetworkEntity> findByNetworkId(Long networkId) {
         log.trace(
                 "findByNetworkId: user={}, networkId={}",
@@ -142,7 +142,7 @@ public class AccountNetworkService {
     /** Get all accounts with access to a network (direct account entities) */
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #networkId)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<AccountEntity> getAccountsByNetworkId(Long networkId) {
         log.trace(
                 "getAccountsByNetworkId: user={}, networkId={}",
@@ -232,7 +232,7 @@ public class AccountNetworkService {
     /** Get account-network relationships by network as DTOs */
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #networkId)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<AccountNetworkDto> getByNetworkId(Long networkId) {
         log.trace(
                 "getByNetworkId: user={}, networkId={}",
@@ -272,7 +272,7 @@ public class AccountNetworkService {
 
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #networkId)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<AccountDto> getAccountDtosByNetworkId(Long networkId) {
         return accountMapper.toDtos(getAccountsByNetworkId(networkId));
     }

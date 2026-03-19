@@ -109,7 +109,7 @@ public class AccountNetworkController {
     @GetMapping("/network/{networkId}")
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #networkId)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<AccountNetworkDto> getAccountsByNetwork(@PathVariable Long networkId) {
         log.trace(
                 "getAccountsByNetwork: user={}, networkId={}",
@@ -145,7 +145,7 @@ public class AccountNetworkController {
     @GetMapping("/accounts-by-network/{networkId}")
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #networkId)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<AccountDto> getAccountEntitiesByNetwork(@PathVariable Long networkId) {
         log.trace(
                 "getAccountEntitiesByNetwork: user={}, networkId={}",

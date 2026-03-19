@@ -133,7 +133,7 @@ public class DeviceController {
     @GetMapping("/network/{networkId}")
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #networkId)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<DeviceDto> getDevicesByNetwork(@PathVariable Long networkId) {
         log.trace(
                 "getDevicesByNetwork: user={}, networkId={}",
@@ -152,7 +152,7 @@ public class DeviceController {
     @GetMapping("/network/{networkId}/online")
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #networkId)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<DeviceDto> getOnlineDevices(@PathVariable Long networkId) {
         return deviceService.findOnlineDeviceSummaries(networkId);
     }
@@ -230,28 +230,6 @@ public class DeviceController {
     public ResponseEntity<DeviceDto> createDevice(@RequestBody SaveDeviceRequest request) {
         DeviceDto saved = deviceService.saveDeviceAndReturnDto(request, null);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-    }
-
-    /**
-     * EXAMPLE: POST /api/devices/mqtt-update
-     *
-     * <p>Process MQTT device update Custom DTO (Data Transfer Object) for request body
-     *
-     * <p>Request body:
-     *
-     * <pre>{@code
-     * {
-     *   "networkId": 5,
-     *   "macAddress": "AA:BB:CC:DD:EE:FF",
-     *   "ipAddress": "192.168.1.100",
-     *   "online": true
-     * }
-     * }</pre>
-     */
-    @PostMapping("/mqtt-update")
-    public DeviceDto processMqttUpdate(@RequestBody MqttDeviceUpdateRequest request) {
-        return deviceService.processDeviceUpdateAndReturnDto(
-                request.networkId, request.macAddress, request.ipAddress, request.online);
     }
 
     // ========== PUT ENDPOINTS (update existing resources) ==========

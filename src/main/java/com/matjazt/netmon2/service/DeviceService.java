@@ -4,28 +4,19 @@ import com.matjazt.netmon2.dto.DeviceDto;
 import com.matjazt.netmon2.dto.request.SaveDeviceRequest;
 import com.matjazt.netmon2.entity.DeviceEntity;
 import com.matjazt.netmon2.entity.DeviceOperationMode;
-import com.matjazt.netmon2.entity.DeviceStatusHistoryEntity;
-import com.matjazt.netmon2.entity.NetworkEntity;
 import com.matjazt.netmon2.mapper.DeviceMapper;
 import com.matjazt.netmon2.repository.DeviceRepository;
-import com.matjazt.netmon2.repository.DeviceStatusHistoryRepository;
-import com.matjazt.netmon2.repository.NetworkRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -65,8 +56,6 @@ public class DeviceService {
 
     // Dependencies injected via constructor
     private final DeviceRepository deviceRepository;
-    private final NetworkRepository networkRepository;
-    private final DeviceStatusHistoryRepository deviceStatusHistoryRepository;
     private final DeviceMapper deviceMapper;
 
     // ========== BASIC CRUD OPERATIONS ==========
@@ -104,11 +93,6 @@ public class DeviceService {
 
     // ========== CUSTOM QUERY EXAMPLES ==========
 
-    /** EXAMPLE: Find devices on a specific network */
-    public List<DeviceEntity> findDevicesByNetwork(Long networkId) {
-        return deviceRepository.findByNetwork_Id(networkId);
-    }
-
     /** EXAMPLE: Find online devices on a network */
     public List<DeviceEntity> findOnlineDevices(Long networkId) {
         return deviceRepository.findByNetwork_IdAndOnline(networkId, true);
@@ -145,13 +129,19 @@ public class DeviceService {
     /** Get devices by network as DTOs */
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccess(authentication, #networkId)")
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<DeviceDto> getDevicesByNetwork(Long networkId) {
         log.trace(
                 "getDevicesByNetwork: user={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId);
-        var entities = deviceRepository.findByNetwork_Id(networkId);
+        var entities =
+                deviceRepository.findByNetwork_Id(
+                        networkId,
+                        Sort.by(
+                                Sort.Order.asc("name"),
+                                Sort.Order.asc("vendor"),
+                                Sort.Order.asc("macAddress")));
         var dtos = deviceMapper.toDtos(entities);
         log.trace("getDevicesByNetwork: returning {} devices", dtos.size());
         return dtos;
@@ -161,70 +151,6 @@ public class DeviceService {
     public List<DeviceDto> findOnlineDeviceSummaries(Long networkId) {
         List<DeviceEntity> entities = deviceRepository.findByNetwork_IdAndOnline(networkId, true);
         return deviceMapper.toDtos(entities);
-    }
-
-    // ========== BUSINESS LOGIC EXAMPLES ==========
-
-    /**
-     * EXAMPLE: Process MQTT device update
-     *
-     * <p>This is real business logic combining multiple operations:
-     *
-     * <ol>
-     *   <li>Find or create device
-     *   <li>Check if status changed
-     *   <li>Update device
-     *   <li>Record history if status changed
-     * </ol>
-     *
-     * <p>@Transactional ensures all-or-nothing: if any step fails, everything rolls back.
-     */
-    @Transactional
-    public DeviceEntity processDeviceUpdate(
-            Long networkId, String macAddress, String ipAddress, Boolean online) {
-        // Find existing device or create new one
-        DeviceEntity device =
-                deviceRepository
-                        .findByNetwork_IdAndMacAddress(networkId, macAddress)
-                        .orElseGet(
-                                () -> {
-                                    // Device doesn't exist - create it
-                                    NetworkEntity network =
-                                            networkRepository
-                                                    .findById(networkId)
-                                                    .orElseThrow(
-                                                            () ->
-                                                                    new RuntimeException(
-                                                                            "Network not found: "
-                                                                                    + networkId));
-
-                                    DeviceEntity newDevice =
-                                            new DeviceEntity(
-                                                    network, macAddress, ipAddress, online);
-                                    newDevice.setDeviceOperationMode(
-                                            DeviceOperationMode.AUTHORIZED); // Default mode
-                                    return newDevice;
-                                });
-
-        // Check if online status changed
-        boolean statusChanged = device.getOnline() != null && !device.getOnline().equals(online);
-
-        // Update device
-        device.setIpAddress(ipAddress);
-        device.setOnline(online);
-        device.updateLastSeen();
-        device = deviceRepository.save(device);
-
-        // If status changed, record history
-        if (statusChanged) {
-            NetworkEntity network = device.getNetwork();
-            DeviceStatusHistoryEntity history =
-                    new DeviceStatusHistoryEntity(
-                            network, device, ipAddress, online, LocalDateTime.now(ZoneOffset.UTC));
-            deviceStatusHistoryRepository.save(history);
-        }
-
-        return device;
     }
 
     /**
@@ -256,14 +182,6 @@ public class DeviceService {
         long offlineDevices = totalDevices - onlineDevices;
 
         return new DeviceStats(totalDevices, onlineDevices, offlineDevices);
-    }
-
-    /** EXAMPLE: Get device history */
-    public List<DeviceStatusHistoryEntity> getDeviceHistory(Long deviceId, int limit) {
-        Pageable pageable = PageRequest.of(0, limit, Sort.by("timestamp").descending());
-        Page<DeviceStatusHistoryEntity> page =
-                deviceStatusHistoryRepository.findByDevice_Id(deviceId, pageable);
-        return page.getContent();
     }
 
     /** EXAMPLE: Check if device exists */
@@ -302,12 +220,6 @@ public class DeviceService {
         DeviceEntity device = deviceMapper.toEntity(request);
         if (id != null) device.setId(id);
         return deviceMapper.toDto(saveDevice(device));
-    }
-
-    @Transactional
-    public DeviceDto processDeviceUpdateAndReturnDto(
-            Long networkId, String macAddress, String ipAddress, Boolean online) {
-        return deviceMapper.toDto(processDeviceUpdate(networkId, macAddress, ipAddress, online));
     }
 
     @Transactional
