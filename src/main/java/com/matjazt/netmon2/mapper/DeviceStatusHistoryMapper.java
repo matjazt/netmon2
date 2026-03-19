@@ -8,6 +8,7 @@ import com.matjazt.netmon2.entity.DeviceStatusHistoryEntity;
 import org.mapstruct.Mapper;
 import org.springframework.data.domain.Page;
 
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ public interface DeviceStatusHistoryMapper {
                 deviceId,
                 entity.getIpAddress(),
                 entity.getOnline(),
-                entity.getTimestamp(),
+                entity.getTimestamp().toInstant(ZoneOffset.UTC),
                 network != null ? network.name() : null,
                 resolveDeviceNameOrVendor(device));
     }

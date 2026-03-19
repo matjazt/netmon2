@@ -2,7 +2,7 @@ package com.matjazt.netmon2.dto;
 
 import com.matjazt.netmon2.entity.AlertType;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /** DTO for transferring Alert data between service and controller layers. */
 public record AlertDto(
@@ -11,5 +11,5 @@ public record AlertDto(
         Long deviceId,
         AlertType alertType,
         String message,
-        LocalDateTime timestamp,
-        LocalDateTime closureTimestamp) {}
+        Instant timestamp,
+        Instant closureTimestamp) {}

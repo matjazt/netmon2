@@ -2,7 +2,7 @@ package com.matjazt.netmon2.dto;
 
 import com.matjazt.netmon2.entity.DeviceOperationMode;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * Generic DTO for device data used in the service layer.
@@ -16,7 +16,7 @@ public record DeviceDto(
         String macAddress,
         String ipAddress,
         Boolean online,
-        LocalDateTime lastSeen,
+        Instant lastSeen,
         DeviceOperationMode deviceOperationMode,
         Long activeAlertId,
         String vendor) {}

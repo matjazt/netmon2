@@ -1,6 +1,6 @@
 package com.matjazt.netmon2.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * Generic DTO for network data used in the service layer.
@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 public record NetworkDto(
         Long id,
         String name,
-        LocalDateTime firstSeen,
-        LocalDateTime lastSeen,
+        Instant firstSeen,
+        Instant lastSeen,
         Long activeAlertId,
         String configuration,
-        LocalDateTime backOnlineTime) {}
+        Instant backOnlineTime) {}

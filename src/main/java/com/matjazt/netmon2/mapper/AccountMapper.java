@@ -7,6 +7,9 @@ import com.matjazt.netmon2.entity.AccountEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 /**
@@ -39,4 +42,8 @@ public interface AccountMapper {
      * <p>MapStruct automatically generates this using toDto() for each element.
      */
     List<AccountDto> toDtos(List<AccountEntity> entities);
+
+    default Instant toInstant(LocalDateTime ldt) {
+        return ldt != null ? ldt.toInstant(ZoneOffset.UTC) : null;
+    }
 }

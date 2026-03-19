@@ -8,6 +8,7 @@ import com.matjazt.netmon2.entity.LogEntity;
 import org.mapstruct.Mapper;
 import org.springframework.data.domain.Page;
 
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +30,7 @@ public interface LogMapper {
         DeviceDto device = deviceId != null ? deviceMap.get(deviceId) : null;
         return new LogDto(
                 entity.getId(),
-                entity.getTimestamp(),
+                entity.getTimestamp().toInstant(ZoneOffset.UTC),
                 entity.getLevel(),
                 entity.getOrigin(),
                 entity.getMessage(),

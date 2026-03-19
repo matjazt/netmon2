@@ -1,6 +1,6 @@
 package com.matjazt.netmon2.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * Generic DTO for device status history data used in the service layer.
@@ -13,6 +13,6 @@ public record DeviceStatusHistoryDto(
         Long deviceId,
         String ipAddress,
         Boolean online,
-        LocalDateTime timestamp,
+        Instant timestamp,
         String networkName,
         String deviceNameOrVendor) {}

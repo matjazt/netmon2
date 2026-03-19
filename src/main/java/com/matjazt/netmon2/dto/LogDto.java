@@ -1,6 +1,6 @@
 package com.matjazt.netmon2.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * Generic DTO for log data used in the service layer.
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
  */
 public record LogDto(
         Long id,
-        LocalDateTime timestamp,
+        Instant timestamp,
         Integer level,
         String origin,
         String message,

@@ -1,6 +1,6 @@
 package com.matjazt.netmon2.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * Generic DTO for account data used in the service layer.
@@ -14,5 +14,5 @@ public record AccountDto(
         String accountTypeName,
         String fullName,
         String email,
-        LocalDateTime createdAt,
-        LocalDateTime lastSeen) {}
+        Instant createdAt,
+        Instant lastSeen) {}
