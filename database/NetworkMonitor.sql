@@ -278,5 +278,6 @@ ALTER TABLE network DROP COLUMN alerting_delay;
 ALTER TABLE network DROP COLUMN email_address;
 
 select * from log
+select device_id, count(*) from log group by device_id
 
 select * from device_status_history dsh 
