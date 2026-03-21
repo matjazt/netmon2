@@ -31,7 +31,7 @@ public interface AccountMapper {
     @Mapping(source = "accountType.name", target = "accountTypeName")
     AccountDto toDto(AccountEntity entity);
 
-    @Mapping(source = "accountTypeId", target = "accountType.id")
+    @Mapping(target = "accountType", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "passwordHash", ignore = true)
     AccountEntity toEntity(SaveAccountRequest request);

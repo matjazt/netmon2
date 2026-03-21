@@ -3,8 +3,10 @@ package com.matjazt.netmon2.service;
 import com.matjazt.netmon2.dto.AccountDto;
 import com.matjazt.netmon2.dto.request.SaveAccountRequest;
 import com.matjazt.netmon2.entity.AccountEntity;
+import com.matjazt.netmon2.entity.AccountTypeEntity;
 import com.matjazt.netmon2.mapper.AccountMapper;
 import com.matjazt.netmon2.repository.AccountRepository;
+import com.matjazt.netmon2.repository.AccountTypeRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,7 @@ import java.util.Optional;
 public class AccountService {
 
     private final AccountRepository accountRepository;
+    private final AccountTypeRepository accountTypeRepository;
     private final AccountMapper accountMapper;
     private final PasswordEncoder passwordEncoder;
 
@@ -159,7 +162,16 @@ public class AccountService {
     @Transactional
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public AccountDto saveAccountAndReturnDto(SaveAccountRequest request, Long id) {
+        AccountTypeEntity accountType =
+                accountTypeRepository
+                        .findById(request.accountTypeId())
+                        .orElseThrow(
+                                () ->
+                                        new RuntimeException(
+                                                "Account type not found: "
+                                                        + request.accountTypeId()));
         AccountEntity account = accountMapper.toEntity(request);
+        account.setAccountType(accountType);
         account.setPasswordHash(passwordEncoder.encode(request.password()));
         if (id != null) account.setId(id);
         return accountMapper.toDto(saveAccount(account));
