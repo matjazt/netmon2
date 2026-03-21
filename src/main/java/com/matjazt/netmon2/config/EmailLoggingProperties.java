@@ -2,8 +2,8 @@ package com.matjazt.netmon2.config;
 
 import lombok.Data;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 /**
@@ -33,7 +33,6 @@ public class EmailLoggingProperties {
     /** Minimum log level to buffer (ERROR, WARN, INFO, DEBUG, TRACE). */
     private String minLevel = "WARN";
 
-    @SuppressWarnings("null")
     public @NonNull String[] getEmailToArray() {
         if (emailTo == null || emailTo.isEmpty()) {
             return new String[0];

@@ -37,6 +37,8 @@ dependencies {
     implementation("me.paulschwarz:springboot4-dotenv:5.1.0")
     implementation("org.zalando:logbook-spring-boot-starter:4.0.2")
 
+    compileOnly("org.jspecify:jspecify:1.0.0")
+
     // Lombok - Java sources need annotationProcessor
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
