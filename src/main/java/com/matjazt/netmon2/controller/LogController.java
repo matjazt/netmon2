@@ -50,7 +50,7 @@ public class LogController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
         log.trace(
-                "getAllLogsPaginated: user={}, page={}, size={}",
+                "getAllLogsPaginated: apiUser={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 page,
                 size);
@@ -75,7 +75,7 @@ public class LogController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public ResponseEntity<LogDto> getLogById(@PathVariable Long id) {
         log.trace(
-                "getLogById: user={}, logId={}",
+                "getLogById: apiUser={}, logId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
         return logService
@@ -98,7 +98,7 @@ public class LogController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
         log.trace(
-                "getLogsByNetwork: user={}, networkId={}, page={}, size={}",
+                "getLogsByNetwork: apiUser={}, networkId={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId,
                 page,
@@ -120,7 +120,7 @@ public class LogController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
         log.trace(
-                "getLogsByDevice: user={}, deviceId={}, page={}, size={}",
+                "getLogsByDevice: apiUser={}, deviceId={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 deviceId,
                 page,
@@ -148,7 +148,7 @@ public class LogController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
         log.trace(
-                "getLogsByTimestampRange: user={}, minTimestamp={}, maxTimestamp={}, page={},"
+                "getLogsByTimestampRange: apiUser={}, minTimestamp={}, maxTimestamp={}, page={},"
                         + " size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 minTimestamp,
@@ -182,7 +182,7 @@ public class LogController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
         log.trace(
-                "getLogsByNetworkAndTimestampRange: user={}, networkId={}, minTimestamp={},"
+                "getLogsByNetworkAndTimestampRange: apiUser={}, networkId={}, minTimestamp={},"
                         + " maxTimestamp={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId,
@@ -216,7 +216,7 @@ public class LogController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
         log.trace(
-                "getLogsByDeviceAndTimestampRange: user={}, deviceId={}, minTimestamp={},"
+                "getLogsByDeviceAndTimestampRange: apiUser={}, deviceId={}, minTimestamp={},"
                         + " maxTimestamp={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 deviceId,

@@ -46,7 +46,7 @@ public class DeviceStatusHistoryService {
     @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
     public Optional<DeviceStatusHistoryEntity> findById(Long id) {
         log.trace(
-                "findById: user={}, id={}",
+                "findById: apiUser={}, id={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
         return deviceStatusHistoryRepository.findById(id);
@@ -60,7 +60,7 @@ public class DeviceStatusHistoryService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public Page<DeviceStatusHistoryDto> getAllPaginated(int page, int size) {
         log.trace(
-                "getAllPaginated: user={}, page={}, size={}",
+                "getAllPaginated: apiUser={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 page,
                 size);
@@ -80,7 +80,7 @@ public class DeviceStatusHistoryService {
     @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
     public Page<DeviceStatusHistoryDto> getByDevice(Long deviceId, int page, int size) {
         log.trace(
-                "getByDevice: user={}, deviceId={}, page={}, size={}",
+                "getByDevice: apiUser={}, deviceId={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 deviceId,
                 page,
@@ -103,7 +103,7 @@ public class DeviceStatusHistoryService {
                     + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public Page<DeviceStatusHistoryDto> getByNetwork(Long networkId, int page, int size) {
         log.trace(
-                "getByNetwork: user={}, networkId={}, page={}, size={}",
+                "getByNetwork: apiUser={}, networkId={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId,
                 page,
@@ -125,7 +125,8 @@ public class DeviceStatusHistoryService {
     public Page<DeviceStatusHistoryDto> getByTimestampRange(
             LocalDateTime minTimestamp, LocalDateTime maxTimestamp, int page, int size) {
         log.trace(
-                "getByTimestampRange: user={}, minTimestamp={}, maxTimestamp={}, page={}, size={}",
+                "getByTimestampRange: apiUser={}, minTimestamp={}, maxTimestamp={}, page={},"
+                    + " size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 minTimestamp,
                 maxTimestamp,
@@ -153,7 +154,7 @@ public class DeviceStatusHistoryService {
             int page,
             int size) {
         log.trace(
-                "getByDeviceAndTimestampRange: user={}, deviceId={}, minTimestamp={},"
+                "getByDeviceAndTimestampRange: apiUser={}, deviceId={}, minTimestamp={},"
                         + " maxTimestamp={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 deviceId,
@@ -185,7 +186,7 @@ public class DeviceStatusHistoryService {
             int page,
             int size) {
         log.trace(
-                "getByNetworkAndTimestampRange: user={}, networkId={}, minTimestamp={},"
+                "getByNetworkAndTimestampRange: apiUser={}, networkId={}, minTimestamp={},"
                         + " maxTimestamp={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId,
@@ -206,7 +207,7 @@ public class DeviceStatusHistoryService {
     @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
     public long countByDevice(Long deviceId) {
         log.trace(
-                "countByDevice: user={}, deviceId={}",
+                "countByDevice: apiUser={}, deviceId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 deviceId);
         return deviceStatusHistoryRepository.countByDevice_Id(deviceId);
@@ -216,7 +217,7 @@ public class DeviceStatusHistoryService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public long countByTimestampRange(LocalDateTime start, LocalDateTime end) {
         log.trace(
-                "countByTimestampRange: user={}, start={}, end={}",
+                "countByTimestampRange: apiUser={}, start={}, end={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 start,
                 end);

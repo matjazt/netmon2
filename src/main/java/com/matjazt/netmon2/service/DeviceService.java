@@ -132,7 +132,7 @@ public class DeviceService {
                     + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<DeviceDto> getDevicesByNetwork(Long networkId) {
         log.trace(
-                "getDevicesByNetwork: user={}, networkId={}",
+                "getDevicesByNetwork: apiUser={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId);
         var entities =

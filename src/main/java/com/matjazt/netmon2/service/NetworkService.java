@@ -42,7 +42,7 @@ public class NetworkService {
                     + " @networkAuthorizationService.canAccessNetwork(authentication, #id)")
     public Optional<NetworkEntity> findNetworkById(Long id) {
         log.trace(
-                "findNetworkById: user={}, networkId={}",
+                "findNetworkById: apiUser={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
         return networkRepository.findById(id);
@@ -52,7 +52,7 @@ public class NetworkService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<NetworkEntity> findAllNetworks() {
         log.trace(
-                "findAllNetworks: user={}",
+                "findAllNetworks: apiUser={}",
                 SecurityContextHolder.getContext().getAuthentication().getName());
         return networkRepository.findAll();
     }
@@ -66,7 +66,7 @@ public class NetworkService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public NetworkEntity saveNetwork(NetworkEntity network) {
         log.trace(
-                "saveNetwork: user={}, name={}",
+                "saveNetwork: apiUser={}, name={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 network.getName());
         return networkRepository.save(network);
@@ -77,7 +77,7 @@ public class NetworkService {
     @PreAuthorize("hasAnyRole('admin')")
     public void deleteNetwork(Long id) {
         log.trace(
-                "deleteNetwork: user={}, networkId={}",
+                "deleteNetwork: apiUser={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
         networkRepository.deleteById(id);
@@ -89,7 +89,7 @@ public class NetworkService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public Optional<NetworkEntity> findNetworkByName(String name) {
         log.trace(
-                "findNetworkByName: user={}, name={}",
+                "findNetworkByName: apiUser={}, name={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 name);
         return networkRepository.findByName(name);
@@ -99,7 +99,7 @@ public class NetworkService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public boolean networkExistsByName(String name) {
         log.trace(
-                "networkExistsByName: user={}, name={}",
+                "networkExistsByName: apiUser={}, name={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 name);
         return networkRepository.existsByName(name);
@@ -109,7 +109,7 @@ public class NetworkService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<NetworkEntity> findNetworksWithActiveAlerts() {
         log.trace(
-                "findNetworksWithActiveAlerts: user={}",
+                "findNetworksWithActiveAlerts: apiUser={}",
                 SecurityContextHolder.getContext().getAuthentication().getName());
         var networks = networkRepository.findByActiveAlertIdIsNotNull();
         log.trace("findNetworksWithActiveAlerts: returning {} networks", networks.size());
@@ -120,7 +120,7 @@ public class NetworkService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<NetworkEntity> findNetworksWithoutActiveAlerts() {
         log.trace(
-                "findNetworksWithoutActiveAlerts: user={}",
+                "findNetworksWithoutActiveAlerts: apiUser={}",
                 SecurityContextHolder.getContext().getAuthentication().getName());
         var networks = networkRepository.findByActiveAlertIdIsNull();
         log.trace("findNetworksWithoutActiveAlerts: returning {} networks", networks.size());
@@ -131,7 +131,7 @@ public class NetworkService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<NetworkEntity> findNetworksByNameContaining(String namePart) {
         log.trace(
-                "findNetworksByNameContaining: user={}, namePart={}",
+                "findNetworksByNameContaining: apiUser={}, namePart={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 namePart);
         var networks = networkRepository.findByNameContainingIgnoreCase(namePart);
@@ -145,7 +145,7 @@ public class NetworkService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<NetworkDto> findAllNetworkSummaries() {
         log.trace(
-                "findAllNetworkSummaries: user={}",
+                "findAllNetworkSummaries: apiUser={}",
                 SecurityContextHolder.getContext().getAuthentication().getName());
         List<NetworkEntity> entities = networkRepository.findAll();
         var dtos = networkMapper.toDtos(entities);

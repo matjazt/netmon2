@@ -52,7 +52,7 @@ public class AccountNetworkController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountNetworkDto> getAllAccountNetworks() {
         log.trace(
-                "getAllAccountNetworks: user={}",
+                "getAllAccountNetworks: apiUser={}",
                 SecurityContextHolder.getContext().getAuthentication().getName());
         List<AccountNetworkDto> dtos = accountNetworkService.findAllSummaries();
         log.trace("getAllAccountNetworks: returning {} relationships", dtos.size());
@@ -75,7 +75,7 @@ public class AccountNetworkController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public ResponseEntity<AccountNetworkDto> getAccountNetworkById(@PathVariable Long id) {
         log.trace(
-                "getAccountNetworkById: user={}, id={}",
+                "getAccountNetworkById: apiUser={}, id={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
         return accountNetworkService
@@ -93,7 +93,7 @@ public class AccountNetworkController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountNetworkDto> getNetworksByAccount(@PathVariable Long accountId) {
         log.trace(
-                "getNetworksByAccount: user={}, accountId={}",
+                "getNetworksByAccount: apiUser={}, accountId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 accountId);
         List<AccountNetworkDto> dtos = accountNetworkService.getByAccountId(accountId);
@@ -112,7 +112,7 @@ public class AccountNetworkController {
                     + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<AccountNetworkDto> getAccountsByNetwork(@PathVariable Long networkId) {
         log.trace(
-                "getAccountsByNetwork: user={}, networkId={}",
+                "getAccountsByNetwork: apiUser={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId);
         List<AccountNetworkDto> dtos = accountNetworkService.getByNetworkId(networkId);
@@ -129,7 +129,7 @@ public class AccountNetworkController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<NetworkDto> getNetworkEntitiesByAccount(@PathVariable Long accountId) {
         log.trace(
-                "getNetworkEntitiesByAccount: user={}, accountId={}",
+                "getNetworkEntitiesByAccount: apiUser={}, accountId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 accountId);
         var networks = accountNetworkService.getNetworkDtosByAccountId(accountId);
@@ -148,7 +148,7 @@ public class AccountNetworkController {
                     + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<AccountDto> getAccountEntitiesByNetwork(@PathVariable Long networkId) {
         log.trace(
-                "getAccountEntitiesByNetwork: user={}, networkId={}",
+                "getAccountEntitiesByNetwork: apiUser={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId);
         var accounts = accountNetworkService.getAccountDtosByNetworkId(networkId);
@@ -165,7 +165,7 @@ public class AccountNetworkController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public boolean checkAccess(@RequestParam Long accountId, @RequestParam Long networkId) {
         log.trace(
-                "checkAccess: user={}, accountId={}, networkId={}",
+                "checkAccess: apiUser={}, accountId={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 accountId,
                 networkId);
@@ -188,7 +188,7 @@ public class AccountNetworkController {
     public ResponseEntity<AccountNetworkDto> createAccountNetwork(
             @RequestBody SaveAccountNetworkRequest request) {
         log.trace(
-                "createAccountNetwork: user={}, accountId={}, networkId={}",
+                "createAccountNetwork: apiUser={}, accountId={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 request.accountId(),
                 request.networkId());
@@ -209,7 +209,7 @@ public class AccountNetworkController {
     public ResponseEntity<AccountNetworkDto> grantAccess(
             @RequestParam Long accountId, @RequestParam Long networkId) {
         log.trace(
-                "grantAccess: user={}, accountId={}, networkId={}",
+                "grantAccess: apiUser={}, accountId={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 accountId,
                 networkId);
@@ -238,7 +238,7 @@ public class AccountNetworkController {
     public ResponseEntity<AccountNetworkDto> updateAccountNetwork(
             @PathVariable Long id, @RequestBody SaveAccountNetworkRequest request) {
         log.trace(
-                "updateAccountNetwork: user={}, id={}",
+                "updateAccountNetwork: apiUser={}, id={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
 
@@ -266,7 +266,7 @@ public class AccountNetworkController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public ResponseEntity<Void> deleteAccountNetwork(@PathVariable Long id) {
         log.trace(
-                "deleteAccountNetwork: user={}, id={}",
+                "deleteAccountNetwork: apiUser={}, id={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
 
@@ -292,7 +292,7 @@ public class AccountNetworkController {
     public ResponseEntity<Void> revokeAccess(
             @RequestParam Long accountId, @RequestParam Long networkId) {
         log.trace(
-                "revokeAccess: user={}, accountId={}, networkId={}",
+                "revokeAccess: apiUser={}, accountId={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 accountId,
                 networkId);

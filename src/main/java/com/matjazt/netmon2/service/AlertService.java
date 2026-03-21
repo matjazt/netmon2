@@ -27,7 +27,7 @@ public class AlertService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public Optional<AlertDto> findById(Long id) {
         log.trace(
-                "findById: user={}, alertId={}",
+                "findById: apiUser={}, alertId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
         return alertRepository.findById(id).map(alertMapper::toDto);
@@ -43,7 +43,7 @@ public class AlertService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AlertDto> findByNetworkId(Long networkId) {
         log.trace(
-                "findByNetworkId: user={}, networkId={}",
+                "findByNetworkId: apiUser={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId);
         return convertAndSortByTimeDesc(alertRepository.findByNetwork_Id(networkId));
@@ -52,7 +52,7 @@ public class AlertService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AlertDto> findActiveByNetworkId(Long networkId) {
         log.trace(
-                "findActiveByNetworkId: user={}, networkId={}",
+                "findActiveByNetworkId: apiUser={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId);
         return convertAndSortByTimeDesc(
@@ -62,7 +62,7 @@ public class AlertService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AlertDto> findByDeviceId(Long deviceId) {
         log.trace(
-                "findByDeviceId: user={}, deviceId={}",
+                "findByDeviceId: apiUser={}, deviceId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 deviceId);
         return convertAndSortByTimeDesc(alertRepository.findByDevice_Id(deviceId));
@@ -71,7 +71,7 @@ public class AlertService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AlertDto> findActiveByDeviceId(Long deviceId) {
         log.trace(
-                "findActiveByDeviceId: user={}, deviceId={}",
+                "findActiveByDeviceId: apiUser={}, deviceId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 deviceId);
         return convertAndSortByTimeDesc(

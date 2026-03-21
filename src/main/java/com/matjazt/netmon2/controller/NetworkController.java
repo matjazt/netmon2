@@ -50,7 +50,7 @@ public class NetworkController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<NetworkDto> getAllNetworks() {
         log.trace(
-                "getAllNetworks: user={}",
+                "getAllNetworks: apiUser={}",
                 SecurityContextHolder.getContext().getAuthentication().getName());
         List<NetworkDto> dtos = networkService.findAllNetworkSummaries();
         log.trace("getAllNetworks: returning {} networks", dtos.size());
@@ -77,7 +77,7 @@ public class NetworkController {
                     + " @networkAuthorizationService.canAccessNetwork(authentication, #id)")
     public ResponseEntity<NetworkDto> getNetworkById(@PathVariable Long id) {
         log.trace(
-                "getNetworkById: user={}, networkId={}",
+                "getNetworkById: apiUser={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
         return networkService
@@ -97,7 +97,7 @@ public class NetworkController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public ResponseEntity<NetworkDto> getNetworkByName(@PathVariable String name) {
         log.trace(
-                "getNetworkByName: user={}, name={}",
+                "getNetworkByName: apiUser={}, name={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 name);
         return networkService
@@ -115,7 +115,7 @@ public class NetworkController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public boolean checkNetworkExists(@RequestParam String name) {
         log.trace(
-                "checkNetworkExists: user={}, name={}",
+                "checkNetworkExists: apiUser={}, name={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 name);
         return networkService.networkExistsByName(name);
@@ -130,7 +130,7 @@ public class NetworkController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<NetworkDto> getNetworksWithActiveAlerts() {
         log.trace(
-                "getNetworksWithActiveAlerts: user={}",
+                "getNetworksWithActiveAlerts: apiUser={}",
                 SecurityContextHolder.getContext().getAuthentication().getName());
         var networks = networkService.findNetworkDtosWithActiveAlerts();
         log.trace("getNetworksWithActiveAlerts: returning {} networks", networks.size());
@@ -146,7 +146,7 @@ public class NetworkController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<NetworkDto> getNetworksWithoutActiveAlerts() {
         log.trace(
-                "getNetworksWithoutActiveAlerts: user={}",
+                "getNetworksWithoutActiveAlerts: apiUser={}",
                 SecurityContextHolder.getContext().getAuthentication().getName());
         var networks = networkService.findNetworkDtosWithoutActiveAlerts();
         log.trace("getNetworksWithoutActiveAlerts: returning {} networks", networks.size());
@@ -162,7 +162,7 @@ public class NetworkController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<NetworkDto> searchNetworksByName(@RequestParam String name) {
         log.trace(
-                "searchNetworksByName: user={}, name={}",
+                "searchNetworksByName: apiUser={}, name={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 name);
         var networks = networkService.findNetworkDtosByNameContaining(name);
@@ -185,7 +185,7 @@ public class NetworkController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public ResponseEntity<NetworkDto> createNetwork(@RequestBody SaveNetworkRequest request) {
         log.trace(
-                "createNetwork: user={}, name={}",
+                "createNetwork: apiUser={}, name={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 request.name());
         NetworkDto saved = networkService.saveNetworkAndReturnDto(request, null);
@@ -207,7 +207,7 @@ public class NetworkController {
     public ResponseEntity<NetworkDto> updateNetwork(
             @PathVariable Long id, @RequestBody SaveNetworkRequest request) {
         log.trace(
-                "updateNetwork: user={}, networkId={}",
+                "updateNetwork: apiUser={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
 
@@ -235,7 +235,7 @@ public class NetworkController {
     @PreAuthorize("hasAnyRole('admin')")
     public ResponseEntity<Void> deleteNetwork(@PathVariable Long id) {
         log.trace(
-                "deleteNetwork: user={}, networkId={}",
+                "deleteNetwork: apiUser={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
 

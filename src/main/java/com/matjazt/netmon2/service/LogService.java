@@ -46,7 +46,7 @@ public class LogService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public Optional<LogEntity> findLogById(Long id) {
         log.trace(
-                "findLogById: user={}, logId={}",
+                "findLogById: apiUser={}, logId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
         return logRepository.findById(id);
@@ -60,7 +60,7 @@ public class LogService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public Page<LogDto> getAllLogsPaginated(int page, int size) {
         log.trace(
-                "getAllLogsPaginated: user={}, page={}, size={}",
+                "getAllLogsPaginated: apiUser={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 page,
                 size);
@@ -81,7 +81,7 @@ public class LogService {
                     + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public Page<LogDto> getLogsByNetwork(Long networkId, int page, int size) {
         log.trace(
-                "getLogsByNetwork: user={}, networkId={}, page={}, size={}",
+                "getLogsByNetwork: apiUser={}, networkId={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId,
                 page,
@@ -101,7 +101,7 @@ public class LogService {
     @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
     public Page<LogDto> getLogsByDevice(Long deviceId, int page, int size) {
         log.trace(
-                "getLogsByDevice: user={}, deviceId={}, page={}, size={}",
+                "getLogsByDevice: apiUser={}, deviceId={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 deviceId,
                 page,
@@ -122,7 +122,7 @@ public class LogService {
     public Page<LogDto> getLogsByTimestampRange(
             LocalDateTime minTimestamp, LocalDateTime maxTimestamp, int page, int size) {
         log.trace(
-                "getLogsByTimestampRange: user={}, minTimestamp={}, maxTimestamp={}, page={},"
+                "getLogsByTimestampRange: apiUser={}, minTimestamp={}, maxTimestamp={}, page={},"
                         + " size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 minTimestamp,
@@ -152,7 +152,7 @@ public class LogService {
             int page,
             int size) {
         log.trace(
-                "getLogsByNetworkAndTimestampRange: user={}, networkId={}, minTimestamp={},"
+                "getLogsByNetworkAndTimestampRange: apiUser={}, networkId={}, minTimestamp={},"
                         + " maxTimestamp={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId,
@@ -182,7 +182,7 @@ public class LogService {
             int page,
             int size) {
         log.trace(
-                "getLogsByDeviceAndTimestampRange: user={}, deviceId={}, minTimestamp={},"
+                "getLogsByDeviceAndTimestampRange: apiUser={}, deviceId={}, minTimestamp={},"
                         + " maxTimestamp={}, page={}, size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 deviceId,

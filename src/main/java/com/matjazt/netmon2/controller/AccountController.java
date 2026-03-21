@@ -50,7 +50,7 @@ public class AccountController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountDto> getAllAccounts() {
         log.trace(
-                "getAllAccounts: user={}",
+                "getAllAccounts: apiUser={}",
                 SecurityContextHolder.getContext().getAuthentication().getName());
         List<AccountDto> dtos = accountService.findAllAccountSummaries();
         log.trace("getAllAccounts: returning {} accounts", dtos.size());
@@ -75,7 +75,7 @@ public class AccountController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public ResponseEntity<AccountDto> getAccountById(@PathVariable Long id) {
         log.trace(
-                "getAccountById: user={}, accountId={}",
+                "getAccountById: apiUser={}, accountId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
         return accountService
@@ -95,7 +95,7 @@ public class AccountController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public ResponseEntity<AccountDto> getAccountByUsername(@PathVariable String username) {
         log.trace(
-                "getAccountByUsername: user={}, targetUsername={}",
+                "getAccountByUsername: apiUser={}, targetUsername={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 username);
         return accountService
@@ -109,7 +109,7 @@ public class AccountController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<AccountDto> getCurrentAccount() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        log.trace("getCurrentAccount: user={}", username);
+        log.trace("getCurrentAccount: apiUser={}", username);
         return accountService
                 .findAccountDtoByUsername(username)
                 .map(ResponseEntity::ok)
@@ -125,7 +125,7 @@ public class AccountController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public boolean checkAccountExists(@RequestParam String username) {
         log.trace(
-                "checkAccountExists: user={}, username={}",
+                "checkAccountExists: apiUser={}, username={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 username);
         return accountService.accountExistsByUsername(username);
@@ -140,7 +140,7 @@ public class AccountController {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountDto> getAccountsByType(@PathVariable String accountTypeName) {
         log.trace(
-                "getAccountsByType: user={}, accountTypeName={}",
+                "getAccountsByType: apiUser={}, accountTypeName={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 accountTypeName);
         return accountService.findAccountDtosByType(accountTypeName);
@@ -161,7 +161,7 @@ public class AccountController {
     @PreAuthorize("hasAnyRole('admin')")
     public ResponseEntity<AccountDto> createAccount(@RequestBody SaveAccountRequest request) {
         log.trace(
-                "createAccount: user={}, username={}",
+                "createAccount: apiUser={}, username={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 request.username());
         AccountDto saved = accountService.saveAccountAndReturnDto(request, null);
@@ -183,7 +183,7 @@ public class AccountController {
     public ResponseEntity<AccountDto> updateAccount(
             @PathVariable Long id, @RequestBody SaveAccountRequest request) {
         log.trace(
-                "updateAccount: user={}, accountId={}",
+                "updateAccount: apiUser={}, accountId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
 
@@ -211,7 +211,7 @@ public class AccountController {
     @PreAuthorize("hasAnyRole('admin')")
     public ResponseEntity<Void> deleteAccount(@PathVariable Long id) {
         log.trace(
-                "deleteAccount: user={}, accountId={}",
+                "deleteAccount: apiUser={}, accountId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
 

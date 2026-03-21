@@ -136,7 +136,7 @@ public class DeviceController {
                     + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<DeviceDto> getDevicesByNetwork(@PathVariable Long networkId) {
         log.trace(
-                "getDevicesByNetwork: user={}, networkId={}",
+                "getDevicesByNetwork: apiUser={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 networkId);
         List<DeviceDto> dtos = deviceService.getDevicesByNetwork(networkId);

@@ -42,7 +42,7 @@ public class AccountService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public Optional<AccountEntity> findAccountById(Long id) {
         log.trace(
-                "findAccountById: user={}, accountId={}",
+                "findAccountById: apiUser={}, accountId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
         return accountRepository.findById(id);
@@ -52,7 +52,7 @@ public class AccountService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountEntity> findAllAccounts() {
         log.trace(
-                "findAllAccounts: user={}",
+                "findAllAccounts: apiUser={}",
                 SecurityContextHolder.getContext().getAuthentication().getName());
         return accountRepository.findAll();
     }
@@ -66,7 +66,7 @@ public class AccountService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public AccountEntity saveAccount(AccountEntity account) {
         log.trace(
-                "saveAccount: user={}, username={}",
+                "saveAccount: apiUser={}, username={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 account.getUsername());
         return accountRepository.save(account);
@@ -77,7 +77,7 @@ public class AccountService {
     @PreAuthorize("hasAnyRole('admin')")
     public void deleteAccount(Long id) {
         log.trace(
-                "deleteAccount: user={}, accountId={}",
+                "deleteAccount: apiUser={}, accountId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
         accountRepository.deleteById(id);
@@ -89,7 +89,7 @@ public class AccountService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public Optional<AccountEntity> findAccountByUsername(String username) {
         log.trace(
-                "findAccountByUsername: user={}, targetUsername={}",
+                "findAccountByUsername: apiUser={}, targetUsername={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 username);
         return accountRepository.findByUsername(username);
@@ -99,7 +99,7 @@ public class AccountService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public boolean accountExistsByUsername(String username) {
         log.trace(
-                "accountExistsByUsername: user={}, username={}",
+                "accountExistsByUsername: apiUser={}, username={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 username);
         return accountRepository.existsByUsername(username);
@@ -109,7 +109,7 @@ public class AccountService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public boolean emailExists(String email) {
         log.trace(
-                "emailExists: user={}, email={}",
+                "emailExists: apiUser={}, email={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 email);
         return accountRepository.existsByEmail(email);
@@ -119,7 +119,7 @@ public class AccountService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountEntity> findAccountsByType(String accountTypeName) {
         log.trace(
-                "findAccountsByType: user={}, accountTypeName={}",
+                "findAccountsByType: apiUser={}, accountTypeName={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 accountTypeName);
         return accountRepository.findByAccountType_Name(accountTypeName);
@@ -131,7 +131,7 @@ public class AccountService {
     @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountDto> findAllAccountSummaries() {
         log.trace(
-                "findAllAccountSummaries: user={}",
+                "findAllAccountSummaries: apiUser={}",
                 SecurityContextHolder.getContext().getAuthentication().getName());
         List<AccountEntity> entities = accountRepository.findAll();
         var dtos = accountMapper.toDtos(entities);
