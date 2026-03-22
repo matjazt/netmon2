@@ -172,8 +172,24 @@ public class AccountService {
                                                         + request.accountTypeId()));
         AccountEntity account = accountMapper.toEntity(request);
         account.setAccountType(accountType);
-        account.setPasswordHash(passwordEncoder.encode(request.password()));
-        if (id != null) account.setId(id);
+
+        if (request.password() == null || request.password().isEmpty()) {
+            if (id != null) {
+                String existingHash =
+                        accountRepository
+                                .findById(id)
+                                .orElseThrow(() -> new RuntimeException("Account not found: " + id))
+                                .getPasswordHash();
+                account.setPasswordHash(existingHash);
+            } else {
+                throw new RuntimeException("Password is required for new accounts");
+            }
+        } else {
+            account.setPasswordHash(passwordEncoder.encode(request.password()));
+        }
+        if (id != null) {
+            account.setId(id);
+        }
         return accountMapper.toDto(saveAccount(account));
     }
 }

@@ -188,7 +188,7 @@ public class NetworkController {
                 "createNetwork: apiUser={}, name={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 request.name());
-        NetworkDto saved = networkService.saveNetworkAndReturnDto(request, null);
+        NetworkDto saved = networkService.createNetworkAndReturnDto(request);
         log.trace("createNetwork: created network with id={}", saved.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
@@ -217,7 +217,7 @@ public class NetworkController {
             return ResponseEntity.notFound().build();
         }
 
-        NetworkDto updated = networkService.saveNetworkAndReturnDto(request, id);
+        NetworkDto updated = networkService.updateNetworkAndReturnDto(request, id);
         log.trace("updateNetwork: updated network with id={}", updated.id());
         return ResponseEntity.ok(updated);
     }

@@ -245,11 +245,6 @@ public class DeviceController {
     public ResponseEntity<DeviceDto> updateDevice(
             @PathVariable Long id, @RequestBody SaveDeviceRequest request) {
 
-        // Verify device exists
-        if (deviceService.findDeviceDtoById(id).isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
         DeviceDto updated = deviceService.saveDeviceAndReturnDto(request, id);
         return ResponseEntity.ok(updated);
     }
@@ -266,6 +261,24 @@ public class DeviceController {
             @PathVariable Long id, @RequestParam DeviceOperationMode mode) {
         try {
             DeviceDto updated = deviceService.updateDeviceModeAndReturnDto(id, mode);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * EXAMPLE: PUT /api/devices/5/name?name=NewDeviceName
+     *
+     * <p>Update only the device name
+     *
+     * <p>Partial update - only changes one field
+     */
+    @PutMapping("/{id}/name")
+    public ResponseEntity<DeviceDto> updateDeviceName(
+            @PathVariable Long id, @RequestParam String name) {
+        try {
+            DeviceDto updated = deviceService.renameDeviceAndReturnDto(id, name);
             return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

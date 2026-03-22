@@ -129,7 +129,13 @@ public class MqttService {
             var now = LocalDateTime.now(ZoneOffset.UTC);
 
             // obtain network information
-            NetworkEntity network = getOrCreateNetwork(networkName);
+            NetworkEntity network =
+                    networkRepository
+                            .findByName(networkName)
+                            .orElseThrow(
+                                    () ->
+                                            new RuntimeException(
+                                                    "Network not found: " + networkName));
             NetworkConfiguration networkConfig =
                     networkConfigurationService.getByNetworkId(network.getId());
 
@@ -375,16 +381,5 @@ public class MqttService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse JSON message", e);
         }
-    }
-
-    /** Get existing network or create a new one. */
-    private NetworkEntity getOrCreateNetwork(String networkName) {
-        return networkRepository
-                .findByName(networkName)
-                .orElseGet(
-                        () -> {
-                            NetworkEntity newNetwork = new NetworkEntity(networkName);
-                            return networkRepository.save(newNetwork);
-                        });
     }
 }

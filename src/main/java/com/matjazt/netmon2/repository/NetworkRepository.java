@@ -3,6 +3,8 @@ package com.matjazt.netmon2.repository;
 import com.matjazt.netmon2.entity.NetworkEntity;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -64,4 +66,17 @@ public interface NetworkRepository extends JpaRepository<NetworkEntity, Long> {
      * <p>Case-insensitive search using IgnoreCase.
      */
     java.util.List<NetworkEntity> findByNameContainingIgnoreCase(String namePart);
+
+    /**
+     * Update configuration string for a network
+     *
+     * <pre>
+     * UPDATE network SET configuration = :configuration WHERE id = :id
+     * </pre>
+     */
+    @Modifying
+    @Query(
+            "UPDATE NetworkEntity n SET n.name = :name, n.configuration = :configuration WHERE n.id"
+                    + " = :id")
+    void updateNameAndConfigurationById(Long id, String name, String configuration);
 }

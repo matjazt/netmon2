@@ -15,6 +15,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -199,9 +201,23 @@ public class NetworkService {
 
     @Transactional
     @PreAuthorize("hasAnyRole('admin', 'system')")
-    public NetworkDto saveNetworkAndReturnDto(SaveNetworkRequest request, Long id) {
+    public NetworkDto createNetworkAndReturnDto(SaveNetworkRequest request) {
         NetworkEntity network = networkMapper.toEntity(request);
-        if (id != null) network.setId(id);
+        var now = LocalDateTime.now(ZoneOffset.UTC);
+        network.setFirstSeen(now);
+        network.setLastSeen(now);
         return networkMapper.toDto(saveNetwork(network));
+    }
+
+    @Transactional
+    @PreAuthorize("hasAnyRole('admin', 'system')")
+    public NetworkDto updateNetworkAndReturnDto(SaveNetworkRequest request, long id) {
+        networkRepository.updateNameAndConfigurationById(
+                id, request.name(), request.configuration());
+        var dbEntity =
+                findNetworkById(id)
+                        .orElseThrow(() -> new RuntimeException("Network not found: " + id));
+
+        return networkMapper.toDto(dbEntity);
     }
 }

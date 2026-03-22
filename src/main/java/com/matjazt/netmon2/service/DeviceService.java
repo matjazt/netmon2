@@ -189,7 +189,7 @@ public class DeviceService {
         return deviceRepository.existsByNetwork_IdAndMacAddress(networkId, macAddress);
     }
 
-    /** EXAMPLE: Update device operation mode */
+    
     @Transactional
     public DeviceEntity updateDeviceMode(Long deviceId, DeviceOperationMode mode) {
         DeviceEntity device =
@@ -198,6 +198,17 @@ public class DeviceService {
                         .orElseThrow(() -> new RuntimeException("Device not found: " + deviceId));
 
         device.setDeviceOperationMode(mode);
+        return deviceRepository.save(device);
+    }
+
+    @Transactional
+    public DeviceEntity renameDevice(Long deviceId, String newName) {
+        DeviceEntity device =
+                deviceRepository
+                        .findById(deviceId)
+                        .orElseThrow(() -> new RuntimeException("Device not found: " + deviceId));
+
+        device.setName(newName);
         return deviceRepository.save(device);
     }
 
@@ -226,6 +237,12 @@ public class DeviceService {
     public DeviceDto updateDeviceModeAndReturnDto(Long deviceId, DeviceOperationMode mode) {
         return deviceMapper.toDto(updateDeviceMode(deviceId, mode));
     }
+
+        @Transactional
+    public DeviceDto renameDeviceAndReturnDto(Long deviceId, String newName) {
+        return deviceMapper.toDto(renameDevice(deviceId, newName));
+    }
+
 
     // ========== INNER CLASS FOR EXAMPLE ==========
 
