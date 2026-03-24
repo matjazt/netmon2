@@ -16,6 +16,7 @@ public record DeviceDto(
         String macAddress,
         String ipAddress,
         Boolean online,
+        Instant firstSeen,
         Instant lastSeen,
         DeviceOperationMode deviceOperationMode,
         Long activeAlertId,

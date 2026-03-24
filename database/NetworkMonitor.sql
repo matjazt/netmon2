@@ -281,3 +281,6 @@ select * from log
 select device_id, count(*) from log group by device_id
 
 select * from device_status_history dsh 
+
+select * from network
+select * from device
