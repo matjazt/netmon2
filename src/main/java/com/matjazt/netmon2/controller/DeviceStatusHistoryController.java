@@ -22,8 +22,6 @@ import java.time.LocalDateTime;
 /**
  * REST Controller for reading DeviceStatusHistory entities.
  *
- * <p>@RestController combines @Controller and @ResponseBody
- *
  * <p>Provides read-only endpoints for device status history with pagination and filtering.
  */
 @RestController
@@ -247,7 +245,7 @@ public class DeviceStatusHistoryController {
     @GetMapping("/device/{deviceId}/count")
     @PreAuthorize(
             "hasAnyRole('admin') or @deviceAuthorizationService.canAccessDevice(authentication,"
-                + " #deviceId)")
+                    + " #deviceId)")
     public long countByDevice(@PathVariable Long deviceId) {
         log.trace(
                 "countByDevice: apiUser={}, deviceId={}",

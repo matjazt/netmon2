@@ -26,8 +26,6 @@ import java.util.List;
 /**
  * REST Controller for managing Account entities.
  *
- * <p>@RestController combines @Controller and @ResponseBody
- *
  * <p>Provides CRUD endpoints for user accounts (admin only).
  */
 @RestController
@@ -41,11 +39,7 @@ public class AccountController {
 
     // ========== GET ENDPOINTS (retrieve data) ==========
 
-    /**
-     * GET /api/accounts
-     *
-     * <p>Get all accounts Returns 200 OK with JSON array of accounts
-     */
+    /** GET /api/accounts — get all accounts. */
     @GetMapping
     @PreAuthorize("hasAnyRole('admin')")
     public List<AccountDto> getAllAccounts() {
@@ -60,9 +54,7 @@ public class AccountController {
     /**
      * GET /api/accounts/5
      *
-     * <p>Get account by ID
-     *
-     * <p>@PathVariable extracts {id} from URL path
+     * <p>Get account by ID.
      *
      * <p>Returns:
      *
@@ -89,9 +81,7 @@ public class AccountController {
     /**
      * GET /api/accounts/username/john
      *
-     * <p>Find account by username
-     *
-     * <p>Username is part of the URL path
+     * <p>Find account by username.
      */
     @GetMapping("/username/{username}")
     @PreAuthorize("hasAnyRole('admin')")
@@ -153,11 +143,9 @@ public class AccountController {
     /**
      * POST /api/accounts
      *
-     * <p>Create a new account
+     * <p>Create a new account.
      *
-     * <p>@RequestBody deserializes JSON from request body to AccountEntity
-     *
-     * <p>Returns 201 Created with the saved account (including generated ID)
+     * <p>Returns 201 Created with the saved account.
      */
     @PostMapping
     @PreAuthorize("hasAnyRole('admin')")
@@ -176,9 +164,7 @@ public class AccountController {
     /**
      * PUT /api/accounts/5
      *
-     * <p>Update an existing account
-     *
-     * <p>ID in path + full entity in body
+     * <p>Update an existing account.
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('admin')")

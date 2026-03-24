@@ -81,8 +81,6 @@ public class AccountService {
         accountRepository.deleteById(id);
     }
 
-    // ========== CUSTOM QUERY EXAMPLES ==========
-
     /** Find account by username */
     public Optional<AccountEntity> findAccountByUsername(String username) {
         log.trace(

@@ -26,8 +26,6 @@ import java.util.List;
 /**
  * REST Controller for managing Network entities.
  *
- * <p>@RestController combines @Controller and @ResponseBody
- *
  * <p>Provides CRUD endpoints for monitored networks.
  */
 @RestController
@@ -41,11 +39,7 @@ public class NetworkController {
 
     // ========== GET ENDPOINTS (retrieve data) ==========
 
-    /**
-     * GET /api/networks
-     *
-     * <p>Get all networks Returns 200 OK with JSON array of networks
-     */
+    /** GET /api/networks — get all networks. */
     @GetMapping
     @PreAuthorize("hasAnyRole('admin')")
     public List<NetworkDto> getAllNetworks() {
@@ -60,9 +54,7 @@ public class NetworkController {
     /**
      * GET /api/networks/5
      *
-     * <p>Get network by ID
-     *
-     * <p>@PathVariable extracts {id} from URL path
+     * <p>Get network by ID.
      *
      * <p>Returns:
      *
@@ -106,11 +98,9 @@ public class NetworkController {
     /**
      * POST /api/networks
      *
-     * <p>Create a new network
+     * <p>Create a new network.
      *
-     * <p>@RequestBody deserializes JSON from request body to NetworkEntity
-     *
-     * <p>Returns 201 Created with the saved network (including generated ID)
+     * <p>Returns 201 Created with the saved network.
      */
     @PostMapping
     @PreAuthorize("hasAnyRole('admin')")
@@ -129,9 +119,7 @@ public class NetworkController {
     /**
      * PUT /api/networks/5
      *
-     * <p>Update an existing network
-     *
-     * <p>ID in path + full entity in body
+     * <p>Update an existing network.
      */
     @PutMapping("/{id}")
     @PreAuthorize(

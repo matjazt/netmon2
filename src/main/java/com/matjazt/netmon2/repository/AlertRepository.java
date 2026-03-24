@@ -113,7 +113,7 @@ public interface AlertRepository extends JpaRepository<AlertEntity, Long> {
     List<AlertEntity> findByTimestampBetween(LocalDateTime start, LocalDateTime end);
 
     /**
-     * PAGINATION EXAMPLE: Find all alerts with pagination
+     * Find all alerts with pagination
      *
      * <p>Pageable parameter allows sorting and pagination. Returns a Page object with:
      *

@@ -25,8 +25,6 @@ import java.util.List;
 /**
  * REST Controller for managing AccountNetwork relationships.
  *
- * <p>@RestController combines @Controller and @ResponseBody
- *
  * <p>Provides CRUD endpoints for managing which accounts have access to which networks.
  */
 @RestController
@@ -40,11 +38,7 @@ public class AccountNetworkController {
 
     // ========== GET ENDPOINTS (retrieve data) ==========
 
-    /**
-     * GET /api/account-networks
-     *
-     * <p>Get all account-network relationships Returns 200 OK with JSON array
-     */
+    /** GET /api/account-networks — get all account-network relationships. */
     @GetMapping
     @PreAuthorize("hasAnyRole('admin')")
     public List<AccountNetworkDto> getAllAccountNetworks() {

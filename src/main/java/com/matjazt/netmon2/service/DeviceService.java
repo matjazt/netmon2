@@ -60,7 +60,7 @@ public class DeviceService {
     // ========== BASIC CRUD OPERATIONS ==========
 
     /**
-     * EXAMPLE: Find device by ID
+     * Find device by ID
      *
      * <p>Optional avoids NullPointerException - you must check if value exists.
      */
@@ -69,13 +69,13 @@ public class DeviceService {
         return deviceRepository.findByIdWithNetwork(id);
     }
 
-    /** EXAMPLE: Get all devices (be careful with large datasets!) */
+    /** Get all devices (be careful with large datasets!) */
     public List<DeviceEntity> findAllDevices() {
         return deviceRepository.findAll();
     }
 
     /**
-     * EXAMPLE: Save a new device or update existing one
+     * Save a new device or update existing one
      *
      * <p>save() does INSERT if ID is null, UPDATE if ID exists.
      */
@@ -84,20 +84,18 @@ public class DeviceService {
         return deviceRepository.save(device);
     }
 
-    /** EXAMPLE: Delete a device */
+    /** Delete a device */
     @Transactional
     public void deleteDevice(Long id) {
         deviceRepository.deleteById(id);
     }
 
-    // ========== CUSTOM QUERY EXAMPLES ==========
-
-    /** EXAMPLE: Find online devices on a network */
+    /** Find online devices on a network */
     public List<DeviceEntity> findOnlineDevices(Long networkId) {
         return deviceRepository.findByNetwork_IdAndOnline(networkId, true);
     }
 
-    /** EXAMPLE: Find device by MAC address */
+    /** Find device by MAC address */
     public Optional<DeviceEntity> findDeviceByMac(String macAddress) {
         return deviceRepository.findByMacAddress(macAddress);
     }
@@ -143,10 +141,8 @@ public class DeviceService {
         return dtos;
     }
 
-
-
     /**
-     * EXAMPLE: Get device statistics for a network
+     * Get device statistics for a network
      *
      * <p>Shows how to use multiple repository methods to build a response.
      */
@@ -158,12 +154,11 @@ public class DeviceService {
         return new DeviceStats(totalDevices, onlineDevices, offlineDevices);
     }
 
-    /** EXAMPLE: Check if device exists */
+    /** Check if device exists */
     public boolean deviceExists(Long networkId, String macAddress) {
         return deviceRepository.existsByNetwork_IdAndMacAddress(networkId, macAddress);
     }
 
-    
     @Transactional
     public DeviceEntity updateDeviceMode(Long deviceId, DeviceOperationMode mode) {
         DeviceEntity device =
@@ -192,10 +187,6 @@ public class DeviceService {
         return findDeviceById(id).map(deviceMapper::toDto);
     }
 
-
-
-
-
     @Transactional
     public DeviceDto saveDeviceAndReturnDto(SaveDeviceRequest request, Long id) {
         DeviceEntity device = deviceMapper.toEntity(request);
@@ -208,13 +199,10 @@ public class DeviceService {
         return deviceMapper.toDto(updateDeviceMode(deviceId, mode));
     }
 
-        @Transactional
+    @Transactional
     public DeviceDto renameDeviceAndReturnDto(Long deviceId, String newName) {
         return deviceMapper.toDto(renameDevice(deviceId, newName));
     }
-
-
-    // ========== INNER CLASS FOR EXAMPLE ==========
 
     /**
      * Simple data class for returning statistics.

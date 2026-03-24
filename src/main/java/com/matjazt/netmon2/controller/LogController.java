@@ -22,8 +22,6 @@ import java.time.LocalDateTime;
 /**
  * REST Controller for reading Log entities.
  *
- * <p>@RestController combines @Controller and @ResponseBody
- *
  * <p>Provides read-only endpoints for log entries with pagination and filtering.
  */
 @RestController
@@ -210,7 +208,7 @@ public class LogController {
     @GetMapping("/device/{deviceId}/by-timestamp")
     @PreAuthorize(
             "hasAnyRole('admin') or @deviceAuthorizationService.canAccessDevice(authentication,"
-                + " #deviceId)")
+                    + " #deviceId)")
     public Page<LogDto> getLogsByDeviceAndTimestampRange(
             @PathVariable Long deviceId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)

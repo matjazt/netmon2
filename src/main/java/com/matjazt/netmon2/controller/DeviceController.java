@@ -25,41 +25,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * REST Controller demonstrating how to use services and repositories.
+ * REST Controller for managing Device entities.
  *
- * <p>@RestController combines @Controller and @ResponseBody
- *
- * <ul>
- *   <li>Makes this a REST API controller
- *   <li>Automatically serializes return values to JSON
- * </ul>
- *
- * <p>@RequestMapping sets the base URL path for all endpoints
- *
- * <p>SPRING MVC REQUEST MAPPINGS:
- *
- * <ul>
- *   <li>@GetMapping - HTTP GET (retrieve data)
- *   <li>@PostMapping - HTTP POST (create new resource)
- *   <li>@PutMapping - HTTP PUT (update existing resource)
- *   <li>@DeleteMapping - HTTP DELETE (remove resource)
- * </ul>
- *
- * <p>PATH VARIABLES vs QUERY PARAMETERS:
- *
- * <ul>
- *   <li>@PathVariable: /devices/{id} - required, part of URL path
- *   <li>@RequestParam: /devices?name=value - optional or multiple values
- * </ul>
- *
- * <p>RESPONSE ENTITY:
- *
- * <ul>
- *   <li>Allows controlling HTTP status codes
- *   <li>ResponseEntity.ok() = 200 OK
- *   <li>ResponseEntity.notFound() = 404 Not Found
- *   <li>ResponseEntity.status(HttpStatus.CREATED) = 201 Created
- * </ul>
+ * <p>Provides CRUD endpoints for devices.
  */
 @RestController
 @RequestMapping("/api/devices")
@@ -72,11 +40,7 @@ public class DeviceController {
 
     // ========== GET ENDPOINTS (retrieve data) ==========
 
-    /**
-     * EXAMPLE: GET /api/devices
-     *
-     * <p>Get all devices (careful with large datasets!) Returns 200 OK with JSON array of devices
-     */
+    /** GET /api/devices — get all devices. */
     @GetMapping
     @PreAuthorize("hasAnyRole('admin')")
     public List<DeviceDto> getAllDevices() {
@@ -84,18 +48,9 @@ public class DeviceController {
     }
 
     /**
-     * EXAMPLE: GET /api/devices/5
+     * GET /api/devices/{id} — get device by ID.
      *
-     * <p>Get device by ID
-     *
-     * <p>@PathVariable extracts {id} from URL path
-     *
-     * <p>Returns:
-     *
-     * <ul>
-     *   <li>200 OK with device JSON if found
-     *   <li>404 Not Found if device doesn't exist
-     * </ul>
+     * <p>Returns 404 if not found.
      */
     @GetMapping("/{id}")
     @PreAuthorize(
@@ -104,15 +59,11 @@ public class DeviceController {
     public ResponseEntity<DeviceDto> getDeviceById(@PathVariable Long id) {
         return deviceService
                 .findDeviceDtoById(id)
-                .map(ResponseEntity::ok) // If found, return 200 OK
-                .orElse(ResponseEntity.notFound().build()); // If not found, return 404
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * EXAMPLE: GET /api/devices/network/5
-     *
-     * <p>Get all devices on a specific network
-     */
+    /** GET /api/devices/network/{networkId} — get all devices on a network. */
     @GetMapping("/network/{networkId}")
     @PreAuthorize(
             "hasAnyRole('admin') or"
@@ -127,13 +78,7 @@ public class DeviceController {
         return dtos;
     }
 
-    /**
-     * EXAMPLE: GET /api/devices/network/5/stats
-     *
-     * <p>Get device statistics for a network
-     *
-     * <p>Returns custom object (not entity) as JSON
-     */
+    /** GET /api/devices/network/{networkId}/stats — get device statistics for a network. */
     @GetMapping("/network/{networkId}/stats")
     @PreAuthorize(
             "hasAnyRole('admin') or"
@@ -142,11 +87,7 @@ public class DeviceController {
         return deviceService.getDeviceStats(networkId);
     }
 
-    /**
-     * EXAMPLE: GET /api/devices/exists?networkId=5&macAddress=AA:BB:CC:DD:EE:FF
-     *
-     * <p>Check if device exists (returns boolean)
-     */
+    /** GET /api/devices/exists?networkId=&macAddress= — check if device exists by MAC address. */
     @GetMapping("/exists")
     @PreAuthorize(
             "hasAnyRole('admin') or"
@@ -159,25 +100,9 @@ public class DeviceController {
     // ========== POST ENDPOINTS (create new resources) ==========
 
     /**
-     * EXAMPLE: POST /api/devices
+     * POST /api/devices — create a new device.
      *
-     * <p>Create a new device
-     *
-     * <p>@RequestBody deserializes JSON from request body to DeviceEntity
-     *
-     * <p>Request body example:
-     *
-     * <pre>{@code
-     * {
-     *   "networkId": 5,
-     *   "macAddress": "AA:BB:CC:DD:EE:FF",
-     *   "ipAddress": "192.168.1.100",
-     *   "online": true,
-     *   "name": "My Device"
-     * }
-     * }</pre>
-     *
-     * <p>Returns 201 Created with the saved device (including generated ID)
+     * <p>Returns 201 Created with the saved device.
      */
     @PostMapping
     @PreAuthorize(
@@ -190,13 +115,7 @@ public class DeviceController {
 
     // ========== PUT ENDPOINTS (update existing resources) ==========
 
-    /**
-     * EXAMPLE: PUT /api/devices/5
-     *
-     * <p>Update an existing device
-     *
-     * <p>ID in path + full entity in body
-     */
+    /** PUT /api/devices/{id} — update an existing device. */
     @PutMapping("/{id}")
     @PreAuthorize(
             "hasAnyRole('admin') or @networkAuthorizationService.canAccessNetwork(authentication,"
@@ -208,13 +127,7 @@ public class DeviceController {
         return ResponseEntity.ok(updated);
     }
 
-    /**
-     * EXAMPLE: PUT /api/devices/5/mode?mode=ALWAYS_ON
-     *
-     * <p>Update only the operation mode
-     *
-     * <p>Partial update - only changes one field
-     */
+    /** PUT /api/devices/{id}/mode?mode= — update the device operation mode. */
     @PutMapping("/{id}/mode")
     @PreAuthorize(
             "hasAnyRole('admin') or @deviceAuthorizationService.canAccessDevice(authentication,"
@@ -229,13 +142,7 @@ public class DeviceController {
         }
     }
 
-    /**
-     * EXAMPLE: PUT /api/devices/5/name?name=NewDeviceName
-     *
-     * <p>Update only the device name
-     *
-     * <p>Partial update - only changes one field
-     */
+    /** PUT /api/devices/{id}/name?name= — update the device name. */
     @PutMapping("/{id}/name")
     @PreAuthorize(
             "hasAnyRole('admin') or @deviceAuthorizationService.canAccessDevice(authentication,"
@@ -253,11 +160,9 @@ public class DeviceController {
     // ========== DELETE ENDPOINTS (remove resources) ==========
 
     /**
-     * EXAMPLE: DELETE /api/devices/5
+     * DELETE /api/devices/{id} — delete a device.
      *
-     * <p>Delete a device
-     *
-     * <p>Returns 204 No Content on success
+     * <p>Returns 204 No Content on success.
      */
     @DeleteMapping("/{id}")
     @PreAuthorize(
@@ -269,6 +174,6 @@ public class DeviceController {
         }
 
         deviceService.deleteDevice(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
+        return ResponseEntity.noContent().build();
     }
 }
