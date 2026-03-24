@@ -59,6 +59,27 @@ public class DeviceStatusHistoryController {
     }
 
     /**
+     * GET /api/device-status-history/my?page=0&size=50
+     *
+     * <p>Get device status history with pagination, filtered to networks accessible by the
+     * logged-in user.
+     *
+     * <p>Sorted by timestamp descending (newest first).
+     */
+    @GetMapping("/my")
+    @PreAuthorize("hasAnyRole('admin', 'user')")
+    public Page<DeviceStatusHistoryDto> getMyHistory(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.trace("getMyHistory: apiUser={}, page={}, size={}", username, page, size);
+        Page<DeviceStatusHistoryDto> dtoPage =
+                deviceStatusHistoryService.getHistoryForUserNetworks(username, page, size);
+        log.trace("getMyHistory: returning {} history records", dtoPage.getSize());
+        return dtoPage;
+    }
+
+    /**
      * GET /api/device-status-history/5
      *
      * <p>Get device status history by ID
@@ -90,7 +111,7 @@ public class DeviceStatusHistoryController {
      */
     @GetMapping("/device/{deviceId}")
     @PreAuthorize(
-            "hasAnyRole('admin') or @deviceAuthorizationService.canAccessDevice(authentication,"
+            "hasAnyRole('admin') or @networkAuthorizationService.canAccessDevice(authentication,"
                     + " #deviceId)")
     public Page<DeviceStatusHistoryDto> getByDevice(
             @PathVariable Long deviceId,
@@ -175,7 +196,7 @@ public class DeviceStatusHistoryController {
      */
     @GetMapping("/device/{deviceId}/by-timestamp")
     @PreAuthorize(
-            "hasAnyRole('admin') or @deviceAuthorizationService.canAccessDevice(authentication,"
+            "hasAnyRole('admin') or @networkAuthorizationService.canAccessDevice(authentication,"
                     + " #deviceId)")
     public Page<DeviceStatusHistoryDto> getByDeviceAndTimestampRange(
             @PathVariable Long deviceId,
@@ -244,7 +265,7 @@ public class DeviceStatusHistoryController {
      */
     @GetMapping("/device/{deviceId}/count")
     @PreAuthorize(
-            "hasAnyRole('admin') or @deviceAuthorizationService.canAccessDevice(authentication,"
+            "hasAnyRole('admin') or @networkAuthorizationService.canAccessDevice(authentication,"
                     + " #deviceId)")
     public long countByDevice(@PathVariable Long deviceId) {
         log.trace(

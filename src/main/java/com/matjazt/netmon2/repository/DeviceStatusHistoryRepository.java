@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -97,6 +98,10 @@ public interface DeviceStatusHistoryRepository
      * <p>Filter by online status.
      */
     List<DeviceStatusHistoryEntity> findByOnlineOrderByTimestampDesc(Boolean online);
+
+    /** Find status history for any of the given networks, with pagination */
+    Page<DeviceStatusHistoryEntity> findByNetwork_IdIn(
+            Collection<Long> networkIds, Pageable pageable);
 
     /** Find "went offline" events for a device */
     List<DeviceStatusHistoryEntity> findByDevice_IdAndOnlineOrderByTimestampDesc(

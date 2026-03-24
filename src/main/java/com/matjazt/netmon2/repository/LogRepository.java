@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Spring Data JPA repository for {@link LogEntity}.
@@ -43,4 +44,7 @@ public interface LogRepository extends JpaRepository<LogEntity, Long> {
             LocalDateTime minTimestamp, LocalDateTime maxTimestamp, Pageable pageable);
 
     /** Find all logs with pagination (already provided by JpaRepository.findAll(Pageable)) */
+
+    /** Find logs that belong to any of the given networks, with pagination */
+    Page<LogEntity> findByNetwork_IdIn(List<Long> networkIds, Pageable pageable);
 }

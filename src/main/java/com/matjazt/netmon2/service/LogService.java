@@ -4,6 +4,8 @@ import com.matjazt.netmon2.dto.DeviceDto;
 import com.matjazt.netmon2.dto.LogDto;
 import com.matjazt.netmon2.entity.LogEntity;
 import com.matjazt.netmon2.mapper.LogMapper;
+import com.matjazt.netmon2.repository.AccountNetworkRepository;
+import com.matjazt.netmon2.repository.AccountRepository;
 import com.matjazt.netmon2.repository.LogRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,8 @@ public class LogService {
     private final LogMapper logMapper;
     private final NetworkService networkService;
     private final DeviceService deviceService;
+    private final AccountRepository accountRepository;
+    private final AccountNetworkRepository accountNetworkRepository;
 
     // ========== READ-ONLY OPERATIONS ==========
 
@@ -184,6 +188,29 @@ public class LogService {
                         deviceId, minTimestamp, maxTimestamp, pageable);
         var dtoPage = enrichPage(entityPage);
         log.trace("getLogsByDeviceAndTimestampRange: returning {} logs", dtoPage.getSize());
+        return dtoPage;
+    }
+
+    /**
+     * Get logs paginated, filtered to networks accessible by the given user.
+     *
+     * <p>Network IDs are resolved in one query; then a single paginated IN-query fetches the logs.
+     * Returns an empty page when the user has no accessible networks.
+     */
+    public Page<LogDto> getLogsForUserNetworks(String username, int page, int size) {
+        log.trace("getLogsForUserNetworks: username={}, page={}, size={}", username, page, size);
+        var account = accountRepository.findByUsername(username).orElseThrow();
+        List<Long> networkIds =
+                accountNetworkRepository.findByAccount_Id(account.getId()).stream()
+                        .map(an -> an.getNetwork().getId())
+                        .toList();
+        if (networkIds.isEmpty()) {
+            return Page.empty(PageRequest.of(page, size));
+        }
+        Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
+        Page<LogEntity> entityPage = logRepository.findByNetwork_IdIn(networkIds, pageable);
+        var dtoPage = enrichPage(entityPage);
+        log.trace("getLogsForUserNetworks: returning {} logs", dtoPage.getSize());
         return dtoPage;
     }
 

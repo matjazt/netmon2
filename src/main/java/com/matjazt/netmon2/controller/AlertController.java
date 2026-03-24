@@ -74,7 +74,7 @@ public class AlertController {
     @GetMapping("/device/{deviceId}")
     @PreAuthorize(
             "hasAnyRole('admin') or"
-                    + " @deviceAuthorizationService.canAccessDevice(authentication, #deviceId)")
+                    + " @networkAuthorizationService.canAccessDevice(authentication, #deviceId)")
     public List<AlertDto> getAlertsByDevice(
             @PathVariable Long deviceId, @RequestParam(defaultValue = "false") boolean active) {
         log.trace(

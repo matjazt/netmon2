@@ -58,6 +58,25 @@ public class LogController {
     }
 
     /**
+     * GET /api/logs/my?page=0&size=50
+     *
+     * <p>Get logs with pagination, filtered to networks accessible by the logged-in user.
+     *
+     * <p>Sorted by timestamp descending (newest first).
+     */
+    @GetMapping("/my")
+    @PreAuthorize("hasAnyRole('admin', 'user')")
+    public Page<LogDto> getMyLogs(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.trace("getMyLogs: apiUser={}, page={}, size={}", username, page, size);
+        Page<LogDto> dtoPage = logService.getLogsForUserNetworks(username, page, size);
+        log.trace("getMyLogs: returning {} logs", dtoPage.getSize());
+        return dtoPage;
+    }
+
+    /**
      * GET /api/logs/5
      *
      * <p>Get log by ID
@@ -89,7 +108,7 @@ public class LogController {
      */
     @GetMapping("/network/{networkId}")
     @PreAuthorize(
-            "hasAnyRole('admin', 'system') or"
+            "hasAnyRole('admin') or"
                     + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public Page<LogDto> getLogsByNetwork(
             @PathVariable Long networkId,
@@ -113,7 +132,7 @@ public class LogController {
      */
     @GetMapping("/device/{deviceId}")
     @PreAuthorize(
-            "hasAnyRole('admin') or @deviceAuthorizationService.canAccessDevice(authentication,"
+            "hasAnyRole('admin') or @networkAuthorizationService.canAccessDevice(authentication,"
                     + " #deviceId)")
     public Page<LogDto> getLogsByDevice(
             @PathVariable Long deviceId,
@@ -207,7 +226,7 @@ public class LogController {
      */
     @GetMapping("/device/{deviceId}/by-timestamp")
     @PreAuthorize(
-            "hasAnyRole('admin') or @deviceAuthorizationService.canAccessDevice(authentication,"
+            "hasAnyRole('admin') or @networkAuthorizationService.canAccessDevice(authentication,"
                     + " #deviceId)")
     public Page<LogDto> getLogsByDeviceAndTimestampRange(
             @PathVariable Long deviceId,

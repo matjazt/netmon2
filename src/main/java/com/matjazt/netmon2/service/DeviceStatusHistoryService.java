@@ -4,6 +4,8 @@ import com.matjazt.netmon2.dto.DeviceDto;
 import com.matjazt.netmon2.dto.DeviceStatusHistoryDto;
 import com.matjazt.netmon2.entity.DeviceStatusHistoryEntity;
 import com.matjazt.netmon2.mapper.DeviceStatusHistoryMapper;
+import com.matjazt.netmon2.repository.AccountNetworkRepository;
+import com.matjazt.netmon2.repository.AccountRepository;
 import com.matjazt.netmon2.repository.DeviceStatusHistoryRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,8 @@ public class DeviceStatusHistoryService {
     private final DeviceStatusHistoryMapper deviceStatusHistoryMapper;
     private final NetworkService networkService;
     private final DeviceService deviceService;
+    private final AccountRepository accountRepository;
+    private final AccountNetworkRepository accountNetworkRepository;
 
     // ========== READ-ONLY OPERATIONS ==========
 
@@ -118,7 +122,7 @@ public class DeviceStatusHistoryService {
             LocalDateTime minTimestamp, LocalDateTime maxTimestamp, int page, int size) {
         log.trace(
                 "getByTimestampRange: apiUser={}, minTimestamp={}, maxTimestamp={}, page={},"
-                    + " size={}",
+                        + " size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 minTimestamp,
                 maxTimestamp,
@@ -208,6 +212,31 @@ public class DeviceStatusHistoryService {
                 start,
                 end);
         return deviceStatusHistoryRepository.countByTimestampBetween(start, end);
+    }
+
+    /**
+     * Get device status history paginated, filtered to networks accessible by the given user.
+     *
+     * <p>Network IDs are resolved in one query; then a single paginated IN-query fetches the
+     * records. Returns an empty page when the user has no accessible networks.
+     */
+    public Page<DeviceStatusHistoryDto> getHistoryForUserNetworks(
+            String username, int page, int size) {
+        log.trace("getHistoryForUserNetworks: username={}, page={}, size={}", username, page, size);
+        var account = accountRepository.findByUsername(username).orElseThrow();
+        List<Long> networkIds =
+                accountNetworkRepository.findByAccount_Id(account.getId()).stream()
+                        .map(an -> an.getNetwork().getId())
+                        .toList();
+        if (networkIds.isEmpty()) {
+            return Page.empty(PageRequest.of(page, size));
+        }
+        Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
+        Page<DeviceStatusHistoryEntity> entityPage =
+                deviceStatusHistoryRepository.findByNetwork_IdIn(networkIds, pageable);
+        var dtoPage = enrichPage(entityPage);
+        log.trace("getHistoryForUserNetworks: returning {} history records", dtoPage.getSize());
+        return dtoPage;
     }
 
     public Optional<DeviceStatusHistoryDto> findDtoById(Long id) {

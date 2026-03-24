@@ -55,7 +55,7 @@ public class DeviceController {
     @GetMapping("/{id}")
     @PreAuthorize(
             "hasAnyRole('admin') or"
-                    + " @deviceAuthorizationService.canAccessDevice(authentication, #id)")
+                    + " @networkAuthorizationService.canAccessDevice(authentication, #id)")
     public ResponseEntity<DeviceDto> getDeviceById(@PathVariable Long id) {
         return deviceService
                 .findDeviceDtoById(id)
@@ -130,7 +130,7 @@ public class DeviceController {
     /** PUT /api/devices/{id}/mode?mode= — update the device operation mode. */
     @PutMapping("/{id}/mode")
     @PreAuthorize(
-            "hasAnyRole('admin') or @deviceAuthorizationService.canAccessDevice(authentication,"
+            "hasAnyRole('admin') or @networkAuthorizationService.canAccessDevice(authentication,"
                     + " #id)")
     public ResponseEntity<DeviceDto> updateDeviceMode(
             @PathVariable Long id, @RequestParam DeviceOperationMode mode) {
@@ -145,7 +145,7 @@ public class DeviceController {
     /** PUT /api/devices/{id}/name?name= — update the device name. */
     @PutMapping("/{id}/name")
     @PreAuthorize(
-            "hasAnyRole('admin') or @deviceAuthorizationService.canAccessDevice(authentication,"
+            "hasAnyRole('admin') or @networkAuthorizationService.canAccessDevice(authentication,"
                     + " #id)")
     public ResponseEntity<DeviceDto> updateDeviceName(
             @PathVariable Long id, @RequestParam String name) {
@@ -166,7 +166,7 @@ public class DeviceController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize(
-            "hasAnyRole('admin') or @deviceAuthorizationService.canAccessDevice(authentication,"
+            "hasAnyRole('admin') or @networkAuthorizationService.canAccessDevice(authentication,"
                     + " #id)")
     public ResponseEntity<Void> deleteDevice(@PathVariable Long id) {
         if (deviceService.findDeviceDtoById(id).isEmpty()) {
