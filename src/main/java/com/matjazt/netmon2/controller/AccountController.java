@@ -72,7 +72,9 @@ public class AccountController {
      * </ul>
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('admin')")
+    @PreAuthorize(
+            "hasAnyRole('admin') or"
+                    + " @networkAuthorizationService.canAccessAccount(authentication, #id)")
     public ResponseEntity<AccountDto> getAccountById(@PathVariable Long id) {
         log.trace(
                 "getAccountById: apiUser={}, accountId={}",

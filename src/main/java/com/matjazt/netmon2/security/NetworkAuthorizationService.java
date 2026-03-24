@@ -141,6 +141,59 @@ public class NetworkAuthorizationService {
         return self.getObject().canAccessNetwork(authentication, networkId);
     }
 
+    /**
+     * Check if the authenticated user can access a specific account.
+     *
+     * <p>Authorization rules:
+     *
+     * <ul>
+     *   <li>Admin users can access all accounts
+     *   <li>System role can access all accounts (for scheduled tasks)
+     *   <li>Regular users can only access their own account
+     * </ul>
+     *
+     * @param authentication current Authentication from Spring Security context
+     * @param accountId ID of the account to check access for
+     * @return true if user has access, false otherwise
+     */
+    @Cacheable(
+            cacheNames = "networkAccessCache",
+            key = "'a' + #accountId + '_' + #authentication.name",
+            sync = true)
+    public boolean canAccessAccount(Authentication authentication, Long accountId) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            log.debug("Access denied: no authenticated user");
+            return false;
+        }
+
+        if (hasAdminOrSystemRole(authentication)) {
+            log.debug(
+                    "Access granted: user '{}' has admin or system role", authentication.getName());
+            return true;
+        }
+
+        var accountOpt = accountRepository.findById(accountId);
+        if (accountOpt.isEmpty()) {
+            log.debug("Access denied: account ID {} not found", accountId);
+            return false;
+        }
+        var account = accountOpt.get();
+        boolean hasAccess = account.getUsername().equals(authentication.getName());
+        if (hasAccess) {
+            log.debug(
+                    "Access granted: user '{}' is accessing their own account ID {}",
+                    authentication.getName(),
+                    accountId);
+        } else {
+            log.debug(
+                    "Access denied: user '{}' is trying to access account ID {} which is not"
+                            + " theirs",
+                    authentication.getName(),
+                    accountId);
+        }
+        return hasAccess;
+    }
+
     private boolean hasAdminOrSystemRole(Authentication authentication) {
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
