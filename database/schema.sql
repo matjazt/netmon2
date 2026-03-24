@@ -232,5 +232,6 @@ INSERT INTO device_operation_mode (id, name, description) VALUES
 insert into account_type (id, name, description) values 
 (1, 'admin', 'administrator'),
  (2, 'user', 'ordinary user'), 
- (3, 'device', 'monitoring device');
+ (3, 'device', 'monitoring device'),
+ (4, 'viewer', 'read-only user');
  

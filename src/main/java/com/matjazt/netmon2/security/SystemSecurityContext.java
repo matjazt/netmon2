@@ -35,6 +35,8 @@ public final class SystemSecurityContext {
     private static final String SYSTEM_USERNAME = "SYSTEM";
     public static final String SYSTEM_ROLE = "ROLE_system";
     public static final String ADMIN_ROLE = "ROLE_admin";
+    public static final String USER_ROLE = "ROLE_user";
+    public static final String VIEWER_ROLE = "ROLE_viewer";
 
     private SystemSecurityContext() {
         throw new UnsupportedOperationException("Utility class");

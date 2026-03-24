@@ -65,7 +65,7 @@ public class LogController {
      * <p>Sorted by timestamp descending (newest first).
      */
     @GetMapping("/my")
-    @PreAuthorize("hasAnyRole('admin', 'user')")
+    @PreAuthorize("hasAnyRole('admin', 'user', 'viewer')")
     public Page<LogDto> getMyLogs(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
@@ -109,7 +109,7 @@ public class LogController {
     @GetMapping("/network/{networkId}")
     @PreAuthorize(
             "hasAnyRole('admin') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
+                    + " @networkAuthorizationService.canReadNetwork(authentication, #networkId)")
     public Page<LogDto> getLogsByNetwork(
             @PathVariable Long networkId,
             @RequestParam(defaultValue = "0") int page,
@@ -132,7 +132,7 @@ public class LogController {
      */
     @GetMapping("/device/{deviceId}")
     @PreAuthorize(
-            "hasAnyRole('admin') or @networkAuthorizationService.canAccessDevice(authentication,"
+            "hasAnyRole('admin') or @networkAuthorizationService.canReadDevice(authentication,"
                     + " #deviceId)")
     public Page<LogDto> getLogsByDevice(
             @PathVariable Long deviceId,
@@ -191,7 +191,7 @@ public class LogController {
     @GetMapping("/network/{networkId}/by-timestamp")
     @PreAuthorize(
             "hasAnyRole('admin') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
+                    + " @networkAuthorizationService.canReadNetwork(authentication, #networkId)")
     public Page<LogDto> getLogsByNetworkAndTimestampRange(
             @PathVariable Long networkId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -226,7 +226,7 @@ public class LogController {
      */
     @GetMapping("/device/{deviceId}/by-timestamp")
     @PreAuthorize(
-            "hasAnyRole('admin') or @networkAuthorizationService.canAccessDevice(authentication,"
+            "hasAnyRole('admin') or @networkAuthorizationService.canReadDevice(authentication,"
                     + " #deviceId)")
     public Page<LogDto> getLogsByDeviceAndTimestampRange(
             @PathVariable Long deviceId,

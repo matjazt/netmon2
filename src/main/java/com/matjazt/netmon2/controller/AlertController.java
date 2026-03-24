@@ -53,7 +53,7 @@ public class AlertController {
     @GetMapping("/network/{networkId}")
     @PreAuthorize(
             "hasAnyRole('admin') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
+                    + " @networkAuthorizationService.canReadNetwork(authentication, #networkId)")
     public List<AlertDto> getAlertsByNetwork(
             @PathVariable Long networkId, @RequestParam(defaultValue = "false") boolean active) {
         log.trace(
@@ -74,7 +74,7 @@ public class AlertController {
     @GetMapping("/device/{deviceId}")
     @PreAuthorize(
             "hasAnyRole('admin') or"
-                    + " @networkAuthorizationService.canAccessDevice(authentication, #deviceId)")
+                    + " @networkAuthorizationService.canReadDevice(authentication, #deviceId)")
     public List<AlertDto> getAlertsByDevice(
             @PathVariable Long deviceId, @RequestParam(defaultValue = "false") boolean active) {
         log.trace(

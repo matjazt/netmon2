@@ -67,7 +67,7 @@ public class DeviceStatusHistoryController {
      * <p>Sorted by timestamp descending (newest first).
      */
     @GetMapping("/my")
-    @PreAuthorize("hasAnyRole('admin', 'user')")
+    @PreAuthorize("hasAnyRole('admin', 'user', 'viewer')")
     public Page<DeviceStatusHistoryDto> getMyHistory(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
@@ -111,7 +111,7 @@ public class DeviceStatusHistoryController {
      */
     @GetMapping("/device/{deviceId}")
     @PreAuthorize(
-            "hasAnyRole('admin') or @networkAuthorizationService.canAccessDevice(authentication,"
+            "hasAnyRole('admin') or @networkAuthorizationService.canReadDevice(authentication,"
                     + " #deviceId)")
     public Page<DeviceStatusHistoryDto> getByDevice(
             @PathVariable Long deviceId,
@@ -137,7 +137,7 @@ public class DeviceStatusHistoryController {
     @GetMapping("/network/{networkId}")
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
+                    + " @networkAuthorizationService.canReadNetwork(authentication, #networkId)")
     public Page<DeviceStatusHistoryDto> getByNetwork(
             @PathVariable Long networkId,
             @RequestParam(defaultValue = "0") int page,
@@ -196,7 +196,7 @@ public class DeviceStatusHistoryController {
      */
     @GetMapping("/device/{deviceId}/by-timestamp")
     @PreAuthorize(
-            "hasAnyRole('admin') or @networkAuthorizationService.canAccessDevice(authentication,"
+            "hasAnyRole('admin') or @networkAuthorizationService.canReadDevice(authentication,"
                     + " #deviceId)")
     public Page<DeviceStatusHistoryDto> getByDeviceAndTimestampRange(
             @PathVariable Long deviceId,
@@ -233,7 +233,7 @@ public class DeviceStatusHistoryController {
     @GetMapping("/network/{networkId}/by-timestamp")
     @PreAuthorize(
             "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
+                    + " @networkAuthorizationService.canReadNetwork(authentication, #networkId)")
     public Page<DeviceStatusHistoryDto> getByNetworkAndTimestampRange(
             @PathVariable Long networkId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -265,7 +265,7 @@ public class DeviceStatusHistoryController {
      */
     @GetMapping("/device/{deviceId}/count")
     @PreAuthorize(
-            "hasAnyRole('admin') or @networkAuthorizationService.canAccessDevice(authentication,"
+            "hasAnyRole('admin') or @networkAuthorizationService.canReadDevice(authentication,"
                     + " #deviceId)")
     public long countByDevice(@PathVariable Long deviceId) {
         log.trace(

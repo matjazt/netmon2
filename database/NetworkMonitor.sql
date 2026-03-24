@@ -284,3 +284,5 @@ select * from device_status_history dsh
 
 select * from network
 select * from device
+
+insert into account_type (id, name, description) values  (4, 'viewer', 'read-only user')

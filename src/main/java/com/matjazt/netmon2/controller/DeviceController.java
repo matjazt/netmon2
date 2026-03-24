@@ -55,7 +55,7 @@ public class DeviceController {
     @GetMapping("/{id}")
     @PreAuthorize(
             "hasAnyRole('admin') or"
-                    + " @networkAuthorizationService.canAccessDevice(authentication, #id)")
+                    + " @networkAuthorizationService.canReadDevice(authentication, #id)")
     public ResponseEntity<DeviceDto> getDeviceById(@PathVariable Long id) {
         return deviceService
                 .findDeviceDtoById(id)
@@ -67,7 +67,7 @@ public class DeviceController {
     @GetMapping("/network/{networkId}")
     @PreAuthorize(
             "hasAnyRole('admin') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
+                    + " @networkAuthorizationService.canReadNetwork(authentication, #networkId)")
     public List<DeviceDto> getDevicesByNetwork(@PathVariable Long networkId) {
         log.trace(
                 "getDevicesByNetwork: apiUser={}, networkId={}",
@@ -82,7 +82,7 @@ public class DeviceController {
     @GetMapping("/network/{networkId}/stats")
     @PreAuthorize(
             "hasAnyRole('admin') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
+                    + " @networkAuthorizationService.canReadNetwork(authentication, #networkId)")
     public DeviceService.DeviceStats getDeviceStats(@PathVariable Long networkId) {
         return deviceService.getDeviceStats(networkId);
     }
@@ -91,7 +91,7 @@ public class DeviceController {
     @GetMapping("/exists")
     @PreAuthorize(
             "hasAnyRole('admin') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
+                    + " @networkAuthorizationService.canReadNetwork(authentication, #networkId)")
     public boolean checkDeviceExists(
             @RequestParam Long networkId, @RequestParam String macAddress) {
         return deviceService.deviceExists(networkId, macAddress);
@@ -106,7 +106,7 @@ public class DeviceController {
      */
     @PostMapping
     @PreAuthorize(
-            "hasAnyRole('admin') or @networkAuthorizationService.canAccessNetwork(authentication,"
+            "hasAnyRole('admin') or @networkAuthorizationService.canWriteNetwork(authentication,"
                     + " #request.networkId)")
     public ResponseEntity<DeviceDto> createDevice(@RequestBody SaveDeviceRequest request) {
         DeviceDto saved = deviceService.saveDeviceAndReturnDto(request, null);
@@ -118,9 +118,9 @@ public class DeviceController {
     /** PUT /api/devices/{id} — update an existing device. */
     @PutMapping("/{id}")
     @PreAuthorize(
-            "hasAnyRole('admin') or (@networkAuthorizationService.canAccessDevice(authentication,"
-                + " #id) and @networkAuthorizationService.canAccessNetwork(authentication,"
-                + " #request.networkId))")
+            "hasAnyRole('admin') or (@networkAuthorizationService.canWriteDevice(authentication,"
+                    + " #id) and @networkAuthorizationService.canWriteNetwork(authentication,"
+                    + " #request.networkId))")
     public ResponseEntity<DeviceDto> updateDevice(
             @PathVariable Long id, @RequestBody SaveDeviceRequest request) {
 
@@ -131,7 +131,7 @@ public class DeviceController {
     /** PUT /api/devices/{id}/mode?mode= — update the device operation mode. */
     @PutMapping("/{id}/mode")
     @PreAuthorize(
-            "hasAnyRole('admin') or @networkAuthorizationService.canAccessDevice(authentication,"
+            "hasAnyRole('admin') or @networkAuthorizationService.canWriteDevice(authentication,"
                     + " #id)")
     public ResponseEntity<DeviceDto> updateDeviceMode(
             @PathVariable Long id, @RequestParam DeviceOperationMode mode) {
@@ -146,7 +146,7 @@ public class DeviceController {
     /** PUT /api/devices/{id}/name?name= — update the device name. */
     @PutMapping("/{id}/name")
     @PreAuthorize(
-            "hasAnyRole('admin') or @networkAuthorizationService.canAccessDevice(authentication,"
+            "hasAnyRole('admin') or @networkAuthorizationService.canWriteDevice(authentication,"
                     + " #id)")
     public ResponseEntity<DeviceDto> updateDeviceName(
             @PathVariable Long id, @RequestParam String name) {
@@ -167,7 +167,7 @@ public class DeviceController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize(
-            "hasAnyRole('admin') or @networkAuthorizationService.canAccessDevice(authentication,"
+            "hasAnyRole('admin') or @networkAuthorizationService.canWriteDevice(authentication,"
                     + " #id)")
     public ResponseEntity<Void> deleteDevice(@PathVariable Long id) {
         if (deviceService.findDeviceDtoById(id).isEmpty()) {

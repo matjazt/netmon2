@@ -65,7 +65,7 @@ public class NetworkController {
      */
     @GetMapping("/{id}")
     @PreAuthorize(
-            "hasAnyRole('admin') or @networkAuthorizationService.canAccessNetwork(authentication,"
+            "hasAnyRole('admin') or @networkAuthorizationService.canReadNetwork(authentication,"
                     + " #id)")
     public ResponseEntity<NetworkDto> getNetworkById(@PathVariable Long id) {
         log.trace(
@@ -123,7 +123,7 @@ public class NetworkController {
      */
     @PutMapping("/{id}")
     @PreAuthorize(
-            "hasAnyRole('admin') or @networkAuthorizationService.canAccessNetwork(authentication,"
+            "hasAnyRole('admin') or @networkAuthorizationService.canWriteNetwork(authentication,"
                     + " #id)")
     public ResponseEntity<NetworkDto> updateNetwork(
             @PathVariable Long id, @RequestBody SaveNetworkRequest request) {

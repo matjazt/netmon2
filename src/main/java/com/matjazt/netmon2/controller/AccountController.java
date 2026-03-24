@@ -66,7 +66,7 @@ public class AccountController {
     @GetMapping("/{id}")
     @PreAuthorize(
             "hasAnyRole('admin') or"
-                    + " @networkAuthorizationService.canAccessAccount(authentication, #id)")
+                    + " @networkAuthorizationService.canReadAccount(authentication, #id)")
     public ResponseEntity<AccountDto> getAccountById(@PathVariable Long id) {
         log.trace(
                 "getAccountById: apiUser={}, accountId={}",
@@ -98,7 +98,7 @@ public class AccountController {
 
     /** GET /api/accounts/me — return the currently authenticated account. */
     @GetMapping("/me")
-    @PreAuthorize("hasAnyRole('admin', 'user')")
+    @PreAuthorize("hasAnyRole('admin', 'user', 'viewer')")
     public ResponseEntity<AccountDto> getCurrentAccount() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         log.trace("getCurrentAccount: apiUser={}", username);
