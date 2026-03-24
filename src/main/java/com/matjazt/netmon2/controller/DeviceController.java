@@ -1,11 +1,9 @@
 package com.matjazt.netmon2.controller;
 
 import com.matjazt.netmon2.dto.DeviceDto;
-import com.matjazt.netmon2.dto.DeviceStatusHistoryDto;
 import com.matjazt.netmon2.dto.request.SaveDeviceRequest;
 import com.matjazt.netmon2.entity.DeviceOperationMode;
 import com.matjazt.netmon2.service.DeviceService;
-import com.matjazt.netmon2.service.DeviceStatusHistoryService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,13 +63,12 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/devices")
-@PreAuthorize("hasAnyRole('admin', 'user')")
+@PreAuthorize("hasAnyRole('admin')")
 @Slf4j
 @RequiredArgsConstructor
 public class DeviceController {
 
     private final DeviceService deviceService;
-    private final DeviceStatusHistoryService deviceStatusHistoryService;
 
     // ========== GET ENDPOINTS (retrieve data) ==========
 
@@ -81,7 +78,7 @@ public class DeviceController {
      * <p>Get all devices (careful with large datasets!) Returns 200 OK with JSON array of devices
      */
     @GetMapping
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public List<DeviceDto> getAllDevices() {
         return deviceService.findAllDeviceSummaries();
     }
@@ -101,28 +98,14 @@ public class DeviceController {
      * </ul>
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
+    @PreAuthorize(
+            "hasAnyRole('admin') or"
+                    + " @deviceAuthorizationService.canAccessDevice(authentication, #id)")
     public ResponseEntity<DeviceDto> getDeviceById(@PathVariable Long id) {
         return deviceService
                 .findDeviceDtoById(id)
                 .map(ResponseEntity::ok) // If found, return 200 OK
                 .orElse(ResponseEntity.notFound().build()); // If not found, return 404
-    }
-
-    /**
-     * EXAMPLE: GET /api/devices/mac/AA:BB:CC:DD:EE:FF
-     *
-     * <p>Find device by MAC address
-     *
-     * <p>MAC address is part of the URL path
-     */
-    @GetMapping("/mac/{macAddress}")
-    @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
-    public ResponseEntity<DeviceDto> getDeviceByMac(@PathVariable String macAddress) {
-        return deviceService
-                .findDeviceDtoByMac(macAddress)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
     }
 
     /**
@@ -132,7 +115,7 @@ public class DeviceController {
      */
     @GetMapping("/network/{networkId}")
     @PreAuthorize(
-            "hasAnyRole('admin', 'system') or"
+            "hasAnyRole('admin') or"
                     + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<DeviceDto> getDevicesByNetwork(@PathVariable Long networkId) {
         log.trace(
@@ -145,19 +128,6 @@ public class DeviceController {
     }
 
     /**
-     * EXAMPLE: GET /api/devices/network/5/online
-     *
-     * <p>Get only online devices on a network
-     */
-    @GetMapping("/network/{networkId}/online")
-    @PreAuthorize(
-            "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
-    public List<DeviceDto> getOnlineDevices(@PathVariable Long networkId) {
-        return deviceService.findOnlineDeviceSummaries(networkId);
-    }
-
-    /**
      * EXAMPLE: GET /api/devices/network/5/stats
      *
      * <p>Get device statistics for a network
@@ -165,31 +135,11 @@ public class DeviceController {
      * <p>Returns custom object (not entity) as JSON
      */
     @GetMapping("/network/{networkId}/stats")
+    @PreAuthorize(
+            "hasAnyRole('admin') or"
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public DeviceService.DeviceStats getDeviceStats(@PathVariable Long networkId) {
         return deviceService.getDeviceStats(networkId);
-    }
-
-    /**
-     * EXAMPLE: GET /api/devices/5/history?limit=50
-     *
-     * <p>Get device status history
-     *
-     * <p>Combines path variable and query parameter
-     */
-    @GetMapping("/{id}/history")
-    public List<DeviceStatusHistoryDto> getDeviceHistory(
-            @PathVariable Long id, @RequestParam(defaultValue = "50") int limit) {
-        return deviceStatusHistoryService.getByDevice(id, 0, limit).getContent();
-    }
-
-    /**
-     * EXAMPLE: GET /api/devices/needing-alerts
-     *
-     * <p>Get devices that need alert generation
-     */
-    @GetMapping("/needing-alerts")
-    public List<DeviceDto> getDevicesNeedingAlerts() {
-        return deviceService.findDevicesNeedingAlertsDtos();
     }
 
     /**
@@ -198,6 +148,9 @@ public class DeviceController {
      * <p>Check if device exists (returns boolean)
      */
     @GetMapping("/exists")
+    @PreAuthorize(
+            "hasAnyRole('admin') or"
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public boolean checkDeviceExists(
             @RequestParam Long networkId, @RequestParam String macAddress) {
         return deviceService.deviceExists(networkId, macAddress);
@@ -216,7 +169,7 @@ public class DeviceController {
      *
      * <pre>{@code
      * {
-     *   "network": {"id": 5},
+     *   "networkId": 5,
      *   "macAddress": "AA:BB:CC:DD:EE:FF",
      *   "ipAddress": "192.168.1.100",
      *   "online": true,
@@ -227,6 +180,9 @@ public class DeviceController {
      * <p>Returns 201 Created with the saved device (including generated ID)
      */
     @PostMapping
+    @PreAuthorize(
+            "hasAnyRole('admin') or @networkAuthorizationService.canAccessNetwork(authentication,"
+                    + " #request.networkId)")
     public ResponseEntity<DeviceDto> createDevice(@RequestBody SaveDeviceRequest request) {
         DeviceDto saved = deviceService.saveDeviceAndReturnDto(request, null);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
@@ -242,6 +198,9 @@ public class DeviceController {
      * <p>ID in path + full entity in body
      */
     @PutMapping("/{id}")
+    @PreAuthorize(
+            "hasAnyRole('admin') or @networkAuthorizationService.canAccessNetwork(authentication,"
+                    + " #request.networkId)")
     public ResponseEntity<DeviceDto> updateDevice(
             @PathVariable Long id, @RequestBody SaveDeviceRequest request) {
 
@@ -257,6 +216,9 @@ public class DeviceController {
      * <p>Partial update - only changes one field
      */
     @PutMapping("/{id}/mode")
+    @PreAuthorize(
+            "hasAnyRole('admin') or @deviceAuthorizationService.canAccessDevice(authentication,"
+                    + " #id)")
     public ResponseEntity<DeviceDto> updateDeviceMode(
             @PathVariable Long id, @RequestParam DeviceOperationMode mode) {
         try {
@@ -275,6 +237,9 @@ public class DeviceController {
      * <p>Partial update - only changes one field
      */
     @PutMapping("/{id}/name")
+    @PreAuthorize(
+            "hasAnyRole('admin') or @deviceAuthorizationService.canAccessDevice(authentication,"
+                    + " #id)")
     public ResponseEntity<DeviceDto> updateDeviceName(
             @PathVariable Long id, @RequestParam String name) {
         try {
@@ -295,6 +260,9 @@ public class DeviceController {
      * <p>Returns 204 No Content on success
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize(
+            "hasAnyRole('admin') or @deviceAuthorizationService.canAccessDevice(authentication,"
+                    + " #id)")
     public ResponseEntity<Void> deleteDevice(@PathVariable Long id) {
         if (deviceService.findDeviceDtoById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -302,22 +270,5 @@ public class DeviceController {
 
         deviceService.deleteDevice(id);
         return ResponseEntity.noContent().build(); // 204 No Content
-    }
-
-    // ========== INNER CLASS (DTO) ==========
-
-    /**
-     * Data Transfer Object for MQTT update request.
-     *
-     * <p>In a real project, this would be in a separate dto package. DTOs separate API structure
-     * from database entities.
-     */
-    public static class MqttDeviceUpdateRequest {
-        public Long networkId;
-        public String macAddress;
-        public String ipAddress;
-        public Boolean online;
-
-        // Spring needs getters/setters or public fields for JSON deserialization
     }
 }

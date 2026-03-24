@@ -3,7 +3,6 @@ package com.matjazt.netmon2.controller;
 import com.matjazt.netmon2.dto.AccountDto;
 import com.matjazt.netmon2.dto.AccountNetworkDto;
 import com.matjazt.netmon2.dto.NetworkDto;
-import com.matjazt.netmon2.dto.request.SaveAccountNetworkRequest;
 import com.matjazt.netmon2.service.AccountNetworkService;
 
 import lombok.RequiredArgsConstructor;
@@ -17,8 +16,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,7 +31,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/account-networks")
-@PreAuthorize("hasAnyRole('admin', 'system')")
+@PreAuthorize("hasAnyRole('admin')")
 @Slf4j
 @RequiredArgsConstructor
 public class AccountNetworkController {
@@ -49,7 +46,7 @@ public class AccountNetworkController {
      * <p>Get all account-network relationships Returns 200 OK with JSON array
      */
     @GetMapping
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public List<AccountNetworkDto> getAllAccountNetworks() {
         log.trace(
                 "getAllAccountNetworks: apiUser={}",
@@ -72,7 +69,7 @@ public class AccountNetworkController {
      * </ul>
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public ResponseEntity<AccountNetworkDto> getAccountNetworkById(@PathVariable Long id) {
         log.trace(
                 "getAccountNetworkById: apiUser={}, id={}",
@@ -90,7 +87,9 @@ public class AccountNetworkController {
      * <p>Get all networks accessible by an account
      */
     @GetMapping("/account/{accountId}")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize(
+            "hasAnyRole('admin') or"
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<AccountNetworkDto> getNetworksByAccount(@PathVariable Long accountId) {
         log.trace(
                 "getNetworksByAccount: apiUser={}, accountId={}",
@@ -107,9 +106,7 @@ public class AccountNetworkController {
      * <p>Get all accounts with access to a network
      */
     @GetMapping("/network/{networkId}")
-    @PreAuthorize(
-            "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
+    @PreAuthorize("hasAnyRole('admin')")
     public List<AccountNetworkDto> getAccountsByNetwork(@PathVariable Long networkId) {
         log.trace(
                 "getAccountsByNetwork: apiUser={}, networkId={}",
@@ -126,7 +123,7 @@ public class AccountNetworkController {
      * <p>Get network entities accessible by an account (direct network objects)
      */
     @GetMapping("/networks-by-account/{accountId}")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public List<NetworkDto> getNetworkEntitiesByAccount(@PathVariable Long accountId) {
         log.trace(
                 "getNetworkEntitiesByAccount: apiUser={}, accountId={}",
@@ -144,7 +141,7 @@ public class AccountNetworkController {
      */
     @GetMapping("/accounts-by-network/{networkId}")
     @PreAuthorize(
-            "hasAnyRole('admin', 'system') or"
+            "hasAnyRole('admin') or"
                     + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<AccountDto> getAccountEntitiesByNetwork(@PathVariable Long networkId) {
         log.trace(
@@ -162,7 +159,7 @@ public class AccountNetworkController {
      * <p>Check if an account has access to a network (returns boolean)
      */
     @GetMapping("/has-access")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public boolean checkAccess(@RequestParam Long accountId, @RequestParam Long networkId) {
         log.trace(
                 "checkAccess: apiUser={}, accountId={}, networkId={}",
@@ -175,29 +172,6 @@ public class AccountNetworkController {
     // ========== POST ENDPOINTS (create new resources) ==========
 
     /**
-     * POST /api/account-networks
-     *
-     * <p>Create a new account-network relationship
-     *
-     * <p>@RequestBody deserializes JSON from request body to AccountNetworkEntity
-     *
-     * <p>Returns 201 Created with the saved relationship (including generated ID)
-     */
-    @PostMapping
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public ResponseEntity<AccountNetworkDto> createAccountNetwork(
-            @RequestBody SaveAccountNetworkRequest request) {
-        log.trace(
-                "createAccountNetwork: apiUser={}, accountId={}, networkId={}",
-                SecurityContextHolder.getContext().getAuthentication().getName(),
-                request.accountId(),
-                request.networkId());
-        AccountNetworkDto saved = accountNetworkService.saveAndReturnDto(request, null);
-        log.trace("createAccountNetwork: created relationship with id={}", saved.id());
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-    }
-
-    /**
      * POST /api/account-networks/grant-access?accountId=5&networkId=10
      *
      * <p>Grant access to a network for an account
@@ -205,7 +179,7 @@ public class AccountNetworkController {
      * <p>Convenience method that doesn't require full entity in body
      */
     @PostMapping("/grant-access")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public ResponseEntity<AccountNetworkDto> grantAccess(
             @RequestParam Long accountId, @RequestParam Long networkId) {
         log.trace(
@@ -224,61 +198,7 @@ public class AccountNetworkController {
         }
     }
 
-    // ========== PUT ENDPOINTS (update existing resources) ==========
-
-    /**
-     * PUT /api/account-networks/5
-     *
-     * <p>Update an existing account-network relationship
-     *
-     * <p>ID in path + full entity in body
-     */
-    @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public ResponseEntity<AccountNetworkDto> updateAccountNetwork(
-            @PathVariable Long id, @RequestBody SaveAccountNetworkRequest request) {
-        log.trace(
-                "updateAccountNetwork: apiUser={}, id={}",
-                SecurityContextHolder.getContext().getAuthentication().getName(),
-                id);
-
-        // Verify relationship exists
-        if (!accountNetworkService.findDtoById(id).isPresent()) {
-            log.trace("updateAccountNetwork: relationship not found, id={}", id);
-            return ResponseEntity.notFound().build();
-        }
-
-        AccountNetworkDto updated = accountNetworkService.saveAndReturnDto(request, id);
-        log.trace("updateAccountNetwork: updated relationship with id={}", updated.id());
-        return ResponseEntity.ok(updated);
-    }
-
     // ========== DELETE ENDPOINTS (remove resources) ==========
-
-    /**
-     * DELETE /api/account-networks/5
-     *
-     * <p>Delete an account-network relationship
-     *
-     * <p>Returns 204 No Content on success
-     */
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public ResponseEntity<Void> deleteAccountNetwork(@PathVariable Long id) {
-        log.trace(
-                "deleteAccountNetwork: apiUser={}, id={}",
-                SecurityContextHolder.getContext().getAuthentication().getName(),
-                id);
-
-        if (!accountNetworkService.findDtoById(id).isPresent()) {
-            log.trace("deleteAccountNetwork: relationship not found, id={}", id);
-            return ResponseEntity.notFound().build();
-        }
-
-        accountNetworkService.delete(id);
-        log.trace("deleteAccountNetwork: deleted relationship with id={}", id);
-        return ResponseEntity.noContent().build();
-    }
 
     /**
      * DELETE /api/account-networks/revoke-access?accountId=5&networkId=10
@@ -288,7 +208,7 @@ public class AccountNetworkController {
      * <p>Convenience method using query parameters
      */
     @DeleteMapping("/revoke-access")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public ResponseEntity<Void> revokeAccess(
             @RequestParam Long accountId, @RequestParam Long networkId) {
         log.trace(

@@ -61,13 +61,6 @@ public interface NetworkRepository extends JpaRepository<NetworkEntity, Long> {
     java.util.List<NetworkEntity> findByActiveAlertIdIsNull();
 
     /**
-     * Find networks by partial name match
-     *
-     * <p>Case-insensitive search using IgnoreCase.
-     */
-    java.util.List<NetworkEntity> findByNameContainingIgnoreCase(String namePart);
-
-    /**
      * Update configuration string for a network
      *
      * <pre>

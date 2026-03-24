@@ -127,27 +127,6 @@ public interface DeviceRepository extends JpaRepository<DeviceEntity, Long> {
     long countByNetwork_IdAndOnline(Long networkId, Boolean online);
 
     /**
-     * CUSTOM QUERY: Find devices that need alerts
-     *
-     * <p>Finds ALWAYS_ON devices that are offline but don't have active alerts yet.
-     */
-    @Query(
-            "SELECT d FROM DeviceEntity d "
-                    + "WHERE d.deviceOperationMode = :alwaysOn "
-                    + "AND d.online = false "
-                    + "AND d.activeAlertId IS NULL")
-    List<DeviceEntity> findAlwaysOnDevicesNeedingAlert(
-            @Param("alwaysOn") DeviceOperationMode alwaysOn);
-
-    /** CUSTOM QUERY: Find unauthorized devices needing alerts */
-    @Query(
-            "SELECT d FROM DeviceEntity d "
-                    + "WHERE d.deviceOperationMode = :unauthorized "
-                    + "AND d.activeAlertId IS NULL")
-    List<DeviceEntity> findUnauthorizedDevicesNeedingAlert(
-            @Param("unauthorized") DeviceOperationMode unauthorized);
-
-    /**
      * CUSTOM QUERY with JOIN FETCH: Get device with network loaded
      *
      * <p>Eagerly loads the network to avoid lazy loading issues.

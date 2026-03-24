@@ -24,7 +24,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/alerts")
-@PreAuthorize("hasAnyRole('admin', 'system')")
+@PreAuthorize("hasAnyRole('admin')")
 @Slf4j
 @RequiredArgsConstructor
 public class AlertController {
@@ -33,6 +33,7 @@ public class AlertController {
 
     /** GET /api/alerts/{id} — get a single alert by ID. */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('admin')")
     public ResponseEntity<AlertDto> getAlertById(@PathVariable Long id) {
         log.trace(
                 "getAlertById: apiUser={}, alertId={}",
@@ -50,6 +51,9 @@ public class AlertController {
      * <p>When {@code active=true} (default false), returns only open alerts.
      */
     @GetMapping("/network/{networkId}")
+    @PreAuthorize(
+            "hasAnyRole('admin') or"
+                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<AlertDto> getAlertsByNetwork(
             @PathVariable Long networkId, @RequestParam(defaultValue = "false") boolean active) {
         log.trace(
@@ -68,6 +72,9 @@ public class AlertController {
      * <p>When {@code active=true} (default false), returns only open alerts.
      */
     @GetMapping("/device/{deviceId}")
+    @PreAuthorize(
+            "hasAnyRole('admin') or"
+                    + " @deviceAuthorizationService.canAccessDevice(authentication, #deviceId)")
     public List<AlertDto> getAlertsByDevice(
             @PathVariable Long deviceId, @RequestParam(defaultValue = "false") boolean active) {
         log.trace(

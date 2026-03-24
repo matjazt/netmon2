@@ -28,7 +28,7 @@ import java.time.LocalDateTime;
  */
 @RestController
 @RequestMapping("/api/logs")
-@PreAuthorize("hasAnyRole('admin', 'user')")
+@PreAuthorize("hasAnyRole('admin')")
 @Slf4j
 @RequiredArgsConstructor
 public class LogController {
@@ -45,7 +45,7 @@ public class LogController {
      * <p>Sorted by timestamp descending (newest first)
      */
     @GetMapping("/paginated")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public Page<LogDto> getAllLogsPaginated(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
@@ -72,7 +72,7 @@ public class LogController {
      * </ul>
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public ResponseEntity<LogDto> getLogById(@PathVariable Long id) {
         log.trace(
                 "getLogById: apiUser={}, logId={}",
@@ -114,7 +114,9 @@ public class LogController {
      * <p>Get logs by device with pagination
      */
     @GetMapping("/device/{deviceId}")
-    @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
+    @PreAuthorize(
+            "hasAnyRole('admin') or @deviceAuthorizationService.canAccessDevice(authentication,"
+                    + " #deviceId)")
     public Page<LogDto> getLogsByDevice(
             @PathVariable Long deviceId,
             @RequestParam(defaultValue = "0") int page,
@@ -139,7 +141,7 @@ public class LogController {
      * <p>Timestamp format: ISO-8601 (e.g., 2025-01-01T00:00:00)
      */
     @GetMapping("/by-timestamp")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public Page<LogDto> getLogsByTimestampRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                     LocalDateTime minTimestamp,
@@ -171,7 +173,7 @@ public class LogController {
      */
     @GetMapping("/network/{networkId}/by-timestamp")
     @PreAuthorize(
-            "hasAnyRole('admin', 'system') or"
+            "hasAnyRole('admin') or"
                     + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public Page<LogDto> getLogsByNetworkAndTimestampRange(
             @PathVariable Long networkId,
@@ -206,7 +208,9 @@ public class LogController {
      * <p>Timestamp format: ISO-8601 (e.g., 2025-01-01T00:00:00)
      */
     @GetMapping("/device/{deviceId}/by-timestamp")
-    @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
+    @PreAuthorize(
+            "hasAnyRole('admin') or @deviceAuthorizationService.canAccessDevice(authentication,"
+                + " #deviceId)")
     public Page<LogDto> getLogsByDeviceAndTimestampRange(
             @PathVariable Long deviceId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)

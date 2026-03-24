@@ -147,29 +147,7 @@ public class DeviceService {
         return dtos;
     }
 
-    /** Get online devices by network as DTOs */
-    public List<DeviceDto> findOnlineDeviceSummaries(Long networkId) {
-        List<DeviceEntity> entities = deviceRepository.findByNetwork_IdAndOnline(networkId, true);
-        return deviceMapper.toDtos(entities);
-    }
 
-    /**
-     * EXAMPLE: Find devices needing alerts
-     *
-     * <p>Demonstrates calling custom repository query methods.
-     */
-    public List<DeviceEntity> findDevicesNeedingAlerts() {
-        List<DeviceEntity> alwaysOnDown =
-                deviceRepository.findAlwaysOnDevicesNeedingAlert(DeviceOperationMode.ALWAYS_ON);
-
-        List<DeviceEntity> unauthorized =
-                deviceRepository.findUnauthorizedDevicesNeedingAlert(
-                        DeviceOperationMode.UNAUTHORIZED);
-
-        // Combine both lists
-        alwaysOnDown.addAll(unauthorized);
-        return alwaysOnDown;
-    }
 
     /**
      * EXAMPLE: Get device statistics for a network
@@ -218,13 +196,9 @@ public class DeviceService {
         return findDeviceById(id).map(deviceMapper::toDto);
     }
 
-    public Optional<DeviceDto> findDeviceDtoByMac(String macAddress) {
-        return findDeviceByMac(macAddress).map(deviceMapper::toDto);
-    }
 
-    public List<DeviceDto> findDevicesNeedingAlertsDtos() {
-        return deviceMapper.toDtos(findDevicesNeedingAlerts());
-    }
+
+
 
     @Transactional
     public DeviceDto saveDeviceAndReturnDto(SaveDeviceRequest request, Long id) {

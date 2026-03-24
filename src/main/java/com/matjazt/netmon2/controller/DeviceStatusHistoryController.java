@@ -28,7 +28,7 @@ import java.time.LocalDateTime;
  */
 @RestController
 @RequestMapping("/api/device-status-history")
-@PreAuthorize("hasAnyRole('admin', 'user')")
+@PreAuthorize("hasAnyRole('admin')")
 @Slf4j
 @RequiredArgsConstructor
 public class DeviceStatusHistoryController {
@@ -45,7 +45,7 @@ public class DeviceStatusHistoryController {
      * <p>Sorted by timestamp descending (newest first)
      */
     @GetMapping("/paginated")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public Page<DeviceStatusHistoryDto> getAllPaginated(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
@@ -73,7 +73,7 @@ public class DeviceStatusHistoryController {
      * </ul>
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
+    @PreAuthorize("hasAnyRole('admin')")
     public ResponseEntity<DeviceStatusHistoryDto> getById(@PathVariable Long id) {
         log.trace(
                 "getById: apiUser={}, id={}",
@@ -91,7 +91,9 @@ public class DeviceStatusHistoryController {
      * <p>Get device status history by device with pagination
      */
     @GetMapping("/device/{deviceId}")
-    @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
+    @PreAuthorize(
+            "hasAnyRole('admin') or @deviceAuthorizationService.canAccessDevice(authentication,"
+                    + " #deviceId)")
     public Page<DeviceStatusHistoryDto> getByDevice(
             @PathVariable Long deviceId,
             @RequestParam(defaultValue = "0") int page,
@@ -142,7 +144,7 @@ public class DeviceStatusHistoryController {
      * <p>Timestamp format: ISO-8601 (e.g., 2025-01-01T00:00:00)
      */
     @GetMapping("/by-timestamp")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public Page<DeviceStatusHistoryDto> getByTimestampRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                     LocalDateTime minTimestamp,
@@ -152,7 +154,7 @@ public class DeviceStatusHistoryController {
             @RequestParam(defaultValue = "50") int size) {
         log.trace(
                 "getByTimestampRange: apiUser={}, minTimestamp={}, maxTimestamp={}, page={},"
-                    + " size={}",
+                        + " size={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 minTimestamp,
                 maxTimestamp,
@@ -174,7 +176,9 @@ public class DeviceStatusHistoryController {
      * <p>Timestamp format: ISO-8601 (e.g., 2025-01-01T00:00:00)
      */
     @GetMapping("/device/{deviceId}/by-timestamp")
-    @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
+    @PreAuthorize(
+            "hasAnyRole('admin') or @deviceAuthorizationService.canAccessDevice(authentication,"
+                    + " #deviceId)")
     public Page<DeviceStatusHistoryDto> getByDeviceAndTimestampRange(
             @PathVariable Long deviceId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -241,7 +245,9 @@ public class DeviceStatusHistoryController {
      * <p>Count status changes for a device
      */
     @GetMapping("/device/{deviceId}/count")
-    @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
+    @PreAuthorize(
+            "hasAnyRole('admin') or @deviceAuthorizationService.canAccessDevice(authentication,"
+                + " #deviceId)")
     public long countByDevice(@PathVariable Long deviceId) {
         log.trace(
                 "countByDevice: apiUser={}, deviceId={}",
@@ -259,7 +265,7 @@ public class DeviceStatusHistoryController {
      * <p>Timestamp format: ISO-8601 (e.g., 2025-01-01T00:00:00)
      */
     @GetMapping("/count-by-timestamp")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public long countByTimestampRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {

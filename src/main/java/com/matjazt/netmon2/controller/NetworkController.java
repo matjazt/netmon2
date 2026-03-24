@@ -32,7 +32,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/networks")
-@PreAuthorize("hasAnyRole('admin', 'user')")
+@PreAuthorize("hasAnyRole('admin')")
 @Slf4j
 @RequiredArgsConstructor
 public class NetworkController {
@@ -47,7 +47,7 @@ public class NetworkController {
      * <p>Get all networks Returns 200 OK with JSON array of networks
      */
     @GetMapping
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public List<NetworkDto> getAllNetworks() {
         log.trace(
                 "getAllNetworks: apiUser={}",
@@ -73,8 +73,8 @@ public class NetworkController {
      */
     @GetMapping("/{id}")
     @PreAuthorize(
-            "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #id)")
+            "hasAnyRole('admin') or @networkAuthorizationService.canAccessNetwork(authentication,"
+                    + " #id)")
     public ResponseEntity<NetworkDto> getNetworkById(@PathVariable Long id) {
         log.trace(
                 "getNetworkById: apiUser={}, networkId={}",
@@ -87,87 +87,18 @@ public class NetworkController {
     }
 
     /**
-     * GET /api/networks/name/HomeNetwork
-     *
-     * <p>Find network by name
-     *
-     * <p>Name is part of the URL path
-     */
-    @GetMapping("/name/{name}")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public ResponseEntity<NetworkDto> getNetworkByName(@PathVariable String name) {
-        log.trace(
-                "getNetworkByName: apiUser={}, name={}",
-                SecurityContextHolder.getContext().getAuthentication().getName(),
-                name);
-        return networkService
-                .findNetworkDtoByName(name)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    /**
      * GET /api/networks/exists?name=HomeNetwork
      *
      * <p>Check if network exists (returns boolean)
      */
     @GetMapping("/exists")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public boolean checkNetworkExists(@RequestParam String name) {
         log.trace(
                 "checkNetworkExists: apiUser={}, name={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 name);
         return networkService.networkExistsByName(name);
-    }
-
-    /**
-     * GET /api/networks/with-active-alerts
-     *
-     * <p>Get all networks with active alerts
-     */
-    @GetMapping("/with-active-alerts")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public List<NetworkDto> getNetworksWithActiveAlerts() {
-        log.trace(
-                "getNetworksWithActiveAlerts: apiUser={}",
-                SecurityContextHolder.getContext().getAuthentication().getName());
-        var networks = networkService.findNetworkDtosWithActiveAlerts();
-        log.trace("getNetworksWithActiveAlerts: returning {} networks", networks.size());
-        return networks;
-    }
-
-    /**
-     * GET /api/networks/without-active-alerts
-     *
-     * <p>Get all networks without active alerts
-     */
-    @GetMapping("/without-active-alerts")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public List<NetworkDto> getNetworksWithoutActiveAlerts() {
-        log.trace(
-                "getNetworksWithoutActiveAlerts: apiUser={}",
-                SecurityContextHolder.getContext().getAuthentication().getName());
-        var networks = networkService.findNetworkDtosWithoutActiveAlerts();
-        log.trace("getNetworksWithoutActiveAlerts: returning {} networks", networks.size());
-        return networks;
-    }
-
-    /**
-     * GET /api/networks/search?name=Home
-     *
-     * <p>Search networks by partial name match
-     */
-    @GetMapping("/search")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public List<NetworkDto> searchNetworksByName(@RequestParam String name) {
-        log.trace(
-                "searchNetworksByName: apiUser={}, name={}",
-                SecurityContextHolder.getContext().getAuthentication().getName(),
-                name);
-        var networks = networkService.findNetworkDtosByNameContaining(name);
-        log.trace("searchNetworksByName: returning {} networks", networks.size());
-        return networks;
     }
 
     // ========== POST ENDPOINTS (create new resources) ==========
@@ -182,7 +113,7 @@ public class NetworkController {
      * <p>Returns 201 Created with the saved network (including generated ID)
      */
     @PostMapping
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public ResponseEntity<NetworkDto> createNetwork(@RequestBody SaveNetworkRequest request) {
         log.trace(
                 "createNetwork: apiUser={}, name={}",
@@ -203,7 +134,9 @@ public class NetworkController {
      * <p>ID in path + full entity in body
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize(
+            "hasAnyRole('admin') or @networkAuthorizationService.canAccessNetwork(authentication,"
+                    + " #id)")
     public ResponseEntity<NetworkDto> updateNetwork(
             @PathVariable Long id, @RequestBody SaveNetworkRequest request) {
         log.trace(

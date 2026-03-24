@@ -1,7 +1,6 @@
 package com.matjazt.netmon2.mapper;
 
 import com.matjazt.netmon2.dto.AccountNetworkDto;
-import com.matjazt.netmon2.dto.request.SaveAccountNetworkRequest;
 import com.matjazt.netmon2.entity.AccountNetworkEntity;
 
 import org.mapstruct.Mapper;
@@ -27,11 +26,6 @@ public interface AccountNetworkMapper {
     @Mapping(source = "account.id", target = "accountId")
     @Mapping(source = "network.id", target = "networkId")
     AccountNetworkDto toDto(AccountNetworkEntity entity);
-
-    @Mapping(source = "accountId", target = "account.id")
-    @Mapping(source = "networkId", target = "network.id")
-    @Mapping(target = "id", ignore = true)
-    AccountNetworkEntity toEntity(SaveAccountNetworkRequest request);
 
     /**
      * Convert list of AccountNetworkEntity to list of AccountNetworkDto.

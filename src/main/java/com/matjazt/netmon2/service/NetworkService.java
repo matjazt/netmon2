@@ -107,40 +107,6 @@ public class NetworkService {
         return networkRepository.existsByName(name);
     }
 
-    /** Find all networks with active alerts */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public List<NetworkEntity> findNetworksWithActiveAlerts() {
-        log.trace(
-                "findNetworksWithActiveAlerts: apiUser={}",
-                SecurityContextHolder.getContext().getAuthentication().getName());
-        var networks = networkRepository.findByActiveAlertIdIsNotNull();
-        log.trace("findNetworksWithActiveAlerts: returning {} networks", networks.size());
-        return networks;
-    }
-
-    /** Find all networks without active alerts */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public List<NetworkEntity> findNetworksWithoutActiveAlerts() {
-        log.trace(
-                "findNetworksWithoutActiveAlerts: apiUser={}",
-                SecurityContextHolder.getContext().getAuthentication().getName());
-        var networks = networkRepository.findByActiveAlertIdIsNull();
-        log.trace("findNetworksWithoutActiveAlerts: returning {} networks", networks.size());
-        return networks;
-    }
-
-    /** Find networks by partial name match */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public List<NetworkEntity> findNetworksByNameContaining(String namePart) {
-        log.trace(
-                "findNetworksByNameContaining: apiUser={}, namePart={}",
-                SecurityContextHolder.getContext().getAuthentication().getName(),
-                namePart);
-        var networks = networkRepository.findByNameContainingIgnoreCase(namePart);
-        log.trace("findNetworksByNameContaining: returning {} networks", networks.size());
-        return networks;
-    }
-
     // ========== DTO SUMMARY METHODS ==========
 
     /** Get all networks as DTOs */
@@ -177,26 +143,6 @@ public class NetworkService {
                     + " @networkAuthorizationService.canAccessNetwork(authentication, #id)")
     public Optional<NetworkDto> findNetworkDtoById(Long id) {
         return findNetworkById(id).map(networkMapper::toDto);
-    }
-
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public Optional<NetworkDto> findNetworkDtoByName(String name) {
-        return findNetworkByName(name).map(networkMapper::toDto);
-    }
-
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public List<NetworkDto> findNetworkDtosWithActiveAlerts() {
-        return networkMapper.toDtos(findNetworksWithActiveAlerts());
-    }
-
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public List<NetworkDto> findNetworkDtosWithoutActiveAlerts() {
-        return networkMapper.toDtos(findNetworksWithoutActiveAlerts());
-    }
-
-    @PreAuthorize("hasAnyRole('admin', 'system')")
-    public List<NetworkDto> findNetworkDtosByNameContaining(String namePart) {
-        return networkMapper.toDtos(findNetworksByNameContaining(namePart));
     }
 
     @Transactional

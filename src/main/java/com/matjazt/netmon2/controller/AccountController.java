@@ -32,7 +32,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/accounts")
-@PreAuthorize("hasAnyRole('admin', 'system')")
+@PreAuthorize("hasAnyRole('admin')")
 @Slf4j
 @RequiredArgsConstructor
 public class AccountController {
@@ -47,7 +47,7 @@ public class AccountController {
      * <p>Get all accounts Returns 200 OK with JSON array of accounts
      */
     @GetMapping
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public List<AccountDto> getAllAccounts() {
         log.trace(
                 "getAllAccounts: apiUser={}",
@@ -72,7 +72,7 @@ public class AccountController {
      * </ul>
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public ResponseEntity<AccountDto> getAccountById(@PathVariable Long id) {
         log.trace(
                 "getAccountById: apiUser={}, accountId={}",
@@ -92,7 +92,7 @@ public class AccountController {
      * <p>Username is part of the URL path
      */
     @GetMapping("/username/{username}")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public ResponseEntity<AccountDto> getAccountByUsername(@PathVariable String username) {
         log.trace(
                 "getAccountByUsername: apiUser={}, targetUsername={}",
@@ -106,7 +106,7 @@ public class AccountController {
 
     /** GET /api/accounts/me — return the currently authenticated account. */
     @GetMapping("/me")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('admin', 'user')")
     public ResponseEntity<AccountDto> getCurrentAccount() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         log.trace("getCurrentAccount: apiUser={}", username);
@@ -122,7 +122,7 @@ public class AccountController {
      * <p>Check if account exists (returns boolean)
      */
     @GetMapping("/exists")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public boolean checkAccountExists(@RequestParam String username) {
         log.trace(
                 "checkAccountExists: apiUser={}, username={}",
@@ -137,7 +137,7 @@ public class AccountController {
      * <p>Get accounts by account type
      */
     @GetMapping("/type/{accountTypeName}")
-    @PreAuthorize("hasAnyRole('admin', 'system')")
+    @PreAuthorize("hasAnyRole('admin')")
     public List<AccountDto> getAccountsByType(@PathVariable String accountTypeName) {
         log.trace(
                 "getAccountsByType: apiUser={}, accountTypeName={}",
