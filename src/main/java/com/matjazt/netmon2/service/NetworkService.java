@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,9 +38,6 @@ public class NetworkService {
     // ========== BASIC CRUD OPERATIONS ==========
 
     /** Find network by ID */
-    @PreAuthorize(
-            "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #id)")
     public Optional<NetworkEntity> findNetworkById(Long id) {
         log.trace(
                 "findNetworkById: apiUser={}, networkId={}",
@@ -51,7 +47,6 @@ public class NetworkService {
     }
 
     /** Get all networks */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<NetworkEntity> findAllNetworks() {
         log.trace(
                 "findAllNetworks: apiUser={}",
@@ -65,7 +60,6 @@ public class NetworkService {
      * <p>save() does INSERT if ID is null, UPDATE if ID exists.
      */
     @Transactional
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public NetworkEntity saveNetwork(NetworkEntity network) {
         log.trace(
                 "saveNetwork: apiUser={}, name={}",
@@ -76,7 +70,6 @@ public class NetworkService {
 
     /** Delete a network */
     @Transactional
-    @PreAuthorize("hasAnyRole('admin')")
     public void deleteNetwork(Long id) {
         log.trace(
                 "deleteNetwork: apiUser={}, networkId={}",
@@ -88,7 +81,6 @@ public class NetworkService {
     // ========== CUSTOM QUERY METHODS ==========
 
     /** Find network by name */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public Optional<NetworkEntity> findNetworkByName(String name) {
         log.trace(
                 "findNetworkByName: apiUser={}, name={}",
@@ -98,7 +90,6 @@ public class NetworkService {
     }
 
     /** Check if network exists by name */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public boolean networkExistsByName(String name) {
         log.trace(
                 "networkExistsByName: apiUser={}, name={}",
@@ -110,7 +101,6 @@ public class NetworkService {
     // ========== DTO SUMMARY METHODS ==========
 
     /** Get all networks as DTOs */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<NetworkDto> findAllNetworkSummaries() {
         log.trace(
                 "findAllNetworkSummaries: apiUser={}",
@@ -138,15 +128,11 @@ public class NetworkService {
 
     // ========== DTO SINGLE-RECORD METHODS ==========
 
-    @PreAuthorize(
-            "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #id)")
     public Optional<NetworkDto> findNetworkDtoById(Long id) {
         return findNetworkById(id).map(networkMapper::toDto);
     }
 
     @Transactional
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public NetworkDto createNetworkAndReturnDto(SaveNetworkRequest request) {
         NetworkEntity network = networkMapper.toEntity(request);
         var now = LocalDateTime.now(ZoneOffset.UTC);
@@ -156,7 +142,6 @@ public class NetworkService {
     }
 
     @Transactional
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public NetworkDto updateNetworkAndReturnDto(SaveNetworkRequest request, long id) {
         networkRepository.updateNameAndConfigurationById(
                 id, request.name(), request.configuration());

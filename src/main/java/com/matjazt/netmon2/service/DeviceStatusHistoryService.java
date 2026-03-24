@@ -13,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +42,6 @@ public class DeviceStatusHistoryService {
     // ========== READ-ONLY OPERATIONS ==========
 
     /** Find device status history by ID */
-    @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
     public Optional<DeviceStatusHistoryEntity> findById(Long id) {
         log.trace(
                 "findById: apiUser={}, id={}",
@@ -57,7 +55,6 @@ public class DeviceStatusHistoryService {
      *
      * <p>Pageable defines page number, size, and sorting
      */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public Page<DeviceStatusHistoryDto> getAllPaginated(int page, int size) {
         log.trace(
                 "getAllPaginated: apiUser={}, page={}, size={}",
@@ -77,7 +74,6 @@ public class DeviceStatusHistoryService {
      *
      * <p>Retrieves all status changes for a specific device
      */
-    @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
     public Page<DeviceStatusHistoryDto> getByDevice(Long deviceId, int page, int size) {
         log.trace(
                 "getByDevice: apiUser={}, deviceId={}, page={}, size={}",
@@ -98,9 +94,6 @@ public class DeviceStatusHistoryService {
      *
      * <p>Retrieves all status changes for all devices on a network
      */
-    @PreAuthorize(
-            "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public Page<DeviceStatusHistoryDto> getByNetwork(Long networkId, int page, int size) {
         log.trace(
                 "getByNetwork: apiUser={}, networkId={}, page={}, size={}",
@@ -121,7 +114,6 @@ public class DeviceStatusHistoryService {
      *
      * <p>Retrieves status changes between minTimestamp and maxTimestamp
      */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public Page<DeviceStatusHistoryDto> getByTimestampRange(
             LocalDateTime minTimestamp, LocalDateTime maxTimestamp, int page, int size) {
         log.trace(
@@ -146,7 +138,6 @@ public class DeviceStatusHistoryService {
      *
      * <p>Retrieves status changes for a specific device within a timestamp range
      */
-    @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
     public Page<DeviceStatusHistoryDto> getByDeviceAndTimestampRange(
             Long deviceId,
             LocalDateTime minTimestamp,
@@ -176,9 +167,6 @@ public class DeviceStatusHistoryService {
      *
      * <p>Retrieves status changes for all devices on a network within a timestamp range
      */
-    @PreAuthorize(
-            "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public Page<DeviceStatusHistoryDto> getByNetworkAndTimestampRange(
             Long networkId,
             LocalDateTime minTimestamp,
@@ -204,7 +192,6 @@ public class DeviceStatusHistoryService {
     }
 
     /** Count status changes for a device */
-    @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
     public long countByDevice(Long deviceId) {
         log.trace(
                 "countByDevice: apiUser={}, deviceId={}",
@@ -214,7 +201,6 @@ public class DeviceStatusHistoryService {
     }
 
     /** Count status changes in date range */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public long countByTimestampRange(LocalDateTime start, LocalDateTime end) {
         log.trace(
                 "countByTimestampRange: apiUser={}, start={}, end={}",
@@ -224,7 +210,6 @@ public class DeviceStatusHistoryService {
         return deviceStatusHistoryRepository.countByTimestampBetween(start, end);
     }
 
-    @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
     public Optional<DeviceStatusHistoryDto> findDtoById(Long id) {
         return findById(id)
                 .map(

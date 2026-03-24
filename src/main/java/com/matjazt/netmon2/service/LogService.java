@@ -13,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +42,6 @@ public class LogService {
     // ========== READ-ONLY OPERATIONS ==========
 
     /** Find log by ID */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public Optional<LogEntity> findLogById(Long id) {
         log.trace(
                 "findLogById: apiUser={}, logId={}",
@@ -57,7 +55,6 @@ public class LogService {
      *
      * <p>Pageable defines page number, size, and sorting
      */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public Page<LogDto> getAllLogsPaginated(int page, int size) {
         log.trace(
                 "getAllLogsPaginated: apiUser={}, page={}, size={}",
@@ -76,9 +73,6 @@ public class LogService {
      *
      * <p>Retrieves all log entries for a specific network
      */
-    @PreAuthorize(
-            "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public Page<LogDto> getLogsByNetwork(Long networkId, int page, int size) {
         log.trace(
                 "getLogsByNetwork: apiUser={}, networkId={}, page={}, size={}",
@@ -98,7 +92,6 @@ public class LogService {
      *
      * <p>Retrieves all log entries for a specific device
      */
-    @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
     public Page<LogDto> getLogsByDevice(Long deviceId, int page, int size) {
         log.trace(
                 "getLogsByDevice: apiUser={}, deviceId={}, page={}, size={}",
@@ -118,7 +111,6 @@ public class LogService {
      *
      * <p>Retrieves log entries between minTimestamp and maxTimestamp
      */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public Page<LogDto> getLogsByTimestampRange(
             LocalDateTime minTimestamp, LocalDateTime maxTimestamp, int page, int size) {
         log.trace(
@@ -142,9 +134,6 @@ public class LogService {
      *
      * <p>Retrieves log entries for a specific network within a timestamp range
      */
-    @PreAuthorize(
-            "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public Page<LogDto> getLogsByNetworkAndTimestampRange(
             Long networkId,
             LocalDateTime minTimestamp,
@@ -174,7 +163,6 @@ public class LogService {
      *
      * <p>Retrieves log entries for a specific device within a timestamp range
      */
-    @PreAuthorize("hasAnyRole('admin', 'system', 'user')")
     public Page<LogDto> getLogsByDeviceAndTimestampRange(
             Long deviceId,
             LocalDateTime minTimestamp,
@@ -199,7 +187,6 @@ public class LogService {
         return dtoPage;
     }
 
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public Optional<LogDto> findLogDtoById(Long id) {
         return findLogById(id)
                 .map(

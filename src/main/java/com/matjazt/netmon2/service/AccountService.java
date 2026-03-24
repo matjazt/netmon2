@@ -11,7 +11,6 @@ import com.matjazt.netmon2.repository.AccountTypeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -42,7 +41,6 @@ public class AccountService {
      *
      * <p>Optional avoids NullPointerException - you must check if value exists.
      */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public Optional<AccountEntity> findAccountById(Long id) {
         log.trace(
                 "findAccountById: apiUser={}, accountId={}",
@@ -52,7 +50,6 @@ public class AccountService {
     }
 
     /** Get all accounts (admin only) */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountEntity> findAllAccounts() {
         log.trace(
                 "findAllAccounts: apiUser={}",
@@ -66,7 +63,6 @@ public class AccountService {
      * <p>save() does INSERT if ID is null, UPDATE if ID exists.
      */
     @Transactional
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public AccountEntity saveAccount(AccountEntity account) {
         log.trace(
                 "saveAccount: apiUser={}, username={}",
@@ -77,7 +73,6 @@ public class AccountService {
 
     /** Delete an account */
     @Transactional
-    @PreAuthorize("hasAnyRole('admin')")
     public void deleteAccount(Long id) {
         log.trace(
                 "deleteAccount: apiUser={}, accountId={}",
@@ -89,7 +84,6 @@ public class AccountService {
     // ========== CUSTOM QUERY EXAMPLES ==========
 
     /** Find account by username */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public Optional<AccountEntity> findAccountByUsername(String username) {
         log.trace(
                 "findAccountByUsername: apiUser={}, targetUsername={}",
@@ -99,7 +93,6 @@ public class AccountService {
     }
 
     /** Check if account exists by username */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public boolean accountExistsByUsername(String username) {
         log.trace(
                 "accountExistsByUsername: apiUser={}, username={}",
@@ -109,7 +102,6 @@ public class AccountService {
     }
 
     /** Check if email exists */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public boolean emailExists(String email) {
         log.trace(
                 "emailExists: apiUser={}, email={}",
@@ -119,7 +111,6 @@ public class AccountService {
     }
 
     /** Find accounts by account type */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountEntity> findAccountsByType(String accountTypeName) {
         log.trace(
                 "findAccountsByType: apiUser={}, accountTypeName={}",
@@ -131,7 +122,6 @@ public class AccountService {
     // ========== DTO SUMMARY METHODS ==========
 
     /** Get all accounts as DTOs */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountDto> findAllAccountSummaries() {
         log.trace(
                 "findAllAccountSummaries: apiUser={}",
@@ -144,23 +134,19 @@ public class AccountService {
 
     // ========== DTO SINGLE-RECORD METHODS ==========
 
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public Optional<AccountDto> findAccountDtoById(Long id) {
         return findAccountById(id).map(accountMapper::toDto);
     }
 
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public Optional<AccountDto> findAccountDtoByUsername(String username) {
         return findAccountByUsername(username).map(accountMapper::toDto);
     }
 
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountDto> findAccountDtosByType(String accountTypeName) {
         return accountMapper.toDtos(findAccountsByType(accountTypeName));
     }
 
     @Transactional
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public AccountDto saveAccountAndReturnDto(SaveAccountRequest request, Long id) {
         AccountTypeEntity accountType =
                 accountTypeRepository

@@ -16,7 +16,6 @@ import com.matjazt.netmon2.repository.NetworkRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +43,6 @@ public class AccountNetworkService {
     // ========== BASIC CRUD OPERATIONS ==========
 
     /** Find account-network relationship by ID */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public Optional<AccountNetworkEntity> findById(Long id) {
         log.trace(
                 "findById: apiUser={}, id={}",
@@ -54,7 +52,6 @@ public class AccountNetworkService {
     }
 
     /** Get all account-network relationships */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountNetworkEntity> findAll() {
         log.trace(
                 "findAll: apiUser={}",
@@ -64,7 +61,6 @@ public class AccountNetworkService {
 
     /** Save a new account-network relationship or update existing one */
     @Transactional
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public AccountNetworkEntity save(AccountNetworkEntity accountNetwork) {
         log.trace(
                 "save: apiUser={}, accountId={}, networkId={}",
@@ -76,7 +72,6 @@ public class AccountNetworkService {
 
     /** Delete an account-network relationship */
     @Transactional
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public void delete(Long id) {
         log.trace(
                 "delete: apiUser={}, id={}",
@@ -88,9 +83,6 @@ public class AccountNetworkService {
     // ========== CUSTOM QUERY METHODS ==========
 
     /** Find all networks accessible by an account */
-    @PreAuthorize(
-            "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #accountId)")
     public List<AccountNetworkEntity> findByAccountId(Long accountId) {
         log.trace(
                 "findByAccountId: apiUser={}, accountId={}",
@@ -102,9 +94,6 @@ public class AccountNetworkService {
     }
 
     /** Find all accounts with access to a network */
-    @PreAuthorize(
-            "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<AccountNetworkEntity> findByNetworkId(Long networkId) {
         log.trace(
                 "findByNetworkId: apiUser={}, networkId={}",
@@ -116,7 +105,6 @@ public class AccountNetworkService {
     }
 
     /** Check if an account has access to a network */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public boolean hasAccess(Long accountId, Long networkId) {
         log.trace(
                 "hasAccess: apiUser={}, accountId={}, networkId={}",
@@ -127,7 +115,6 @@ public class AccountNetworkService {
     }
 
     /** Get all networks accessible by an account (direct network entities) */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<NetworkEntity> getNetworksByAccountId(Long accountId) {
         log.trace(
                 "getNetworksByAccountId: apiUser={}, accountId={}",
@@ -139,9 +126,6 @@ public class AccountNetworkService {
     }
 
     /** Get all accounts with access to a network (direct account entities) */
-    @PreAuthorize(
-            "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<AccountEntity> getAccountsByNetworkId(Long networkId) {
         log.trace(
                 "getAccountsByNetworkId: apiUser={}, networkId={}",
@@ -154,7 +138,6 @@ public class AccountNetworkService {
 
     /** Delete the relationship between an account and a network */
     @Transactional
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public void revokeAccess(Long accountId, Long networkId) {
         log.trace(
                 "revokeAccess: apiUser={}, accountId={}, networkId={}",
@@ -170,7 +153,6 @@ public class AccountNetworkService {
 
     /** Grant access to a network for an account */
     @Transactional
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public AccountNetworkEntity grantAccess(Long accountId, Long networkId) {
         log.trace(
                 "grantAccess: apiUser={}, accountId={}, networkId={}",
@@ -204,7 +186,6 @@ public class AccountNetworkService {
     // ========== DTO SUMMARY METHODS ==========
 
     /** Get all account-network relationships as DTOs */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountNetworkDto> findAllSummaries() {
         log.trace(
                 "findAllSummaries: apiUser={}",
@@ -216,7 +197,6 @@ public class AccountNetworkService {
     }
 
     /** Get account-network relationships by account as DTOs */
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AccountNetworkDto> getByAccountId(Long accountId) {
         log.trace(
                 "getByAccountId: apiUser={}, accountId={}",
@@ -229,9 +209,6 @@ public class AccountNetworkService {
     }
 
     /** Get account-network relationships by network as DTOs */
-    @PreAuthorize(
-            "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<AccountNetworkDto> getByNetworkId(Long networkId) {
         log.trace(
                 "getByNetworkId: apiUser={}, networkId={}",
@@ -245,25 +222,19 @@ public class AccountNetworkService {
 
     // ========== DTO SINGLE-RECORD METHODS ==========
 
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public Optional<AccountNetworkDto> findDtoById(Long id) {
         return findById(id).map(accountNetworkMapper::toDto);
     }
 
     @Transactional
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public AccountNetworkDto grantAccessAndReturnDto(Long accountId, Long networkId) {
         return accountNetworkMapper.toDto(grantAccess(accountId, networkId));
     }
 
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<NetworkDto> getNetworkDtosByAccountId(Long accountId) {
         return networkMapper.toDtos(getNetworksByAccountId(accountId));
     }
 
-    @PreAuthorize(
-            "hasAnyRole('admin', 'system') or"
-                    + " @networkAuthorizationService.canAccessNetwork(authentication, #networkId)")
     public List<AccountDto> getAccountDtosByNetworkId(Long networkId) {
         return accountMapper.toDtos(getAccountsByNetworkId(networkId));
     }

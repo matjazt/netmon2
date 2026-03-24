@@ -8,7 +8,6 @@ import com.matjazt.netmon2.repository.AlertRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +23,6 @@ public class AlertService {
     private final AlertRepository alertRepository;
     private final AlertMapper alertMapper;
 
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public Optional<AlertDto> findById(Long id) {
         log.trace(
                 "findById: apiUser={}, alertId={}",
@@ -40,7 +38,6 @@ public class AlertService {
                 .toList();
     }
 
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AlertDto> findByNetworkId(Long networkId) {
         log.trace(
                 "findByNetworkId: apiUser={}, networkId={}",
@@ -49,7 +46,6 @@ public class AlertService {
         return convertAndSortByTimeDesc(alertRepository.findByNetwork_Id(networkId));
     }
 
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AlertDto> findActiveByNetworkId(Long networkId) {
         log.trace(
                 "findActiveByNetworkId: apiUser={}, networkId={}",
@@ -59,7 +55,6 @@ public class AlertService {
                 alertRepository.findByNetwork_IdAndClosureTimestampIsNull(networkId));
     }
 
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AlertDto> findByDeviceId(Long deviceId) {
         log.trace(
                 "findByDeviceId: apiUser={}, deviceId={}",
@@ -68,7 +63,6 @@ public class AlertService {
         return convertAndSortByTimeDesc(alertRepository.findByDevice_Id(deviceId));
     }
 
-    @PreAuthorize("hasAnyRole('admin', 'system')")
     public List<AlertDto> findActiveByDeviceId(Long deviceId) {
         log.trace(
                 "findActiveByDeviceId: apiUser={}, deviceId={}",
