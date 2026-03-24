@@ -27,6 +27,32 @@ public class NetworkConfigurationService {
     private final ObjectMapper objectMapper;
 
     /**
+     * Validate a raw configuration JSON string without touching the database.
+     *
+     * <p>Parses the JSON and calls {@link NetworkConfiguration#IsValid()}. Throws {@link
+     * IllegalArgumentException} with a descriptive message on any failure.
+     *
+     * @param json the JSON string to validate
+     * @throws IllegalArgumentException if the JSON is blank, unparseable, or fails IsValid()
+     */
+    public void validateConfigurationJson(String json) {
+        if (json == null || json.isBlank()) {
+            throw new IllegalArgumentException("Network configuration cannot be null or blank");
+        }
+        try {
+            NetworkConfiguration cfg = objectMapper.readValue(json, NetworkConfiguration.class);
+            if (!cfg.IsValid()) {
+                throw new IllegalArgumentException("Invalid network configuration: " + json);
+            }
+        } catch (IllegalArgumentException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new IllegalArgumentException(
+                    "Unable to parse network configuration: " + json, ex);
+        }
+    }
+
+    /**
      * Get network configuration by network ID (cached).
      *
      * <p>Returns a NetworkConfiguration object. Results are cached for 10 minutes.
@@ -36,10 +62,7 @@ public class NetworkConfigurationService {
      * @throws IllegalArgumentException if network not found
      */
     @Transactional(readOnly = true)
-    @Cacheable(
-            cacheNames = "networkConfigCache",
-            key = "#networkId",
-            sync = true)
+    @Cacheable(cacheNames = "networkConfigCache", key = "#networkId", sync = true)
     public NetworkConfiguration getByNetworkId(Long networkId) {
         NetworkEntity entity =
                 networkRepository
@@ -76,9 +99,7 @@ public class NetworkConfigurationService {
      * @throws IllegalArgumentException if network not found
      */
     @Transactional
-    @CacheEvict(
-            cacheNames = "networkConfigCache",
-            key = "#networkId")
+    @CacheEvict(cacheNames = "networkConfigCache", key = "#networkId")
     public void update(Long networkId, NetworkConfiguration config) {
         NetworkEntity entity =
                 networkRepository

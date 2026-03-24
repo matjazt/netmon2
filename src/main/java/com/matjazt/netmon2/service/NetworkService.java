@@ -34,6 +34,7 @@ public class NetworkService {
 
     private final NetworkRepository networkRepository;
     private final NetworkMapper networkMapper;
+    private final NetworkConfigurationService networkConfigurationService;
 
     // ========== BASIC CRUD OPERATIONS ==========
 
@@ -134,6 +135,7 @@ public class NetworkService {
 
     @Transactional
     public NetworkDto createNetworkAndReturnDto(SaveNetworkRequest request) {
+        networkConfigurationService.validateConfigurationJson(request.configuration());
         NetworkEntity network = networkMapper.toEntity(request);
         var now = LocalDateTime.now(ZoneOffset.UTC);
         network.setFirstSeen(now);
@@ -143,6 +145,7 @@ public class NetworkService {
 
     @Transactional
     public NetworkDto updateNetworkAndReturnDto(SaveNetworkRequest request, long id) {
+        networkConfigurationService.validateConfigurationJson(request.configuration());
         networkRepository.updateNameAndConfigurationById(
                 id, request.name(), request.configuration());
         var dbEntity =

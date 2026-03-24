@@ -109,9 +109,14 @@ public class NetworkController {
                 "createNetwork: apiUser={}, name={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 request.name());
-        NetworkDto saved = networkService.createNetworkAndReturnDto(request);
-        log.trace("createNetwork: created network with id={}", saved.id());
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        try {
+            NetworkDto saved = networkService.createNetworkAndReturnDto(request);
+            log.trace("createNetwork: created network with id={}", saved.id());
+            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        } catch (IllegalArgumentException e) {
+            log.trace("createNetwork: invalid configuration - {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     // ========== PUT ENDPOINTS (update existing resources) ==========
@@ -138,9 +143,14 @@ public class NetworkController {
             return ResponseEntity.notFound().build();
         }
 
-        NetworkDto updated = networkService.updateNetworkAndReturnDto(request, id);
-        log.trace("updateNetwork: updated network with id={}", updated.id());
-        return ResponseEntity.ok(updated);
+        try {
+            NetworkDto updated = networkService.updateNetworkAndReturnDto(request, id);
+            log.trace("updateNetwork: updated network with id={}", updated.id());
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            log.trace("updateNetwork: invalid configuration - {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     // ========== DELETE ENDPOINTS (remove resources) ==========
