@@ -199,7 +199,10 @@ public class LogService {
      */
     public Page<LogDto> getLogsForUserNetworks(String username, int page, int size) {
         log.trace("getLogsForUserNetworks: username={}, page={}, size={}", username, page, size);
-        var account = accountRepository.findByUsername(username).orElseThrow();
+        var account = accountRepository.findByUsername(username).orElse(null);
+        if (account == null) {
+            return Page.empty(PageRequest.of(page, size));
+        }
         List<Long> networkIds =
                 accountNetworkRepository.findByAccount_Id(account.getId()).stream()
                         .map(an -> an.getNetwork().getId())

@@ -118,8 +118,9 @@ public class DeviceController {
     /** PUT /api/devices/{id} — update an existing device. */
     @PutMapping("/{id}")
     @PreAuthorize(
-            "hasAnyRole('admin') or @networkAuthorizationService.canAccessNetwork(authentication,"
-                    + " #request.networkId)")
+            "hasAnyRole('admin') or (@networkAuthorizationService.canAccessDevice(authentication,"
+                + " #id) and @networkAuthorizationService.canAccessNetwork(authentication,"
+                + " #request.networkId))")
     public ResponseEntity<DeviceDto> updateDevice(
             @PathVariable Long id, @RequestBody SaveDeviceRequest request) {
 
