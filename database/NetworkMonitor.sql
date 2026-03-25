@@ -287,10 +287,9 @@ select * from device
 
 insert into account_type (id, name, description) values  (4, 'viewer', 'read-only user')
 
--- naredi na produkciji
 ALTER TABLE log DROP CONSTRAINT fk_log_device;
 ALTER TABLE log DROP CONSTRAINT fk_log_network;
 
-alter table account_type alter column id drop DEFAULT
+alter table account_type alter column id drop default;
 ALTER TABLE account_type ALTER COLUMN id TYPE int4;
 ALTER TABLE account_type ALTER COLUMN id SET NOT NULL;
