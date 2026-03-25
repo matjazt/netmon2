@@ -34,7 +34,7 @@ public class EmailLoggingProperties {
     private String minLevel = "WARN";
 
     public @NonNull String[] getEmailToArray() {
-        if (emailTo == null || emailTo.isEmpty()) {
+        if (emailTo == null || emailTo.isBlank()) {
             return new String[0];
         }
         return emailTo.split(",\\s*");

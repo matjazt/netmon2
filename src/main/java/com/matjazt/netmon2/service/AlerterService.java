@@ -131,7 +131,9 @@ public class AlerterService {
         // Send email if network has an email address configured
         var notificationEmailAddress = networkConfig.getNotificationEmailAddress();
 
-        if (notificationEmailAddress != null && !notificationEmailAddress.isEmpty()) {
+        if (notificationEmailAddress != null
+                && !notificationEmailAddress.isBlank()
+                && !notificationEmailAddress.toLowerCase().endsWith("@example.com")) {
             try {
                 sendEmail(notificationEmailAddress, subject, fullMessage);
                 log.info(
@@ -430,7 +432,6 @@ public class AlerterService {
      * @param body Email body
      */
     public void sendEmail(String to, String subject, String body) {
-
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(
                 String.format("\"%s\" <%s>", properties.getFromName(), properties.getFromEmail()));

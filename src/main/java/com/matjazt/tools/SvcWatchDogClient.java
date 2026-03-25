@@ -115,7 +115,7 @@ public class SvcWatchDogClient implements Closeable {
 
         // see the shutdownEvent initialization comments above
         String watchdogPortStr = SimpleTools.getConfigString("WATCHDOG_PORT", null);
-        if (watchdogPortStr != null && !watchdogPortStr.isEmpty()) {
+        if (watchdogPortStr != null && !watchdogPortStr.isBlank()) {
             try {
                 udpPort = Integer.parseInt(watchdogPortStr);
                 if (udpPort > 0 && udpPingInterval > 0) {
