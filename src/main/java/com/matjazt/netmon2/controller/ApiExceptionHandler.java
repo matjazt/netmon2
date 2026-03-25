@@ -44,6 +44,21 @@ public class ApiExceptionHandler {
     }
 
     /**
+     * Handle DataIntegrityViolationException, which can occur when database constraints are
+     * violated (e.g. foreign key constraint, unique constraint).
+     */
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ProblemDetail> handleDataIntegrityViolation(
+            org.springframework.dao.DataIntegrityViolationException ex) {
+        log.info("Data integrity violation: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(
+                        ProblemDetail.forStatusAndDetail(
+                                HttpStatus.BAD_REQUEST,
+                                "Database error: " + ex.getMostSpecificCause().getMessage()));
+    }
+
+    /**
      * Authenticated user lacks the required role/permission.
      *
      * <p>Note: unauthenticated requests (401) are handled earlier by Spring Security's
