@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -164,7 +165,8 @@ public class DeviceService {
         DeviceEntity device =
                 deviceRepository
                         .findById(deviceId)
-                        .orElseThrow(() -> new RuntimeException("Device not found: " + deviceId));
+                        .orElseThrow(
+                                () -> new NoSuchElementException("Device not found: " + deviceId));
 
         device.setDeviceOperationMode(mode);
         return deviceRepository.save(device);
@@ -175,7 +177,8 @@ public class DeviceService {
         DeviceEntity device =
                 deviceRepository
                         .findById(deviceId)
-                        .orElseThrow(() -> new RuntimeException("Device not found: " + deviceId));
+                        .orElseThrow(
+                                () -> new NoSuchElementException("Device not found: " + deviceId));
 
         device.setName(newName);
         return deviceRepository.save(device);

@@ -181,15 +181,10 @@ public class AccountNetworkController {
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 accountId,
                 networkId);
-        try {
-            AccountNetworkDto saved =
-                    accountNetworkService.grantAccessAndReturnDto(accountId, networkId);
-            log.trace("grantAccess: created relationship with id={}", saved.id());
-            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-        } catch (RuntimeException e) {
-            log.trace("grantAccess: failed - {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        AccountNetworkDto saved =
+                accountNetworkService.grantAccessAndReturnDto(accountId, networkId);
+        log.trace("grantAccess: created relationship with id={}", saved.id());
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     // ========== DELETE ENDPOINTS (remove resources) ==========

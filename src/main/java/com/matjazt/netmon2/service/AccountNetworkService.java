@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
@@ -163,19 +164,25 @@ public class AccountNetworkService {
         // Check if relationship already exists
         if (accountNetworkRepository.existsByAccount_IdAndNetwork_Id(accountId, networkId)) {
             log.trace("grantAccess: relationship already exists");
-            throw new RuntimeException(
+            throw new IllegalStateException(
                     "Account " + accountId + " already has access to network " + networkId);
         }
 
         AccountEntity account =
                 accountRepository
                         .findById(accountId)
-                        .orElseThrow(() -> new RuntimeException("Account not found: " + accountId));
+                        .orElseThrow(
+                                () ->
+                                        new NoSuchElementException(
+                                                "Account not found: " + accountId));
 
         NetworkEntity network =
                 networkRepository
                         .findById(networkId)
-                        .orElseThrow(() -> new RuntimeException("Network not found: " + networkId));
+                        .orElseThrow(
+                                () ->
+                                        new NoSuchElementException(
+                                                "Network not found: " + networkId));
 
         AccountNetworkEntity relationship = new AccountNetworkEntity(account, network);
         var saved = accountNetworkRepository.save(relationship);

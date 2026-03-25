@@ -109,14 +109,9 @@ public class NetworkController {
                 "createNetwork: apiUser={}, name={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 request.name());
-        try {
-            NetworkDto saved = networkService.createNetworkAndReturnDto(request);
-            log.trace("createNetwork: created network with id={}", saved.id());
-            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-        } catch (IllegalArgumentException e) {
-            log.trace("createNetwork: invalid configuration - {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        NetworkDto saved = networkService.createNetworkAndReturnDto(request);
+        log.trace("createNetwork: created network with id={}", saved.id());
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     // ========== PUT ENDPOINTS (update existing resources) ==========
@@ -137,20 +132,9 @@ public class NetworkController {
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
 
-        // Verify network exists
-        if (!networkService.findNetworkDtoById(id).isPresent()) {
-            log.trace("updateNetwork: network not found, id={}", id);
-            return ResponseEntity.notFound().build();
-        }
-
-        try {
-            NetworkDto updated = networkService.updateNetworkAndReturnDto(request, id);
-            log.trace("updateNetwork: updated network with id={}", updated.id());
-            return ResponseEntity.ok(updated);
-        } catch (IllegalArgumentException e) {
-            log.trace("updateNetwork: invalid configuration - {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        NetworkDto updated = networkService.updateNetworkAndReturnDto(request, id);
+        log.trace("updateNetwork: updated network with id={}", updated.id());
+        return ResponseEntity.ok(updated);
     }
 
     // ========== DELETE ENDPOINTS (remove resources) ==========
@@ -169,11 +153,6 @@ public class NetworkController {
                 "deleteNetwork: apiUser={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
-
-        if (!networkService.findNetworkDtoById(id).isPresent()) {
-            log.trace("deleteNetwork: network not found, id={}", id);
-            return ResponseEntity.notFound().build();
-        }
 
         networkService.deleteNetwork(id);
         log.trace("deleteNetwork: deleted network with id={}", id);

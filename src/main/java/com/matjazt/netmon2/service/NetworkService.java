@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -72,6 +73,10 @@ public class NetworkService {
     /** Delete a network */
     @Transactional
     public void deleteNetwork(Long id) {
+        if (!networkRepository.existsById(id)) {
+            log.warn("deleteNetwork: network with id={} does not exist, cannot delete", id);
+            throw new NoSuchElementException("Network not found: " + id);
+        }
         log.trace(
                 "deleteNetwork: apiUser={}, networkId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
@@ -135,7 +140,7 @@ public class NetworkService {
 
     @Transactional
     public NetworkDto createNetworkAndReturnDto(SaveNetworkRequest request) {
-        networkConfigurationService.validateConfigurationJson(request.configuration());
+        networkConfigurationService.validateConfigurationJson(request.configuration() + "TESTIRAM");
         NetworkEntity network = networkMapper.toEntity(request);
         var now = LocalDateTime.now(ZoneOffset.UTC);
         network.setFirstSeen(now);

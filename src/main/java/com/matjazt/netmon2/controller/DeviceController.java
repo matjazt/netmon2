@@ -135,12 +135,7 @@ public class DeviceController {
                     + " #id)")
     public ResponseEntity<DeviceDto> updateDeviceMode(
             @PathVariable Long id, @RequestParam DeviceOperationMode mode) {
-        try {
-            DeviceDto updated = deviceService.updateDeviceModeAndReturnDto(id, mode);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(deviceService.updateDeviceModeAndReturnDto(id, mode));
     }
 
     /** PUT /api/devices/{id}/name?name= — update the device name. */
@@ -150,12 +145,7 @@ public class DeviceController {
                     + " #id)")
     public ResponseEntity<DeviceDto> updateDeviceName(
             @PathVariable Long id, @RequestParam String name) {
-        try {
-            DeviceDto updated = deviceService.renameDeviceAndReturnDto(id, name);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(deviceService.renameDeviceAndReturnDto(id, name));
     }
 
     // ========== DELETE ENDPOINTS (remove resources) ==========
