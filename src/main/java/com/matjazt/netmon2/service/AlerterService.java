@@ -169,7 +169,7 @@ public class AlerterService {
 
         // store alert in database
         var alert =
-                alertRepository.save(
+                alertRepository.saveAndFlush(
                         new AlertEntity(
                                 LocalDateTime.now(ZoneOffset.UTC),
                                 network,

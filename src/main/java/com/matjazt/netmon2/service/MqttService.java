@@ -229,7 +229,7 @@ public class MqttService {
                     device.setLastSeen(messageTimestamp);
                     device.setVendor(macVendorLookupService.lookupVendor(mac));
                     // persist the new device before using it in the alert
-                    deviceRepository.save(device);
+                    deviceRepository.saveAndFlush(device);
 
                     alerterService.openAlert(
                             AlertType.DEVICE_UNAUTHORIZED,

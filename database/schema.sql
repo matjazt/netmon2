@@ -8,7 +8,7 @@
 -- DROP TABLE account_type;
 
 CREATE TABLE account_type (
-	id bigserial NOT NULL,
+	id int4 NOT NULL,
 	"name" varchar(50) NOT NULL,
 	description varchar(255) NULL,
 	CONSTRAINT pk_account_type PRIMARY KEY (id),
@@ -209,9 +209,7 @@ CREATE TABLE log (
     message varchar(5000) NOT NULL,
 	device_id int8 NULL,
 	network_id int8 NOT NULL,
-	CONSTRAINT pk_log PRIMARY KEY (id),
-	CONSTRAINT fk_log_device FOREIGN KEY (device_id) REFERENCES device(id),
-	CONSTRAINT fk_log_network FOREIGN KEY (network_id) REFERENCES network(id)
+	CONSTRAINT pk_log PRIMARY KEY (id)
 );
 CREATE INDEX idx_log_device ON log USING btree (device_id);
 CREATE INDEX idx_log_network ON log USING btree (network_id);
