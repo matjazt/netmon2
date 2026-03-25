@@ -140,7 +140,7 @@ public class NetworkService {
 
     @Transactional
     public NetworkDto createNetworkAndReturnDto(SaveNetworkRequest request) {
-        networkConfigurationService.validateConfigurationJson(request.configuration() + "TESTIRAM");
+        networkConfigurationService.validateConfigurationJson(request.configuration());
         NetworkEntity network = networkMapper.toEntity(request);
         var now = LocalDateTime.now(ZoneOffset.UTC);
         network.setFirstSeen(now);
@@ -155,7 +155,7 @@ public class NetworkService {
                 id, request.name(), request.configuration());
         var dbEntity =
                 findNetworkById(id)
-                        .orElseThrow(() -> new RuntimeException("Network not found: " + id));
+                        .orElseThrow(() -> new NoSuchElementException("Network not found: " + id));
 
         return networkMapper.toDto(dbEntity);
     }

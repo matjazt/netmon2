@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
@@ -151,7 +152,7 @@ public class AccountService {
                         .findById(request.accountTypeId())
                         .orElseThrow(
                                 () ->
-                                        new RuntimeException(
+                                        new NoSuchElementException(
                                                 "Account type not found: "
                                                         + request.accountTypeId()));
         AccountEntity account = accountMapper.toEntity(request);
@@ -162,11 +163,14 @@ public class AccountService {
                 String existingHash =
                         accountRepository
                                 .findById(id)
-                                .orElseThrow(() -> new RuntimeException("Account not found: " + id))
+                                .orElseThrow(
+                                        () ->
+                                                new NoSuchElementException(
+                                                        "Account not found: " + id))
                                 .getPasswordHash();
                 account.setPasswordHash(existingHash);
             } else {
-                throw new RuntimeException("Password is required for new accounts");
+                throw new IllegalArgumentException("Password is required for new accounts");
             }
         } else {
             account.setPasswordHash(passwordEncoder.encode(request.password()));

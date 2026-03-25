@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Service for processing MQTT messages containing network device scan results.
@@ -134,7 +135,7 @@ public class MqttService {
                             .findByName(networkName)
                             .orElseThrow(
                                     () ->
-                                            new RuntimeException(
+                                            new NoSuchElementException(
                                                     "Network not found: " + networkName));
             NetworkConfiguration networkConfig =
                     networkConfigurationService.getByNetworkId(network.getId());
@@ -379,7 +380,7 @@ public class MqttService {
         try {
             return new ObjectMapper().readValue(payload, NetworkStatusMessageDto.class);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to parse JSON message", e);
+            throw new IllegalArgumentException("Failed to parse JSON message", e);
         }
     }
 }
