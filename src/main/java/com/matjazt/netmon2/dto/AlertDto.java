@@ -12,4 +12,6 @@ public record AlertDto(
         AlertType alertType,
         String message,
         Instant timestamp,
-        Instant closureTimestamp) {}
+        Instant closureTimestamp,
+        String networkName,
+        String deviceNameOrVendor) {}

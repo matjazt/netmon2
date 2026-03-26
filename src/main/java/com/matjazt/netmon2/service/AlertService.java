@@ -1,6 +1,7 @@
 package com.matjazt.netmon2.service;
 
 import com.matjazt.netmon2.dto.AlertDto;
+import com.matjazt.netmon2.dto.DeviceDto;
 import com.matjazt.netmon2.entity.AlertEntity;
 import com.matjazt.netmon2.mapper.AlertMapper;
 import com.matjazt.netmon2.repository.AlertRepository;
@@ -11,7 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /** Service for reading Alert data. */
@@ -22,18 +27,28 @@ public class AlertService {
 
     private final AlertRepository alertRepository;
     private final AlertMapper alertMapper;
+    private final NetworkService networkService;
+    private final DeviceService deviceService;
 
     public Optional<AlertDto> findById(Long id) {
         log.trace(
                 "findById: apiUser={}, alertId={}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 id);
-        return alertRepository.findById(id).map(alertMapper::toDto);
+        return alertRepository
+                .findById(id)
+                .map(
+                        entity ->
+                                alertMapper.toDto(
+                                        entity,
+                                        networkService.getAllNetworksAsMap(),
+                                        buildDeviceMap(List.of(entity))));
     }
 
     private List<AlertDto> convertAndSortByTimeDesc(List<AlertEntity> entities) {
-
-        return alertMapper.toDtos(entities).stream()
+        var networkMap = networkService.getAllNetworksAsMap();
+        var deviceMap = buildDeviceMap(entities);
+        return alertMapper.toDtos(entities, networkMap, deviceMap).stream()
                 .sorted((o1, o2) -> o2.timestamp().compareTo(o1.timestamp()))
                 .toList();
     }
@@ -70,5 +85,17 @@ public class AlertService {
                 deviceId);
         return convertAndSortByTimeDesc(
                 alertRepository.findByDevice_IdAndClosureTimestampIsNull(deviceId));
+    }
+
+    // ========== PRIVATE HELPERS ==========
+
+    private Map<Long, DeviceDto> buildDeviceMap(Collection<AlertEntity> entities) {
+        Map<Long, DeviceDto> result = new HashMap<>();
+        entities.stream()
+                .map(e -> e.getNetwork() != null ? e.getNetwork().getId() : null)
+                .filter(Objects::nonNull)
+                .distinct()
+                .forEach(nid -> result.putAll(deviceService.getNetworkDevicesAsMap(nid)));
+        return result;
     }
 }
