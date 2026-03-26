@@ -296,7 +296,10 @@ public class MqttService {
                                     network);
 
                         } else {
-                            log.info("Device {} came online on network {}", device, network);
+                            log.info(
+                                    "Device {} came online on network {}",
+                                    device.toString(),
+                                    network.toString());
                         }
                     }
                 }
@@ -331,7 +334,10 @@ public class MqttService {
 
                 // if (lastOnlineStatus.isPresent()) {
                 // device went offline
-                log.info("Device {} went offline on network {}", knownDevice, network);
+                log.info(
+                        "Device {} went offline on network {}",
+                        knownDevice.toString(),
+                        network.toString());
 
                 // Record offline status with last known IP
                 var offlineStatus =
