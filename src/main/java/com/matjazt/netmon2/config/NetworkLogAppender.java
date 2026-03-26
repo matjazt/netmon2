@@ -13,6 +13,7 @@ import com.matjazt.netmon2.service.LogDbWriterService;
 import com.matjazt.tools.SimpleTools;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 /**
  * Custom Logback appender that captures log messages referencing network/device entities.
@@ -114,7 +115,7 @@ public class NetworkLogAppender extends AppenderBase<ILoggingEvent> {
             LogEntity logEntry =
                     new LogEntity(
                             null,
-                            LocalDateTime.now(),
+                            LocalDateTime.now(ZoneOffset.UTC),
                             event.getLevel().toInt(),
                             SimpleTools.safeTruncate(
                                     ABBREVIATOR.abbreviate(event.getLoggerName()), 500),
