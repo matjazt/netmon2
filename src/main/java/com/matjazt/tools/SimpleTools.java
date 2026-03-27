@@ -217,4 +217,23 @@ public class SimpleTools {
     public static boolean arrayContainsString(String[] array, String element) {
         return array != null && element != null && Arrays.stream(array).anyMatch(element::equals);
     }
+
+    public static String getLocalHostname() {
+        try {
+            return java.net.InetAddress.getLocalHost().getHostName();
+        } catch (Exception ex) {
+        }
+
+        try {
+            return java.net.InetAddress.getLocalHost().getCanonicalHostName();
+        } catch (Exception ex) {
+        }
+
+        try {
+            return java.net.InetAddress.getLocalHost().getHostAddress();
+        } catch (Exception ex) {
+        }
+
+        return "UNKNOWN_HOST";
+    }
 }

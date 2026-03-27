@@ -340,9 +340,9 @@ public class BufferedEmailAppender extends AppenderBase<ILoggingEvent> {
                 cfg.getEmailSubjectPrefix()
                         + " "
                         + logs.size()
-                        + " log entries - "
-                        + LocalDateTime.now()
-                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                        + " log entries from "
+                        + SimpleTools.getLocalHostname();
+
         message.setSubject(subject);
 
         String plainTextContent = buildPlainTextEmail(logs);
