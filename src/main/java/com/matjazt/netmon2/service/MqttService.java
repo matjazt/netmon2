@@ -151,6 +151,16 @@ public class MqttService {
                 return;
             }
 
+            if (messageTimestamp.isBefore(network.getLastSeen())) {
+                log.info(
+                        "Message timestamp is older than the last seen timestamp ({} < {}),"
+                            + " ignoring entire message for network {}",
+                        messageTimestamp,
+                        network.getLastSeen(),
+                        network);
+                return;
+            }
+
             if (messageTimestamp.isAfter(now)) {
                 // adjust the timestamp silently, as this can happen if the device sending the
                 // message has a slightly incorrect clock.
