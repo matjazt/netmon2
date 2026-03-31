@@ -13,10 +13,14 @@ This application subscribes to MQTT topics that publish network device lists, de
 - **Spring Security**: Authentication and authorization with BCrypt
 - **Spring Integration MQTT**: MQTT connectivity with Eclipse Paho client
 - **Spring Mail**: Email notification support
+- **Logbook (Zalando)**: HTTP request/response logging
+- **Caffeine**: In-memory caching
 - **Gradle**: Build tool and dependency management
 - **PostgreSQL**: Relational database for storing device history
 - **MapStruct**: DTO mapping framework
+- **Lombok**: Boilerplate reduction
 - **Docker**: Containerized deployment with Docker Compose
+- **SvcWatchDog**: Windows service watchdog integration (optional)
 
 ## Prerequisites
 
@@ -48,10 +52,12 @@ This creates the following tables:
 - **device_status_history**: Historical state changes
 - **alert**: Generated alerts (network down, device down, unauthorized devices)
 - **account**: User accounts for API access
-- **account_type**: Account role types (admin, user, device)
+- **account_type**: Account role types (admin, user, device, viewer)
 - **account_network**: User-network access mapping
 - **alert_type**: Alert type reference data
 - **device_operation_mode**: Device monitoring policy reference data
+- **log**: Application log entries persisted to the database (linked to network/device)
+- **log_level**: Log level reference data
 
 **Note**: `database/NetworkMonitor.sql` contains development queries and should NOT be executed.
 
@@ -75,21 +81,31 @@ MQTT_CLIENT_ID=netmon2
 MQTT_USERNAME=your-mqtt-username
 MQTT_PASSWORD=your-mqtt-password
 
-# Email/SMTP Configuration
-ALERTER_SMTP_HOST=smtp.example.com
-ALERTER_SMTP_PORT=587
-ALERTER_SMTP_USERNAME=alerts@example.com
-ALERTER_SMTP_PASSWORD=your-smtp-password
-ALERTER_SMTP_START_TLS=true
-ALERTER_SMTP_AUTH=true
+# Email delivery (SMTP) configuration
+EMAIL_DELIVERY_SMTP_HOST=smtp.example.com
+EMAIL_DELIVERY_SMTP_PORT=587
+EMAIL_DELIVERY_SMTP_USERNAME=alerts@example.com
+EMAIL_DELIVERY_SMTP_PASSWORD=your-smtp-password
+EMAIL_DELIVERY_SMTP_STARTTLS=true
+EMAIL_DELIVERY_SMTP_AUTH=true
+
+# Buffered email logging (sends aggregated log entries via email)
+EMAIL_LOGGING_EMAIL_FROM=netmon2@example.com
+EMAIL_LOGGING_EMAIL_TO=admin@example.com
+EMAIL_LOGGING_MAX_COUNT=100
+EMAIL_LOGGING_MAX_DELAY_SECONDS=600
+EMAIL_LOGGING_MIN_LEVEL=WARN
+
+# Alerter
 ALERTER_FROM_EMAIL=alerts@example.com
+
+# CORS (comma-separated list of allowed origins)
+NETMON_CORS_ALLOWED_ORIGINS=https://app.example.com
 ```
 
 These environment variables override the defaults in `application.yaml` and are automatically loaded when using Docker Compose or can be sourced in your shell before running the application.
 
 ### Application Configuration
-
-Edit `src/main/resources/application-local.yaml` (or `application.yaml` for defaults):
 
 **MQTT Settings:**
 
@@ -111,17 +127,34 @@ mqtt:
   ssl-verify-hostname: true           # Verify SSL hostname
 ```
 
-**Email/SMTP Settings:**
+**Email Delivery (SMTP) Settings:**
 
 ```yaml
-alerter:
+email-delivery:
   smtp-host: smtp.example.com         # SMTP server hostname
   smtp-port: 587                      # SMTP port (587 for TLS)
   smtp-username: your-email           # SMTP username
   smtp-password: your-password        # SMTP password
-  smtp-start-tls: true                # Enable STARTTLS
+  smtp-starttls: true                 # Enable STARTTLS
   smtp-auth: true                     # Enable SMTP authentication
-  from-email: alerts@example.com      # Sender email address
+```
+
+**Buffered Email Logging Settings:**
+
+```yaml
+email-logging:
+  email-from: netmon2@example.com     # Sender address for log emails
+  email-to: admin@example.com         # Recipient address for log emails
+  max-count: 100                      # Send when buffer reaches this many entries
+  max-delay-seconds: 300              # Send after this many seconds regardless
+  min-level: WARN                     # Minimum log level to buffer (ERROR, WARN, INFO, etc.)
+```
+
+**Alerter Settings:**
+
+```yaml
+alerter:
+  from-email: alerts@example.com      # Sender email address for alert emails
   from-name: Network Monitor          # Sender display name
   interval-seconds: 20                # Alert check interval
   initial-delay-seconds: 30           # Initial delay before first check
@@ -179,45 +212,38 @@ docker compose logs -f
 
 ### Application URLs
 
-- Application: `http://127.0.0.1/netmon2/`
-- REST API: `http://127.0.0.1/netmon2/api/devices`
-- OpenAPI/Swagger UI: `http://127.0.0.1/netmon2/swagger-ui.html`
+- REST API base: `http://127.0.0.1:8080/netmon2/api/`
+- Swagger UI: `http://127.0.0.1:8080/netmon2/swagger-ui.html`
+- OpenAPI specification: `http://127.0.0.1:8080/netmon2/v3/api-docs`
+- Health check: `http://127.0.0.1:8080/netmon2/actuator/health`
 
-## REST API Endpoints
+## REST API
 
-### Get All Devices (Paginated)
+The application provides a comprehensive REST API documented via OpenAPI/Swagger. The full API reference — including all endpoints, request/response schemas, and authentication requirements — is available in the Swagger UI at:
 
-```text
-GET /api/devices/paginated?page=0&size=20
+```
+http://127.0.0.1:8080/netmon2/swagger-ui.html
 ```
 
-Returns paginated list of device summaries.
+The machine-readable OpenAPI specification is available at:
 
-### Get Device by ID
-
-```text
-GET /api/devices/{id}
+```
+http://127.0.0.1:8080/netmon2/v3/api-docs
 ```
 
-Returns device details by ID.
+**Authentication**: All API endpoints (except `/actuator/health`) require HTTP Basic Authentication. Credentials are validated against the `account` table with BCrypt password hashing.
 
-### Get Devices by Network
+**Available resource groups** (all under `/api/`):
 
-```text
-GET /api/devices/network/{networkId}
-```
-
-Returns all devices for a specific network.
-
-### Get Online Devices
-
-```text
-GET /api/devices/network/{networkId}/online
-```
-
-Returns currently online devices for a network.
-
-**Authentication**: API uses Spring Security with HTTP Basic Authentication. User credentials are validated against the `account` table with BCrypt password hashing.
+| Path prefix | Description |
+|---|---|
+| `/api/accounts` | User account management (admin only) |
+| `/api/account-networks` | User–network access mapping |
+| `/api/networks` | Monitored network management |
+| `/api/devices` | Device management and status |
+| `/api/device-status-history` | Historical device state changes |
+| `/api/alerts` | Alert records |
+| `/api/logs` | Application log entries (persisted to DB) |
 
 ## How It Works
 
@@ -283,7 +309,7 @@ When triggered:
 Users authenticate via Spring Security:
 
 - Passwords stored as BCrypt hashes
-- Account types: admin, user, device (for MQTT publishers)
+- Account types: admin, user, device (for MQTT publishers), viewer (read-only)
 - User-network access control via `account_network` junction table
 - Security context available throughout application
 
@@ -302,6 +328,7 @@ netmon2/
 ├── docs/                            # Documentation
 │   ├── MqttMessageFormat.md         # MQTT message format and examples
 │   └── Docker.md                    # Docker setup and usage guide
+├── log/                             # Application log files (not in git)
 ├── network-scanners/                # Network scanner implementations
 │   └── RouterOS/                    # MikroTik RouterOS scanner
 │       ├── networkScan.rsc          # RouterOS script
@@ -309,18 +336,20 @@ netmon2/
 │       └── networkScan.RouterOS.md  # Installation guide
 └── src/
     ├── main/
-    │   ├── java/com/matjazt/netmon2/
-    │   │   ├── config/              # Spring configuration classes
-    │   │   ├── controller/          # REST controllers
-    │   │   ├── dto/                 # Data Transfer Objects
-    │   │   ├── entity/              # JPA entities
-    │   │   ├── mapper/              # MapStruct mappers
-    │   │   ├── repository/          # Spring Data repositories
-    │   │   ├── security/            # Spring Security configuration
-    │   │   └── service/             # Business logic services
+    │   ├── java/com/matjazt/
+    │   │   ├── netmon2/
+    │   │   │   ├── config/          # Spring configuration classes
+    │   │   │   ├── controller/      # REST controllers
+    │   │   │   ├── dto/             # Data Transfer Objects
+    │   │   │   ├── entity/          # JPA entities
+    │   │   │   ├── mapper/          # MapStruct mappers
+    │   │   │   ├── repository/      # Spring Data repositories
+    │   │   │   ├── security/        # Spring Security configuration
+    │   │   │   └── service/         # Business logic services
+    │   │   └── tools/               # Shared utilities (SvcWatchDogClient)
     │   └── resources/
     │       ├── application.yaml     # Default configuration
-    │       └── application-local.yaml  # Local overrides
+    │       └── application-local.yaml  # Local overrides (not in git, create manually)
     └── test/                        # Unit and integration tests
 ```
 
@@ -331,11 +360,17 @@ netmon2/
 ✅ **Historical Tracking**: Store all state changes with timestamps  
 ✅ **Multi-Network Support**: Monitor multiple networks simultaneously  
 ✅ **Device Management**: Classify devices as unauthorized, authorized, or always-on  
+✅ **MAC Vendor Lookup**: Automatically resolves device vendor names from the IEEE OUI registry  
 ✅ **Automated Alerting**: Email notifications for network/device issues  
+✅ **Email Log Buffering**: Aggregated log entries sent via email on a configurable schedule  
+✅ **Persistent Log Storage**: Application log entries persisted to the database (linked to network/device)  
 ✅ **User Authentication**: Secure API with Spring Security and BCrypt  
-✅ **Role-Based Access**: Admin, user, and device account types  
+✅ **Role-Based Access**: Admin, user, device, and viewer account types  
+✅ **CORS Configuration**: Configurable allowed origins via properties or environment variable  
+✅ **HTTP Request Logging**: Full HTTP request/response logging via Logbook  
 ✅ **REST API**: Query current status and historical data  
-✅ **OpenAPI Documentation**: Auto-generated API docs via SpringDoc
+✅ **OpenAPI Documentation**: Auto-generated API docs via SpringDoc  
+✅ **SvcWatchDog Support**: Optional Windows service watchdog integration
 
 ## License
 
