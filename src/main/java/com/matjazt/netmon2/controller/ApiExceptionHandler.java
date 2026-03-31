@@ -43,6 +43,15 @@ public class ApiExceptionHandler {
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage()));
     }
 
+    /** No handler/route found for the requested URL. */
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<ProblemDetail> handleNoResourceFound(
+            org.springframework.web.servlet.resource.NoResourceFoundException ex) {
+        log.info("No resource found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage()));
+    }
+
     /**
      * Handle DataIntegrityViolationException, which can occur when database constraints are
      * violated (e.g. foreign key constraint, unique constraint).
