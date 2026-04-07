@@ -72,6 +72,12 @@ public class NetworkLogAppender extends AppenderBase<ILoggingEvent> {
     @Override
     protected void append(ILoggingEvent event) {
         try {
+            var loggerName = event.getLoggerName();
+            if (loggerName == null || loggerName.endsWith("SqlExceptionHelper")) {
+                // Skip internal logging to avoid recursion and noise
+                return;
+            }
+
             LogDbWriterService writer = getWriter();
             if (writer == null) {
                 return;
@@ -117,8 +123,7 @@ public class NetworkLogAppender extends AppenderBase<ILoggingEvent> {
                             null,
                             LocalDateTime.now(ZoneOffset.UTC),
                             event.getLevel().toInt(),
-                            SimpleTools.safeTruncate(
-                                    ABBREVIATOR.abbreviate(event.getLoggerName()), 500),
+                            SimpleTools.safeTruncate(ABBREVIATOR.abbreviate(loggerName), 500),
                             SimpleTools.safeTruncate(message, 5000),
                             network,
                             device);
