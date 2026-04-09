@@ -293,3 +293,23 @@ ALTER TABLE log DROP CONSTRAINT fk_log_network;
 alter table account_type alter column id drop default;
 ALTER TABLE account_type ALTER COLUMN id TYPE int4;
 ALTER TABLE account_type ALTER COLUMN id SET NOT NULL;
+
+select * from device
+select * from account
+select * from network
+select * from account_network 
+
+-- delete single device
+delete from device_status_history where device_id = 52
+delete from log where device_id = 52
+delete from alert where device_id = 52
+delete from device where id = 52
+
+
+-- delete entire network
+delete from device_status_history where network_id = 3
+delete from log where network_id = 3
+delete from device where network_id = 3
+delete from alert where network_id = 3
+delete from account_network where network_id = 3
+delete from network where id = 3
