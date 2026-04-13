@@ -2,6 +2,14 @@
 
 A Spring Boot application for monitoring network devices via MQTT with automated alerting, user authentication, and a REST API.
 
+## Frontend GUI
+
+A dedicated web GUI is available for this backend:
+
+- <https://github.com/matjazt/netmon2Gui>
+
+There is also a live public demo available, so check it out.
+
 ## Overview
 
 This application subscribes to MQTT topics that publish network device lists, detects when devices go online or offline, stores state changes in a PostgreSQL database, triggers email alerts for critical events, and provides an authenticated REST API to query device status. It supports multi-user access with role-based account management and configurable device monitoring policies (unauthorized, authorized, always-on).
