@@ -5,6 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,15 +16,16 @@ import org.springframework.stereotype.Component;
  * <p>This is particularly useful for Logback appenders, which are instantiated outside the Spring
  * container but need access to Spring beans.
  *
- * <p>Usage: {@code LogDbWriterService writer =
- * SpringContextHelper.getBean(LogDbWriterService.class);}
+ * <p>Usage: {@code AppLogDbWriterService writer =
+ * SpringContextHelper.getBean(AppLogDbWriterService.class);}
  *
  * <p>WARNING: Only use this after Spring context is fully initialized. Calling {@code getBean()}
  * during application startup may fail.
  */
 @Component
 @Slf4j
-public class SpringContextHelper implements ApplicationContextAware {
+public class SpringContextHelper
+        implements ApplicationContextAware, ApplicationListener<ContextClosedEvent> {
 
     private static ApplicationContext context;
 
@@ -37,6 +41,11 @@ public class SpringContextHelper implements ApplicationContextAware {
         log.info("SpringContextHelper initialized with application context");
     }
 
+    @Override
+    public void onApplicationEvent(ContextClosedEvent event) {
+        context = null; // stop all bean lookups during/after shutdown
+    }
+
     /**
      * Retrieves a Spring bean by its type.
      *
@@ -49,8 +58,9 @@ public class SpringContextHelper implements ApplicationContextAware {
      */
     public static <T> T getBean(Class<T> beanClass) {
         try {
-            if (context == null) {
-                // this happens a LOT during application startup before Spring is ready
+            if (context == null
+                    || (context instanceof ConfigurableApplicationContext cac && !cac.isActive())) {
+                // This happens a lot during application startup before Spring is ready
                 return null;
             }
             var bean = context.getBean(beanClass);
