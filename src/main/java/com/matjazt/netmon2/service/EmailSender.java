@@ -27,6 +27,9 @@ public class EmailSender {
     @Value("${email-delivery.smtp-auth:true}")
     private boolean smtpAuth;
 
+    @Value("${email-delivery.smtp-timeout-ms:10000}")
+    private int smtpTimeoutMs;
+
     @Bean
     public JavaMailSender javaMailSender() {
         var mailSender = new JavaMailSenderImpl();
@@ -41,6 +44,9 @@ public class EmailSender {
         props.put("mail.smtp.auth", smtpAuth);
         props.put("mail.smtp.starttls.enable", smtpStartTls);
         props.put("mail.debug", "false"); // Set to "true" for debugging SMTP issues
+        props.put("mail.smtp.connectiontimeout", smtpTimeoutMs);
+        props.put("mail.smtp.timeout", smtpTimeoutMs);
+        props.put("mail.smtp.writetimeout", smtpTimeoutMs);
 
         return mailSender;
     }
