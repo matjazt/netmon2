@@ -10,6 +10,7 @@ import com.matjazt.netmon2.entity.NetworkEntity;
 import com.matjazt.netmon2.repository.DeviceRepository;
 import com.matjazt.netmon2.repository.DeviceStatusHistoryRepository;
 import com.matjazt.netmon2.repository.NetworkRepository;
+import com.matjazt.tools.SimpleTools;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -87,6 +88,8 @@ public class MqttService {
      */
     @Transactional
     public void processMqttMessage(Message<String> mqttMessage) {
+        SimpleTools.checkTransactionStatus(true);
+        
         org.springframework.messaging.MessageHeaders headers = mqttMessage.getHeaders();
         String topic =
                 headers.get(

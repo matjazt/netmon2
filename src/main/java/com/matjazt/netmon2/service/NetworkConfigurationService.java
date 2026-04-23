@@ -3,6 +3,7 @@ package com.matjazt.netmon2.service;
 import com.matjazt.netmon2.entity.NetworkConfiguration;
 import com.matjazt.netmon2.entity.NetworkEntity;
 import com.matjazt.netmon2.repository.NetworkRepository;
+import com.matjazt.tools.SimpleTools;
 
 import lombok.RequiredArgsConstructor;
 
@@ -101,6 +102,7 @@ public class NetworkConfigurationService {
     @Transactional
     @CacheEvict(cacheNames = "networkConfigCache", key = "#networkId")
     public void update(Long networkId, NetworkConfiguration config) {
+        SimpleTools.checkTransactionStatus(true);
         NetworkEntity entity =
                 networkRepository
                         .findById(networkId)

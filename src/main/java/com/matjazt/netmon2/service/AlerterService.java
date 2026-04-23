@@ -249,6 +249,7 @@ public class AlerterService {
     @Transactional
     public void processNetworkAlerts(long networkId) {
 
+        SimpleTools.checkTransactionStatus(true);
         // see if the entire network is down or up
 
         var network =

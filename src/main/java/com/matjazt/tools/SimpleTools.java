@@ -1,5 +1,7 @@
 package com.matjazt.tools;
 
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -235,5 +237,18 @@ public class SimpleTools {
         }
 
         return "UNKNOWN_HOST";
+    }
+
+    public static void checkTransactionStatus(boolean expectedStatus) {
+        boolean actual = TransactionSynchronizationManager.isActualTransactionActive();
+
+        if (actual != expectedStatus) {
+            String msg =
+                    expectedStatus
+                            ? "Expected an active transaction, but none exists"
+                            : "Expected no active transaction, but one is active";
+
+            throw new IllegalStateException(msg);
+        }
     }
 }
