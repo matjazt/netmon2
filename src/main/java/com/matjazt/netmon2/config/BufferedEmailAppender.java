@@ -193,6 +193,10 @@ public class BufferedEmailAppender extends AppenderBase<ILoggingEvent> {
                 return;
             }
 
+            // trigger lazy resolution of mail sender, otherwise it might not be set until shutdown,
+            // and then it would be too late to resolve it
+            getMailSender();
+
             // Filter by minimum level
             if (event.getLevel().toInt() < minLevel.toInt()) {
                 return;
