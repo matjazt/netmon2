@@ -125,7 +125,7 @@ public class NetworkService {
      * <p>Result is cached in networkDetailsCache. Called by log and history services to resolve
      * network names without additional SQL queries.
      */
-    @Cacheable("networkDetailsCache")
+    @Cacheable(cacheNames = "networkDetailsCache", sync = true)
     public Map<Long, NetworkDto> getAllNetworksAsMap() {
         log.trace("getAllNetworksAsMap: loading all networks into cache");
         return networkMapper.toDtos(networkRepository.findAll()).stream()

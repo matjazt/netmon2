@@ -109,7 +109,7 @@ public class DeviceService {
      * <p>Result is cached in deviceDetailsCache keyed by networkId. Called by log and history
      * services to resolve device names without additional SQL queries.
      */
-    @Cacheable(value = "deviceDetailsCache", key = "#networkId")
+    @Cacheable(value = "deviceDetailsCache", key = "#networkId", sync = true)
     public Map<Long, DeviceDto> getNetworkDevicesAsMap(Long networkId) {
         log.trace("getNetworkDevicesAsMap: loading devices for networkId={}", networkId);
         return deviceMapper.toDtos(deviceRepository.findByNetwork_Id(networkId)).stream()
