@@ -1,5 +1,6 @@
 package com.matjazt.netmon2.service;
 
+import com.matjazt.netmon2.aop.TimedEvent;
 import com.matjazt.netmon2.dto.NetworkStatusMessageDto;
 import com.matjazt.netmon2.entity.AlertType;
 import com.matjazt.netmon2.entity.DeviceEntity;
@@ -15,6 +16,7 @@ import com.matjazt.tools.SimpleTools;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,21 +77,22 @@ public class MqttService {
     /**
      * Handles incoming MQTT messages containing device scan results.
      *
-     * <p>This method contains the core business logic for processing MQTT messages. It is called by
-     * {@link TimingProxy#processMqttMessage(Message)}, which serves as the actual
-     * {@code @ServiceActivator} and measures execution time outside the transactional boundary.
+     * <p>The {@code @ServiceActivator} annotation registers this method as the entry point for
+     * messages arriving on the {@code mqttInputChannel}. This method contains the core business
+     * logic for processing MQTT messages.
      *
      * <p>Processes device scan results: extracts network name from topic, parses JSON payload,
      * updates network last-seen timestamp, records device state changes (online/offline), and
      * triggers alerts for unauthorized devices.
      *
      * @param mqttMessage Spring Integration message containing MQTT payload and headers
-     * @see TimingProxy#processMqttMessage(Message)
      */
     @Transactional
+    @TimedEvent(logAfter = true)
+    @ServiceActivator(inputChannel = "mqttInputChannel")
     public void processMqttMessage(Message<String> mqttMessage) {
         SimpleTools.checkTransactionStatus(true);
-        
+
         org.springframework.messaging.MessageHeaders headers = mqttMessage.getHeaders();
         String topic =
                 headers.get(
@@ -157,7 +160,7 @@ public class MqttService {
             if (messageTimestamp.isBefore(network.getLastSeen())) {
                 log.info(
                         "Message timestamp is older than the last seen timestamp ({} < {}),"
-                            + " ignoring entire message for network {}",
+                                + " ignoring entire message for network {}",
                         messageTimestamp,
                         network.getLastSeen(),
                         network);

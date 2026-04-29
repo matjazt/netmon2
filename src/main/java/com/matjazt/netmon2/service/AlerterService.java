@@ -1,5 +1,6 @@
 package com.matjazt.netmon2.service;
 
+import com.matjazt.netmon2.aop.TimedEvent;
 import com.matjazt.netmon2.config.AlerterProperties;
 import com.matjazt.netmon2.entity.AlertEntity;
 import com.matjazt.netmon2.entity.AlertType;
@@ -11,12 +12,15 @@ import com.matjazt.netmon2.repository.DeviceRepository;
 import com.matjazt.netmon2.repository.DeviceStatusHistoryRepository;
 import com.matjazt.netmon2.repository.NetworkRepository;
 import com.matjazt.tools.SimpleTools;
+import com.matjazt.tools.SvcWatchDogClient;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +29,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Background service for processing alerts and sending email notifications.
@@ -52,6 +57,9 @@ public class AlerterService {
     private final AlertRepository alertRepository;
     private final NetworkConfigurationService networkConfigurationService;
     private final MacVendorLookupService macVendorLookupService;
+
+    // Inject the proxied self so that @Transactional works when called from the same class
+    private final ObjectProvider<AlerterService> self; // proxy for transactions
 
     // private static final DateTimeFormatter TIME_FORMATTER =
     //        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -246,7 +254,39 @@ public class AlerterService {
         return alert;
     }
 
+    /**
+     * Periodically processes alerts for all networks with execution time measurement.
+     *
+     * <p>This scheduled task runs at intervals defined by {@link AlerterProperties#intervalSeconds}
+     * after an initial delay of {@link AlerterProperties#initialDelaySeconds}. It processes alerts
+     * for each network sequentially, each network in its own transaction.
+     *
+     * @see AlerterService#processNetworkAlerts(NetworkEntity)
+     */
+    @Scheduled(
+            fixedRateString = "#{@alerterProperties.intervalSeconds * 1000}",
+            initialDelayString = "#{@alerterProperties.initialDelaySeconds * 1000}",
+            timeUnit = TimeUnit.MILLISECONDS)
+    @TimedEvent(logAfter = true)
+    public void processAlerts() {
+        // ping the watchdog with a timeout generously longer than the interval - the purpose is to
+        // ensure that if processing takes longer than expected, the watchdog can detect it, but at
+        // the same time avoid false positives due to normal processing delays
+        SvcWatchDogClient.getInstance()
+                .ping("AlerterService", (int) (properties.getIntervalSeconds() + 60));
+
+        // Process networks one by one, each in its own transaction
+        for (NetworkEntity network : networkRepository.findAll()) {
+            // we should not pass the entire network entity because it was loaded outside the
+            // (future) transaction
+            self.getObject().processNetworkAlerts(network.getId());
+        }
+    }
+
+    // important: this method must be public, so it can be called via the self proxy to enable
+    // transactions when called from the same class.
     @Transactional
+    @TimedEvent()
     public void processNetworkAlerts(long networkId) {
 
         SimpleTools.checkTransactionStatus(true);
