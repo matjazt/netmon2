@@ -10,5 +10,5 @@ public @interface TimedEvent {
 
     boolean logBefore() default false; // Whether to log before method execution (default: false)
 
-    boolean logAfter() default true; // Whether to log after method execution (default: false)
+    boolean logAfter() default false; // Whether to log after method execution (default: false)
 }
