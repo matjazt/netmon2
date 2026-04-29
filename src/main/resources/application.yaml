@@ -80,6 +80,12 @@ netmon:
         maximum-size: 2000
         expire-after-write: 2m
 
+timing:
+  # Cron expression for how often REST API timing stats are logged and reset.
+  # Default: every hour. Override with env var TIMING_LOGCRON.
+  # Format: second minute hour day-of-month month day-of-week
+  logCron: "0 0 * * * *"
+
 logbook:
   filter:
     # Soft switch #1. Set to false (or LOGBOOK_FILTER_ENABLED=false) to disable for successful requests.
@@ -108,7 +114,7 @@ logging:
     # org.hibernate.stat: DEBUG
     # org.hibernate.orm.jdbc.bind: TRACE
     com.matjazt.tools.SvcWatchDogClient: INFO
-    com.matjazt: TRACE
+    com.matjazt: DEBUG
     # Set to TRACE to see Logbook output; set to OFF to silence it without disabling the filter
     org.zalando.logbook: TRACE
 
