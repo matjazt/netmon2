@@ -1,6 +1,6 @@
 plugins {
     java
-    id("org.springframework.boot") version "4.0.3"
+    id("org.springframework.boot") version "4.0.6"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -20,7 +20,9 @@ repositories {
 }
 
 dependencies {
+    
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-aop:4.0.0-M2")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-json")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
