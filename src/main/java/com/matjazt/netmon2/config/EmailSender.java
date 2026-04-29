@@ -1,4 +1,4 @@
-package com.matjazt.netmon2.service;
+package com.matjazt.netmon2.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
