@@ -45,11 +45,12 @@ public class SecurityConfig {
                 // Require authentication for all requests
                 .authorizeHttpRequests(
                         auth ->
-                                auth. // Allow unauthenticated access to health endpoint and
-                                        // internal error page
-                                        requestMatchers(
-                                                "/actuator/health", "/actuator/health/**", "/error")
+                                auth // Keep internal error handling endpoint publicly accessible
+                                        .requestMatchers("/error", "/error/**")
                                         .permitAll()
+                                        // Protect actuator health endpoint with required roles
+                                        .requestMatchers("/actuator/health", "/actuator/health/**")
+                                        .hasAnyRole("admin", "user")
                                         .anyRequest()
                                         .authenticated())
                 // Enable HTTP Basic Authentication
