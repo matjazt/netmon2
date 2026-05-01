@@ -9,6 +9,15 @@
             "port": 5005,
             "projectName": "netmon2",
             "preLaunchTask": "gradle-bootRun-debug"
+        },
+        {
+            "type": "java",
+            "name": "Launch Netmon2",
+            "request": "launch",
+            "mainClass": "com.matjazt.netmon2.Netmon2Application",
+            "projectName": "netmon2",
+            "args": "",
+            "vmArgs": "-Dfile.encoding=UTF-8"
         }
     ]
 }
