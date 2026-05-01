@@ -94,6 +94,8 @@ CREATE TABLE device (
 -- DROP INDEX idx_device_mac_address;
 CREATE UNIQUE INDEX uk_device_network_mac_address ON device USING btree (network_id, mac_address);
 
+CREATE UNIQUE INDEX uk_device_network_name ON device USING btree (network_id, name);
+
 
 -- account definition
 
