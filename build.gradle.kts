@@ -2,6 +2,8 @@ plugins {
     java
     id("org.springframework.boot") version "4.0.6"
     id("io.spring.dependency-management") version "1.1.7"
+    // Needed to forces the VSCode IDE to use the -parameters flag (see below, too)
+    id("eclipse")
 }
 
 
@@ -12,6 +14,19 @@ description = "Network monitoring back end"
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+eclipse {
+    jdt {
+        file {
+            withProperties {
+                val props = this as java.util.Properties
+                // This forces the VSCodeIDE to use the -parameters flag
+                // Note that you need to run gradlew eclipse and then clean VSCode Java language server cache
+                props["org.eclipse.jdt.core.compiler.codegen.methodParameters"] = "generate"
+            }
+        }
     }
 }
 
@@ -62,7 +77,8 @@ dependencies {
 }
 
 tasks.withType<JavaCompile> {
-    // this flag makes Java retain parameter names in the compiled bytecode, which allows for better error messages and reflection-based features, such as those used by Spring and MapStruct
+    // this flag makes Java retain parameter names in the compiled bytecode, which allows for better error messages
+    // and reflection-based features, such as those used by Spring and MapStruct
     options.compilerArgs.add("-parameters")
 }
 
