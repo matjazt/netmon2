@@ -2,15 +2,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug (Gradle bootRun)",
-            "type": "java",
-            "request": "attach",
-            "hostName": "localhost",
-            "port": 5005,
-            "projectName": "netmon2",
-            "preLaunchTask": "gradle-bootRun-debug"
-        },
-        {
             "type": "java",
             "name": "Launch Netmon2",
             "request": "launch",
