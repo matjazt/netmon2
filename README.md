@@ -23,7 +23,7 @@ This application subscribes to MQTT topics that publish network device lists, de
 - **Spring Mail**: Email notification support
 - **Logbook (Zalando)**: HTTP request/response logging
 - **Caffeine**: In-memory caching
-- **Gradle**: Build tool and dependency management
+- **Maven**: Build tool and dependency management
 - **PostgreSQL**: Relational database for storing device history
 - **MapStruct**: DTO mapping framework
 - **Lombok**: Boilerplate reduction
@@ -33,7 +33,7 @@ This application subscribes to MQTT topics that publish network device lists, de
 ## Prerequisites
 
 - JDK 21 (Adoptium recommended)
-- Gradle (wrapper included)
+- Maven 3.9+ installed
 - PostgreSQL server
 
 ## Database Setup
@@ -182,26 +182,26 @@ spring:
 
 ## Building
 
-Build the application using Gradle:
+Build the application using Maven:
 
 ```powershell
-./gradlew build
+mvn package
 ```
 
-This creates `build/libs/netmon2-0.0.1-SNAPSHOT.jar` - an executable JAR file.
+This creates `target/netmon2-0.0.1-SNAPSHOT.jar` - an executable JAR file.
 
 ## Running
 
-### Run with Gradle
+### Run with Maven
 
 ```powershell
-./gradlew bootRun
+mvn spring-boot:run
 ```
 
 ### Run JAR Directly
 
 ```powershell
-java -jar build/libs/netmon2-0.0.1-SNAPSHOT.jar
+java -jar target/netmon2-0.0.1-SNAPSHOT.jar
 ```
 
 ### Run with Docker
@@ -325,8 +325,7 @@ Users authenticate via Spring Security:
 
 ```txt
 netmon2/
-├── build.gradle.kts                 # Gradle project configuration
-├── settings.gradle.kts              # Gradle settings
+├── pom.xml                          # Maven project configuration
 ├── Dockerfile                       # Docker image configuration
 ├── docker-compose.yml               # Docker Compose configuration
 ├── .dockerignore                    # Docker build exclusions

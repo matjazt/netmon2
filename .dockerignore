@@ -4,11 +4,9 @@
 .gitignore
 .gitattributes
 
-# Gradle
+# Maven
 
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
+target/
 
 # IDE
 

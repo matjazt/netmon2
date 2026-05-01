@@ -1,23 +1,20 @@
 # Multi-stage build for Spring Boot application
 # Stage 1: Build the application
-FROM eclipse-temurin:21-jdk-jammy AS builder
+FROM maven:3.9-eclipse-temurin-21 AS builder
 
 WORKDIR /app
 
-# Copy Gradle wrapper and build files
-COPY gradlew .
-COPY gradle gradle
-COPY build.gradle.kts .
-COPY settings.gradle.kts .
+# Copy Maven build file
+COPY pom.xml .
 
 # Download dependencies (cached layer)
-RUN ./gradlew dependencies --no-daemon || true
+RUN mvn dependency:go-offline -q || true
 
 # Copy source code
 COPY src src
 
 # Build the application (skip tests for faster builds)
-RUN ./gradlew bootJar --no-daemon -x test
+RUN mvn package -q -DskipTests
 
 # Stage 2: Runtime image
 FROM eclipse-temurin:21-jre-jammy
@@ -28,7 +25,7 @@ WORKDIR /app
 RUN groupadd -r netmon && useradd -r -g netmon netmon
 
 # Copy the built JAR from builder stage
-COPY --from=builder /app/build/libs/*.jar app.jar
+COPY --from=builder /app/target/*.jar app.jar
 
 # Create log directory with proper permissions
 RUN mkdir -p /app/log && chown -R netmon:netmon /app

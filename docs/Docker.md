@@ -10,7 +10,7 @@ The project uses three key files for Docker deployment:
 
 Defines how to build the application image. Uses a multi-stage build:
 
-- **Stage 1 (builder)**: Compiles the Spring Boot application using Gradle
+- **Stage 1 (builder)**: Compiles the Spring Boot application using Maven
 - **Stage 2 (runtime)**: Creates minimal runtime image with JRE and compiled JAR
 
 The final image (~300MB) runs as a non-root user and includes a health check endpoint.
@@ -109,7 +109,7 @@ docker compose up -d
 **When to use which:**
 
 - `--build`: Code changes, dependency updates
-- `--no-cache`: Gradle dependency issues, corrupted cached layers
+- `--no-cache`: Maven dependency issues, corrupted cached layers
 - `--force-recreate`: Environment variable changes, volume mount issues
 - `--pull`: Force pull base images (updates JDK from Docker Hub)
 
@@ -274,8 +274,7 @@ docker compose build --no-cache
 docker compose build --progress=plain
 
 # Common issues:
-# - Network timeout downloading Gradle dependencies (retry)
-# - Gradle permission issues (check gradlew is executable)
+# - Network timeout downloading Maven dependencies (retry)
 # - Out of disk space (run docker system prune -a)
 # - Base image pull fails (check internet connection)
 ```
@@ -505,7 +504,7 @@ curl http://localhost:8080/actuator/health
 ### Updating Dependencies
 
 ```powershell
-# 1. Update build.gradle.kts
+# 1. Update pom.xml
 # ... add/update dependencies ...
 
 # 2. Force rebuild without cache

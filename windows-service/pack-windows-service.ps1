@@ -14,8 +14,8 @@ Push-Location $projectRoot
 
 try {
     # Verify we're in the right place
-    if (-not (Test-Path "build.gradle.kts")) {
-        throw "build.gradle.kts not found"
+    if (-not (Test-Path "pom.xml")) {
+        throw "pom.xml not found"
     }
 
     # Create bin directory
@@ -23,13 +23,13 @@ try {
     New-Item -ItemType Directory -Path $binDir -Force | Out-Null
 
     # Build JAR
-    & .\gradlew.bat clean bootJar
+    & mvn clean package
     if ($LASTEXITCODE -ne 0) {
-        throw "Gradle build failed"
+        throw "Maven build failed"
     }
 
     # Copy JAR
-    $jarPath = "build\libs\netmon2-0.0.1-SNAPSHOT.jar"
+    $jarPath = "target\netmon2-0.0.1-SNAPSHOT.jar"
     if (-not (Test-Path $jarPath)) {
         throw "JAR file not found"
     }
