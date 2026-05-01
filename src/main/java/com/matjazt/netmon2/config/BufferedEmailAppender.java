@@ -12,9 +12,12 @@ import com.matjazt.tools.SimpleTools;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -67,6 +70,9 @@ public class BufferedEmailAppender extends AppenderBase<ILoggingEvent> {
     private volatile boolean schedulerStarted;
     private volatile boolean shuttingDown;
     private volatile boolean enabled;
+
+    // Rate limiting: timestamps of recently sent emails, guarded by lock
+    private final Deque<Instant> recentSendTimestamps = new ArrayDeque<>();
 
     // Do NOT attempt to get Spring beans in start() - Spring is not ready yet
 
@@ -351,6 +357,34 @@ public class BufferedEmailAppender extends AppenderBase<ILoggingEvent> {
 
         String plainTextContent = buildPlainTextEmail(logs);
         message.setText(plainTextContent);
+
+        // Rate limiting: drop email if the allowed count for the period is exceeded
+        if (cfg.getMaxEmailsPerPeriod() > 0) {
+            Instant now = Instant.now();
+            Instant windowStart = now.minusSeconds(cfg.getEmailRatePeriodSeconds());
+            lock.lock();
+            try {
+                // Evict timestamps that have fallen outside the current window
+                while (!recentSendTimestamps.isEmpty()
+                        && recentSendTimestamps.peekFirst().isBefore(windowStart)) {
+                    recentSendTimestamps.pollFirst();
+                }
+                if (recentSendTimestamps.size() >= cfg.getMaxEmailsPerPeriod()) {
+                    addWarn(
+                            "Rate limit reached ("
+                                    + cfg.getMaxEmailsPerPeriod()
+                                    + " emails per "
+                                    + cfg.getEmailRatePeriodSeconds()
+                                    + "s) — discarding "
+                                    + logs.size()
+                                    + " buffered log entries");
+                    return;
+                }
+                recentSendTimestamps.addLast(now);
+            } finally {
+                lock.unlock();
+            }
+        }
 
         sender.send(message);
 

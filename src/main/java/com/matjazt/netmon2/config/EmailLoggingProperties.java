@@ -33,6 +33,15 @@ public class EmailLoggingProperties {
     /** Minimum log level to buffer (ERROR, WARN, INFO, DEBUG, TRACE). */
     private String minLevel = "WARN";
 
+    /**
+     * Maximum number of emails that can be sent within {@code emailRatePeriodSeconds}. 0 =
+     * unlimited.
+     */
+    private int maxEmailsPerPeriod = 10;
+
+    /** Length of the rate-limiting window in seconds. */
+    private int emailRatePeriodSeconds = 3600;
+
     public @NonNull String[] getEmailToArray() {
         if (emailTo == null || emailTo.isBlank()) {
             return new String[0];

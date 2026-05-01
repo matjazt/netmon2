@@ -173,6 +173,10 @@ email-logging:
   max-delay-seconds: 300 # Send email after this many seconds (300 seconds)
   min-level: WARN # Minimum log level to buffer (ERROR, WARN, INFO, DEBUG, TRACE)
 
+  # Rate limiting
+  max-emails-per-period: 10 # Maximum emails to send within the rate period (0 = unlimited)
+  email-rate-period-seconds: 3600 # Length of the rate-limiting window in seconds (3600 = 1 hour)
+
 alerter:
   from-email: changeit # Sender email address
   from-name: netmon2 # Sender display name
