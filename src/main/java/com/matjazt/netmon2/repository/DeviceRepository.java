@@ -25,24 +25,13 @@ import java.util.Optional;
  * <p>Query Method Types:
  *
  * <ul>
- *   <li>Derived queries: Method name parsed to generate query (e.g., findByMacAddress)
+ *   <li>Derived queries: Method name parsed to generate query
  *   <li>JPQL queries: Custom queries with @Query annotation for complex logic
  *   <li>Native queries: Direct SQL when JPQL limitations are reached
  * </ul>
  */
 @Repository
 public interface DeviceRepository extends JpaRepository<DeviceEntity, Long> {
-
-    /**
-     * Finds device by MAC address.
-     *
-     * <p>MAC address is the unique identifier for devices across all networks. Returns Optional
-     * since device may not exist yet.
-     *
-     * @param macAddress the device MAC address (format: "AA:BB:CC:DD:EE:FF")
-     * @return Optional containing the device if found, empty otherwise
-     */
-    Optional<DeviceEntity> findByMacAddress(String macAddress);
 
     /**
      * Finds all devices on a specific network.
@@ -54,6 +43,7 @@ public interface DeviceRepository extends JpaRepository<DeviceEntity, Long> {
      * @return list of devices on the network
      */
     List<DeviceEntity> findByNetwork_Id(Long networkId);
+
     List<DeviceEntity> findByNetwork_Id(Long networkId, Sort sort);
 
     /**
@@ -79,13 +69,6 @@ public interface DeviceRepository extends JpaRepository<DeviceEntity, Long> {
     List<DeviceEntity> findByNetwork_IdAndOnline(Long networkId, Boolean online);
 
     /**
-     * Find devices by operation mode
-     *
-     * <p>Example: find all ALWAYS_ON devices to monitor for downtime.
-     */
-    List<DeviceEntity> findByDeviceOperationMode(DeviceOperationMode mode);
-
-    /**
      * Find unauthorized devices on a network
      *
      * <p>These should trigger alerts.
@@ -93,15 +76,7 @@ public interface DeviceRepository extends JpaRepository<DeviceEntity, Long> {
     List<DeviceEntity> findByNetwork_IdAndDeviceOperationMode(
             Long networkId, DeviceOperationMode mode);
 
-    /**
-     * Find offline ALWAYS_ON devices
-     *
-     * <p>These devices should be online but aren't - need alerts!
-     */
-    List<DeviceEntity> findByDeviceOperationModeAndOnline(DeviceOperationMode mode, Boolean online);
 
-    /** Find devices with active alerts */
-    List<DeviceEntity> findByActiveAlertIdIsNotNull();
 
     /**
      * Find devices not seen since a certain time

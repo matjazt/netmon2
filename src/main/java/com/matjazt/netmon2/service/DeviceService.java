@@ -96,10 +96,6 @@ public class DeviceService {
         return deviceRepository.findByNetwork_IdAndOnline(networkId, true);
     }
 
-    /** Find device by MAC address */
-    public Optional<DeviceEntity> findDeviceByMac(String macAddress) {
-        return deviceRepository.findByMacAddress(macAddress);
-    }
 
     // ========== DISPLAY CACHE METHODS ==========
 

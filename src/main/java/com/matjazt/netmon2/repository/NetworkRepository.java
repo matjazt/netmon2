@@ -44,16 +44,6 @@ public interface NetworkRepository extends JpaRepository<NetworkEntity, Long> {
     boolean existsByName(String name);
 
     /**
-     * Finds all networks with active unresolved alerts.
-     *
-     * <p>A network has an active alert when {@code activeAlertId} is not null. Used by alert
-     * service to check if network issues have resolved.
-     *
-     * @return list of networks with active alerts
-     */
-    java.util.List<NetworkEntity> findByActiveAlertIdIsNotNull();
-
-    /**
      * Finds all networks without active alerts.
      *
      * @return list of networks with no active alerts
