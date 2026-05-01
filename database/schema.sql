@@ -134,8 +134,8 @@ CREATE TABLE device_status_history (
 	CONSTRAINT fk_device_status_history_network FOREIGN KEY (network_id) REFERENCES network(id),
 	CONSTRAINT fk_device_status_history_device FOREIGN KEY (device_id) REFERENCES device(id)
 );
-CREATE INDEX idx_device_status_history_network ON device_status_history USING btree (network_id);
-CREATE INDEX idx_device_status_history_device ON device_status_history USING btree (device_id);
+CREATE INDEX idx_device_status_history_device_timestamp ON device_status_history USING btree (device_id, timestamp DESC);
+CREATE INDEX idx_device_status_history_network_timestamp ON device_status_history USING btree (network_id, timestamp DESC);
 CREATE INDEX idx_device_status_history_timestamp ON device_status_history USING btree ("timestamp");
 
 
@@ -183,7 +183,7 @@ CREATE TABLE alert (
 CREATE INDEX idx_alert_device ON alert USING btree (device_id);
 CREATE INDEX idx_alert_network ON alert USING btree (network_id);
 CREATE INDEX idx_alert_timestamp ON alert USING btree ("timestamp");
-
+CREATE INDEX idx_alert_closure_timestamp ON alert USING btree (closure_timestamp);
 
 
 CREATE TABLE log_level (
