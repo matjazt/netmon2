@@ -177,6 +177,10 @@ email-logging:
   max-emails-per-period: 10 # Maximum emails to send within the rate period (0 = unlimited)
   email-rate-period-seconds: 3600 # Length of the rate-limiting window in seconds (3600 = 1 hour)
 
+  # Daily heartbeat email: 6-field Spring cron expression (second minute hour day month weekday).
+  # Leave blank or set to "-" to disable.
+  daily-email-time: "0 30 4 * * *"
+
 alerter:
   from-email: changeit # Sender email address
   from-name: netmon2 # Sender display name

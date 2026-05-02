@@ -61,8 +61,6 @@ public class AlerterService {
     // Inject the proxied self so that @Transactional works when called from the same class
     private final ObjectProvider<AlerterService> self; // proxy for transactions
 
-    // private static final DateTimeFormatter TIME_FORMATTER =
-    //        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private static final Map<AlertType, String> ALERT_TYPE_MESSAGES =
             Map.ofEntries(
