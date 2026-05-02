@@ -83,6 +83,8 @@ public class MqttInboundConfig {
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(props.getQos());
         adapter.setOutputChannel(mqttInputChannel());
+        // without this, the adapter waits for 5 seconds  when stopping:
+        adapter.setDisconnectCompletionTimeout(100);
 
         return adapter;
     }
