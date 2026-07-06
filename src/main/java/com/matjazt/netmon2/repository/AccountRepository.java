@@ -6,7 +6,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -27,7 +26,6 @@ import java.util.Optional;
  * <p>@Repository marks this as a Data Access Object (DAO) component. Spring will automatically
  * create an implementation at runtime!
  */
-@Repository
 public interface AccountRepository extends JpaRepository<AccountEntity, Long> {
 
     /**

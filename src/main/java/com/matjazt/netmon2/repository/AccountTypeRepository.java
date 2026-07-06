@@ -3,7 +3,6 @@ package com.matjazt.netmon2.repository;
 import com.matjazt.netmon2.entity.AccountTypeEntity;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
@@ -13,7 +12,6 @@ import java.util.Optional;
  * <p>This is a simpler repository since account types are typically reference data that doesn't
  * change often.
  */
-@Repository
 public interface AccountTypeRepository extends JpaRepository<AccountTypeEntity, Integer> {
 
     /**

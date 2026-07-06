@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,7 +29,6 @@ import java.util.Optional;
  *   <li>Native queries: Direct SQL when JPQL limitations are reached
  * </ul>
  */
-@Repository
 public interface DeviceRepository extends JpaRepository<DeviceEntity, Long> {
 
     /**
@@ -75,8 +73,6 @@ public interface DeviceRepository extends JpaRepository<DeviceEntity, Long> {
      */
     List<DeviceEntity> findByNetwork_IdAndDeviceOperationMode(
             Long networkId, DeviceOperationMode mode);
-
-
 
     /**
      * Find devices not seen since a certain time
@@ -131,8 +127,8 @@ public interface DeviceRepository extends JpaRepository<DeviceEntity, Long> {
     /**
      * MODIFYING QUERY: Bulk update last seen time
      *
-     * <p>@Modifying tells Spring this is an UPDATE/DELETE query, not SELECT. Use @Transactional in
-     * the service layer when calling this.
+     * <p>@Modifying tells Spring this is an UPDATE/DELETE query, not SELECT.
+     * Use @ApplicationTransactional in the service layer when calling this.
      *
      * <p>Returns the number of entities updated.
      */

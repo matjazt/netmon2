@@ -5,7 +5,6 @@ import com.matjazt.netmon2.entity.NetworkEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
@@ -19,7 +18,6 @@ import java.util.Optional;
  * delete(), etc. Custom query methods are derived from method names - no implementation code
  * needed.
  */
-@Repository
 public interface NetworkRepository extends JpaRepository<NetworkEntity, Long> {
 
     /**

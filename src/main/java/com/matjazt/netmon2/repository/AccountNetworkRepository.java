@@ -7,7 +7,6 @@ import com.matjazt.netmon2.entity.NetworkEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -17,7 +16,6 @@ import java.util.List;
  * <p>Manages the many-to-many relationship between accounts and networks. Determines which accounts
  * can manage which networks.
  */
-@Repository
 public interface AccountNetworkRepository extends JpaRepository<AccountNetworkEntity, Long> {
 
     /**

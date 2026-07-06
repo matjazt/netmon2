@@ -5,7 +5,6 @@ import com.matjazt.netmon2.entity.LogEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,7 +15,6 @@ import java.util.List;
  * <p>Provides CRUD operations for managing log entries. Used by the async log writer service to
  * persist log messages that reference network or device entities.
  */
-@Repository
 public interface LogRepository extends JpaRepository<LogEntity, Long> {
 
     /** Find logs by network ID with pagination */
