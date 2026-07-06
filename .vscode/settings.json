@@ -10,9 +10,10 @@
         }
     },
     "java.configuration.updateBuildConfiguration": "automatic",
-    "java.compile.nullAnalysis.mode": "automatic",
+    "java.compile.nullAnalysis.mode": "disabled", // tole bi bilo v teoriji smiselno uporabljati, ampak bi bile prilagoditve kode precej naporne
     "spring-boot.ls.problem.application-yaml.YAML_SHOULD_ESCAPE": "HINT",
     "spring-boot.ls.problem.application-yaml.YAML_UNKNOWN_PROPERTY": "HINT",
+    "spring-boot.ls.problem.boot2.JAVA_CONSTRUCTOR_PARAMETER_INJECTION": "HINT",
     "java.format.settings.google.extra": "--aosp",
     //"java.format.settings.google.mode": "jar-file",
     "files.watcherExclude": {
