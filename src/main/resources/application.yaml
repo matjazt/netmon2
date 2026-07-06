@@ -84,7 +84,7 @@ timing:
   # Cron expression for how often REST API timing stats are logged and reset.
   # Default: every hour. Override with env var TIMING_LOGCRON.
   # Format: second minute hour day-of-month month day-of-week
-  logCron: "0 0 * * * *"
+  log-cron: "0 0 * * * *"
 
 logbook:
   filter:

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 /**
  * Periodically logs accumulated REST API timing statistics and resets the counters.
  *
- * <p>The log interval is controlled by the {@code timing.logCron} property in {@code
+ * <p>The log interval is controlled by the {@code timing.log-cron} property in {@code
  * application.yaml}.
  */
 @Service
@@ -24,7 +24,7 @@ public class TimingLoggingService {
     private final TimingStatistics timingStatistics;
 
     @PreDestroy
-    @Scheduled(cron = "${timing.logCron:0 0 * * * *}")
+    @Scheduled(cron = "${timing.log-cron:0 0 * * * *}")
     public void logAndResetTimings() {
         String stats = timingStatistics.getAllStatisticsAsJson();
         if (stats != null) {
