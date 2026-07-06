@@ -1,6 +1,7 @@
 package com.matjazt.netmon2.service;
 
 import com.matjazt.netmon2.aop.TimedEvent;
+import com.matjazt.netmon2.config.ApplicationTransactional;
 import com.matjazt.netmon2.dto.NetworkStatusMessageDto;
 import com.matjazt.netmon2.entity.AlertType;
 import com.matjazt.netmon2.entity.DeviceEntity;
@@ -19,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import tools.jackson.databind.ObjectMapper;
 
@@ -87,7 +87,7 @@ public class MqttService {
      *
      * @param mqttMessage Spring Integration message containing MQTT payload and headers
      */
-    @Transactional
+    @ApplicationTransactional
     @TimedEvent(logAfter = true)
     @ServiceActivator(inputChannel = "mqttInputChannel")
     public void processMqttMessage(Message<String> mqttMessage) {

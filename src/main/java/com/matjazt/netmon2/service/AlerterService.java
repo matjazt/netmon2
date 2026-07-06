@@ -2,6 +2,7 @@ package com.matjazt.netmon2.service;
 
 import com.matjazt.netmon2.aop.TimedEvent;
 import com.matjazt.netmon2.config.AlerterProperties;
+import com.matjazt.netmon2.config.ApplicationTransactional;
 import com.matjazt.netmon2.entity.AlertEntity;
 import com.matjazt.netmon2.entity.AlertType;
 import com.matjazt.netmon2.entity.DeviceEntity;
@@ -22,7 +23,6 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -58,9 +58,9 @@ public class AlerterService {
     private final NetworkConfigurationService networkConfigurationService;
     private final MacVendorLookupService macVendorLookupService;
 
-    // Inject the proxied self so that @Transactional works when called from the same class
+    // Inject the proxied self so that @ApplicationTransactional works when called from the same
+    // class
     private final ObjectProvider<AlerterService> self; // proxy for transactions
-
 
     private static final Map<AlertType, String> ALERT_TYPE_MESSAGES =
             Map.ofEntries(
@@ -283,7 +283,7 @@ public class AlerterService {
 
     // important: this method must be public, so it can be called via the self proxy to enable
     // transactions when called from the same class.
-    @Transactional
+    @ApplicationTransactional
     @TimedEvent()
     public void processNetworkAlerts(long networkId) {
 

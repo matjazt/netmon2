@@ -1,5 +1,6 @@
 package com.matjazt.netmon2.service;
 
+import com.matjazt.netmon2.config.ApplicationTransactional;
 import com.matjazt.netmon2.entity.NetworkConfiguration;
 import com.matjazt.netmon2.entity.NetworkEntity;
 import com.matjazt.netmon2.repository.NetworkRepository;
@@ -99,7 +100,7 @@ public class NetworkConfigurationService {
      * @param config the new configuration
      * @throws IllegalArgumentException if network not found
      */
-    @Transactional
+    @ApplicationTransactional
     @CacheEvict(cacheNames = "networkConfigCache", key = "#networkId")
     public void update(Long networkId, NetworkConfiguration config) {
         SimpleTools.checkTransactionStatus(true);
@@ -111,6 +112,7 @@ public class NetworkConfigurationService {
                                         new IllegalArgumentException(
                                                 "Network not found: " + networkId));
         entity.setConfiguration(objectMapper.writeValueAsString(config));
-        // not needed due to the @Transactional annotation: networkRepository.save(entity);
+        // not needed due to the @ApplicationTransactional annotation:
+        // networkRepository.save(entity);
     }
 }

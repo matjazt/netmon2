@@ -1,5 +1,6 @@
 package com.matjazt.netmon2.service;
 
+import com.matjazt.netmon2.config.ApplicationTransactional;
 import com.matjazt.netmon2.dto.DeviceDto;
 import com.matjazt.netmon2.dto.request.SaveDeviceRequest;
 import com.matjazt.netmon2.entity.DeviceEntity;
@@ -14,7 +15,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  * <ol>
  *   <li>DEPENDENCY INJECTION - Constructor injection (recommended approach) Spring automatically
  *       creates repository implementations and injects them.
- *   <li>@Transactional - Wraps method in a database transaction
+ *   <li>@ApplicationTransactional - Wraps method in a database transaction
  *       <ul>
  *         <li>Automatically commits on success
  *         <li>Automatically rolls back on exception
@@ -80,13 +80,13 @@ public class DeviceService {
      *
      * <p>save() does INSERT if ID is null, UPDATE if ID exists.
      */
-    @Transactional
+    @ApplicationTransactional
     public DeviceEntity saveDevice(DeviceEntity device) {
         return deviceRepository.save(device);
     }
 
     /** Delete a device */
-    @Transactional
+    @ApplicationTransactional
     public void deleteDevice(Long id) {
         deviceRepository.deleteById(id);
     }
@@ -95,7 +95,6 @@ public class DeviceService {
     public List<DeviceEntity> findOnlineDevices(Long networkId) {
         return deviceRepository.findByNetwork_IdAndOnline(networkId, true);
     }
-
 
     // ========== DISPLAY CACHE METHODS ==========
 
@@ -156,7 +155,7 @@ public class DeviceService {
         return deviceRepository.existsByNetwork_IdAndMacAddress(networkId, macAddress);
     }
 
-    @Transactional
+    @ApplicationTransactional
     public DeviceEntity updateDeviceMode(Long deviceId, DeviceOperationMode mode) {
         DeviceEntity device =
                 deviceRepository
@@ -168,7 +167,7 @@ public class DeviceService {
         return deviceRepository.save(device);
     }
 
-    @Transactional
+    @ApplicationTransactional
     public DeviceEntity renameDevice(Long deviceId, String newName) {
         DeviceEntity device =
                 deviceRepository
@@ -186,19 +185,19 @@ public class DeviceService {
         return findDeviceById(id).map(deviceMapper::toDto);
     }
 
-    @Transactional
+    @ApplicationTransactional
     public DeviceDto saveDeviceAndReturnDto(SaveDeviceRequest request, Long id) {
         DeviceEntity device = deviceMapper.toEntity(request);
         if (id != null) device.setId(id);
         return deviceMapper.toDto(saveDevice(device));
     }
 
-    @Transactional
+    @ApplicationTransactional
     public DeviceDto updateDeviceModeAndReturnDto(Long deviceId, DeviceOperationMode mode) {
         return deviceMapper.toDto(updateDeviceMode(deviceId, mode));
     }
 
-    @Transactional
+    @ApplicationTransactional
     public DeviceDto renameDeviceAndReturnDto(Long deviceId, String newName) {
         return deviceMapper.toDto(renameDevice(deviceId, newName));
     }

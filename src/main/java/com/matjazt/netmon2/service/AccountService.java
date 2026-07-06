@@ -1,5 +1,6 @@
 package com.matjazt.netmon2.service;
 
+import com.matjazt.netmon2.config.ApplicationTransactional;
 import com.matjazt.netmon2.dto.AccountDto;
 import com.matjazt.netmon2.dto.request.SaveAccountRequest;
 import com.matjazt.netmon2.entity.AccountEntity;
@@ -14,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -63,7 +63,7 @@ public class AccountService {
      *
      * <p>save() does INSERT if ID is null, UPDATE if ID exists.
      */
-    @Transactional
+    @ApplicationTransactional
     public AccountEntity saveAccount(AccountEntity account) {
         log.trace(
                 "saveAccount: apiUser={}, username={}",
@@ -73,7 +73,7 @@ public class AccountService {
     }
 
     /** Delete an account */
-    @Transactional
+    @ApplicationTransactional
     public void deleteAccount(Long id) {
         log.trace(
                 "deleteAccount: apiUser={}, accountId={}",
@@ -145,7 +145,7 @@ public class AccountService {
         return accountMapper.toDtos(findAccountsByType(accountTypeName));
     }
 
-    @Transactional
+    @ApplicationTransactional
     public AccountDto saveAccountAndReturnDto(SaveAccountRequest request, Long id) {
         AccountTypeEntity accountType =
                 accountTypeRepository

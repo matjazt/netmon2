@@ -1,5 +1,6 @@
 package com.matjazt.netmon2.service;
 
+import com.matjazt.netmon2.config.ApplicationTransactional;
 import com.matjazt.netmon2.dto.AccountDto;
 import com.matjazt.netmon2.dto.AccountNetworkDto;
 import com.matjazt.netmon2.dto.NetworkDto;
@@ -18,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -61,7 +61,7 @@ public class AccountNetworkService {
     }
 
     /** Save a new account-network relationship or update existing one */
-    @Transactional
+    @ApplicationTransactional
     public AccountNetworkEntity save(AccountNetworkEntity accountNetwork) {
         log.trace(
                 "save: apiUser={}, accountId={}, networkId={}",
@@ -72,7 +72,7 @@ public class AccountNetworkService {
     }
 
     /** Delete an account-network relationship */
-    @Transactional
+    @ApplicationTransactional
     public void delete(Long id) {
         log.trace(
                 "delete: apiUser={}, id={}",
@@ -138,7 +138,7 @@ public class AccountNetworkService {
     }
 
     /** Delete the relationship between an account and a network */
-    @Transactional
+    @ApplicationTransactional
     public void revokeAccess(Long accountId, Long networkId) {
         log.trace(
                 "revokeAccess: apiUser={}, accountId={}, networkId={}",
@@ -153,7 +153,7 @@ public class AccountNetworkService {
     }
 
     /** Grant access to a network for an account */
-    @Transactional
+    @ApplicationTransactional
     public AccountNetworkEntity grantAccess(Long accountId, Long networkId) {
         log.trace(
                 "grantAccess: apiUser={}, accountId={}, networkId={}",
@@ -233,7 +233,7 @@ public class AccountNetworkService {
         return findById(id).map(accountNetworkMapper::toDto);
     }
 
-    @Transactional
+    @ApplicationTransactional
     public AccountNetworkDto grantAccessAndReturnDto(Long accountId, Long networkId) {
         return accountNetworkMapper.toDto(grantAccess(accountId, networkId));
     }

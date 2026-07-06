@@ -1,5 +1,6 @@
 package com.matjazt.netmon2.service;
 
+import com.matjazt.netmon2.config.ApplicationTransactional;
 import com.matjazt.netmon2.dto.NetworkDto;
 import com.matjazt.netmon2.dto.request.SaveNetworkRequest;
 import com.matjazt.netmon2.entity.NetworkEntity;
@@ -12,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -61,7 +61,7 @@ public class NetworkService {
      *
      * <p>save() does INSERT if ID is null, UPDATE if ID exists.
      */
-    @Transactional
+    @ApplicationTransactional
     public NetworkEntity saveNetwork(NetworkEntity network) {
         log.trace(
                 "saveNetwork: apiUser={}, name={}",
@@ -71,7 +71,7 @@ public class NetworkService {
     }
 
     /** Delete a network */
-    @Transactional
+    @ApplicationTransactional
     public void deleteNetwork(Long id) {
         if (!networkRepository.existsById(id)) {
             log.warn("deleteNetwork: network with id={} does not exist, cannot delete", id);
@@ -138,7 +138,7 @@ public class NetworkService {
         return findNetworkById(id).map(networkMapper::toDto);
     }
 
-    @Transactional
+    @ApplicationTransactional
     public NetworkDto createNetworkAndReturnDto(SaveNetworkRequest request) {
         networkConfigurationService.validateConfigurationJson(request.configuration());
         NetworkEntity network = networkMapper.toEntity(request);
@@ -148,7 +148,7 @@ public class NetworkService {
         return networkMapper.toDto(saveNetwork(network));
     }
 
-    @Transactional
+    @ApplicationTransactional
     public NetworkDto updateNetworkAndReturnDto(SaveNetworkRequest request, long id) {
         networkConfigurationService.validateConfigurationJson(request.configuration());
         networkRepository.updateNameAndConfigurationById(
