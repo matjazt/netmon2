@@ -27,6 +27,35 @@
     :error "Invalid JSON format in configuration file";
 }
 
+# Function to check whether an IP address falls within one of the configured ranges
+:local isIpInRanges do={
+    :local ip $1;
+    :local ranges $2;
+
+    :local ip1 [:find $ip "."];
+    :local ip2 [:find $ip "." ($ip1 + 1)];
+    :local ip3 [:find $ip "." ($ip2 + 1)];
+    :local ipBase [:pick $ip 0 $ip3];
+    :local lastOctet [:tonum [:pick $ip ($ip3 + 1) [:len $ip]]];
+
+    :local found false;
+    :foreach range in=$ranges do={
+        :local subnet ($range->"subnet");
+        :local startAddr ($range->"start");
+        :local endAddr ($range->"end");
+
+        :local sp1 [:find $subnet "."];
+        :local sp2 [:find $subnet "." ($sp1 + 1)];
+        :local sp3 [:find $subnet "." ($sp2 + 1)];
+        :local subnetBase [:pick $subnet 0 $sp3];
+
+        :if ($ipBase = $subnetBase && $lastOctet >= $startAddr && $lastOctet <= $endAddr) do={
+            :set found true;
+        }
+    }
+    :return $found;
+}
+
 # Function to perform ping with multiple packets
 :local pingWithCount do={
     :local ip $1;
@@ -133,8 +162,8 @@
     :local deviceMac ($a->"mac-address");
     :local status ($a->"status");
     
-    # only process entries with valid IP and MAC
-    :if ([:len $deviceMac] > 0 && $deviceMac != "00:00:00:00:00:00") do={
+    # only process entries with valid IP and MAC, belonging to a configured range
+    :if ([:len $deviceMac] > 0 && $deviceMac != "00:00:00:00:00:00" && [$isIpInRanges $deviceIp ($networkScanConfig->"ranges")]) do={
        
         :local isOnline false;
         :local isPingableNode false;
