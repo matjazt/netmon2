@@ -51,7 +51,7 @@ public class DailyHeartbeatEmailService {
 
         String hostname = SimpleTools.getLocalHostname();
 
-        String subject = cfg.getEmailSubjectPrefix() + " Daily Heartbeat - " + hostname;
+        String subject = "[" + cfg.getApplicationName() + " @ " + hostname + "] Daily heartbeat";
 
         String body =
                 String.join(

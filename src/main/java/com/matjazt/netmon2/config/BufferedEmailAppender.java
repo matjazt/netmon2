@@ -4,7 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.pattern.TargetLengthBasedClassNameAbbreviator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;
-import ch.qos.logback.classic.spi.ThrowableProxyUtil;
+import ch.qos.logback.classic.spi.StackTraceElementProxy;
 import ch.qos.logback.core.AppenderBase;
 
 import com.matjazt.tools.SimpleTools;
@@ -24,6 +24,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Custom Logback appender that buffers log messages and sends them via email when either:
@@ -41,6 +43,7 @@ import java.util.concurrent.locks.ReentrantLock;
  *   <li>Time-based and count-based flushing
  *   <li>Graceful shutdown with buffer flush
  *   <li>Configuration via Spring properties using relaxed binding
+ *   <li>Regex-based prefiltering for excluded log messages
  *   <li>Fail-safe — if Spring context is not ready, events are silently skipped
  *   <li>Self-healing — once Spring context is available, configuration is cached
  * </ul>
@@ -53,10 +56,21 @@ public class BufferedEmailAppender extends AppenderBase<ILoggingEvent> {
     private static final TargetLengthBasedClassNameAbbreviator ABBREVIATOR =
             new TargetLengthBasedClassNameAbbreviator(50);
 
+    // First two package segments of this class (e.g. "com.mycompany."), used to keep only
+    // application stack frames in emailed exceptions and drop framework/library noise.
+    private static final String OWN_PACKAGE_PREFIX = resolveOwnPackagePrefix();
+
+    private static String resolveOwnPackagePrefix() {
+        String[] parts = BufferedEmailAppender.class.getPackageName().split("\\.");
+        int segments = Math.min(2, parts.length);
+        return String.join(".", java.util.Arrays.copyOf(parts, segments)) + ".";
+    }
+
     // Lazy-resolved Spring configuration
     private volatile EmailLoggingProperties config;
     private volatile boolean configResolved = false;
     private volatile Level minLevel;
+    private volatile List<Pattern> excludePatterns = List.of();
 
     // Lazy-resolved Spring mail sender
     private volatile JavaMailSender mailSender;
@@ -87,29 +101,54 @@ public class BufferedEmailAppender extends AppenderBase<ILoggingEvent> {
                 if (!configResolved) {
                     config = SpringContextHelper.getBean(EmailLoggingProperties.class);
                     if (config != null) {
-                        configResolved = true;
                         minLevel = Level.toLevel(config.getMinLevel(), Level.ERROR);
-
+                        excludePatterns = compileExcludePatterns(config.getExcludePatterns());
                         enabled =
                                 config.getEmailFrom() != null
                                         && config.getEmailFrom().contains("@")
                                         && config.getEmailTo() != null
                                         && config.getEmailTo().contains("@");
-
+                        configResolved = true;
                         addInfo(
                                 "BufferedEmailAppender configuration resolved: enabled="
                                         + enabled
                                         + ", maxCount="
                                         + config.getMaxCount()
+                                        + ", maxSize="
+                                        + config.getMaxSize()
                                         + ", maxDelaySeconds="
                                         + config.getMaxDelaySeconds()
                                         + ", minLevel="
-                                        + minLevel);
+                                        + minLevel
+                                        + ", excludePatterns="
+                                        + excludePatterns.size());
                     }
                 }
             }
         }
         return config;
+    }
+
+    private List<Pattern> compileExcludePatterns(List<String> configuredPatterns) {
+        if (configuredPatterns == null || configuredPatterns.isEmpty()) {
+            return List.of();
+        }
+
+        List<Pattern> compiledPatterns = new ArrayList<>();
+        for (String configuredPattern : configuredPatterns) {
+            if (configuredPattern == null || configuredPattern.isBlank()) {
+                continue;
+            }
+
+            String trimmedPattern = configuredPattern.trim();
+            try {
+                compiledPatterns.add(Pattern.compile(trimmedPattern));
+            } catch (PatternSyntaxException e) {
+                addWarn("Ignoring invalid email logging exclude regexp: " + trimmedPattern, e);
+            }
+        }
+
+        return List.copyOf(compiledPatterns);
     }
 
     /**
@@ -213,6 +252,11 @@ public class BufferedEmailAppender extends AppenderBase<ILoggingEvent> {
 
             String formattedLog = formatLogEntry(event);
 
+            // Filter by configured exclusion regexps before any buffering/scheduler work
+            if (isExcludedByPattern(formattedLog)) {
+                return;
+            }
+
             lock.lock();
             try {
                 // Initialize first log time if buffer was empty
@@ -223,7 +267,7 @@ public class BufferedEmailAppender extends AppenderBase<ILoggingEvent> {
                 buffer.add(formattedLog);
 
                 // Flush if max count reached
-                if (buffer.size() >= cfg.getMaxCount()) {
+                if (buffer.size() >= cfg.getMaxCount() || getBufferSize() >= cfg.getMaxSize()) {
                     flushBufferInternal();
                 }
             } finally {
@@ -233,6 +277,29 @@ public class BufferedEmailAppender extends AppenderBase<ILoggingEvent> {
         } catch (Exception e) {
             addError("Error appending log event: " + e.getMessage(), e);
         }
+    }
+
+    private int getBufferSize() {
+        int size = 0;
+        for (String log : buffer) {
+            size += log.length();
+        }
+        return size;
+    }
+
+    private boolean isExcludedByPattern(String formattedLog) {
+        List<Pattern> compiledPatterns = excludePatterns;
+        if (compiledPatterns.isEmpty()) {
+            return false;
+        }
+
+        for (Pattern pattern : compiledPatterns) {
+            if (pattern.matcher(formattedLog).find()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /** Format a single log entry as plain text line. */
@@ -246,10 +313,43 @@ public class BufferedEmailAppender extends AppenderBase<ILoggingEvent> {
         // Extract exception if present
         IThrowableProxy tp = event.getThrowableProxy();
         if (tp != null) {
-            message += "\n" + ThrowableProxyUtil.asString(tp);
+            StringBuilder sb = new StringBuilder();
+            appendFilteredThrowable(sb, tp, false);
+            message += "\n" + sb.toString();
         }
 
         return String.format("%s %s [%s] %s - %s", timestamp, level, thread, logger, message);
+    }
+
+    private void appendFilteredThrowable(StringBuilder sb, IThrowableProxy tp, boolean isCause) {
+        if (isCause) {
+            sb.append("Caused by: ");
+        }
+
+        sb.append(tp.getClassName());
+        String message = tp.getMessage();
+        if (!SimpleTools.isBlank(message)) {
+            sb.append(": " + message);
+        }
+        sb.append('\n');
+
+        StackTraceElementProxy[] frames = tp.getStackTraceElementProxyArray();
+        int includedCount = 0;
+        for (StackTraceElementProxy frame : frames) {
+            if (frame.getStackTraceElement().getClassName().startsWith(OWN_PACKAGE_PREFIX)) {
+                sb.append("\tat ").append(frame.getStackTraceElement()).append('\n');
+                includedCount++;
+            }
+        }
+        int omitted = frames.length - includedCount;
+        if (omitted > 0) {
+            sb.append("\t... ").append(omitted).append(" frames omitted (non-application code)\n");
+        }
+
+        IThrowableProxy cause = tp.getCause();
+        if (cause != null) {
+            appendFilteredThrowable(sb, cause, true);
+        }
     }
 
     /** Check if buffer should be flushed due to time elapsed (scheduled check). */
@@ -347,11 +447,13 @@ public class BufferedEmailAppender extends AppenderBase<ILoggingEvent> {
         message.setTo(cfg.getEmailToArray());
 
         String subject =
-                cfg.getEmailSubjectPrefix()
-                        + " "
+                "["
+                        + cfg.getApplicationName()
+                        + " @ "
+                        + SimpleTools.getLocalHostname()
+                        + "] "
                         + logs.size()
-                        + " log entries from "
-                        + SimpleTools.getLocalHostname();
+                        + " log entries";
 
         message.setSubject(subject);
 
@@ -398,6 +500,16 @@ public class BufferedEmailAppender extends AppenderBase<ILoggingEvent> {
     /** Build plain text email body with log entries. */
     private String buildPlainTextEmail(List<String> logs) {
         StringBuilder text = new StringBuilder();
+        text.append("Application Log Report\n");
+        text.append("======================\n\n");
+        text.append("Hostname: ").append(SimpleTools.getLocalHostname()).append("\n");
+        text.append("Total Entries: ").append(logs.size()).append("\n");
+        text.append("Generated: ")
+                .append(LocalDateTime.now().format(TIMESTAMP_FORMATTER))
+                .append("\n\n");
+        text.append("Log Entries:\n");
+        text.append("------------\n\n");
+
         for (String log : logs) {
             text.append(log).append("\n");
         }
