@@ -63,13 +63,9 @@ public class SpringContextHelper
                 // This happens a lot during application startup before Spring is ready
                 return null;
             }
-            var bean = context.getBean(beanClass);
-            log.debug(
-                    "Successfully retrieved bean {} from Spring context",
-                    beanClass.getSimpleName());
-            return bean;
+            return context.getBean(beanClass);
         } catch (Exception e) {
-            log.warn("Failed to retrieve bean {}: {}", beanClass.getSimpleName(), e.getMessage());
+            log.error("Failed to retrieve bean {}: {}", beanClass.getSimpleName(), e.getMessage());
             return null;
         }
     }
