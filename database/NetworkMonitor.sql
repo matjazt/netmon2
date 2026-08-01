@@ -305,6 +305,11 @@ delete from log where device_id = 52
 delete from alert where device_id = 52
 delete from device where id = 52
 
+-- delete multiple devices
+delete from device_status_history where device_id in (49, 50, 51)
+delete from log where device_id in (49, 50, 51)
+delete from alert where device_id in (49, 50, 51)
+delete from device where id in (49, 50, 51)
 
 -- delete entire network
 delete from device_status_history where network_id = 3
